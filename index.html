@@ -7,237 +7,180 @@
   <style>
     :root { --primary:#1a3a5c; --secondary:#2c5f8a; --accent:#e8a020; --danger:#c0392b; --bg:#f0f2f5; --card:#fff; --text:#1a1a2e; --muted:#6c7a8d; --border:#d0d7e3; --radius:10px; }
     * { box-sizing:border-box; margin:0; padding:0; }
-    body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
-    header { background:var(--primary); color:#fff; padding:14px 18px; position:sticky; top:0; z-index:50; font-size:1.1rem; font-weight:700; }
-    nav { position:fixed; bottom:0; left:0; right:0; background:var(--primary); display:flex; z-index:50; box-shadow:0 -2px 8px rgba(0,0,0,0.15); }
-    nav button { flex:1; background:none; border:none; color:rgba(255,255,255,0.65); padding:12px 4px 10px; font-size:0.7rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; }
-    nav button.active { color:var(--accent); }
-    main { padding:14px 14px 80px; max-width:600px; margin:0 auto; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:80px; }
+    header { background:var(--primary); color:#fff; padding:16px; font-weight:700; position:sticky; top:0; z-index:100; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    nav { position:fixed; bottom:0; left:0; right:0; background:var(--primary); display:flex; z-index:100; }
+    nav button { flex:1; background:none; border:none; color:rgba(255,255,255,0.6); padding:14px 5px; font-size:0.75rem; cursor:pointer; }
+    nav button.active { color:var(--accent); font-weight:700; border-top:3px solid var(--accent); }
+    main { padding:15px; max-width:600px; margin:0 auto; }
     .view { display:none; }
     .view.active { display:block; }
-    .search-bar { margin-bottom:14px; }
-    .search-bar input { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:0.95rem; background:var(--card); }
-    .card { background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(0,0,0,0.08); padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; cursor:pointer; }
-    .avatar { width:46px; height:46px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:700; flex-shrink:0; overflow:hidden; }
+    .search-bar { margin-bottom:15px; }
+    .search-bar input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:1rem; }
+    .card { background:var(--card); border-radius:var(--radius); padding:15px; margin-bottom:12px; display:flex; align-items:center; gap:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05); cursor:pointer; }
+    .avatar { width:55px; height:55px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:700; flex-shrink:0; overflow:hidden; }
     .avatar img { width:100%; height:100%; object-fit:cover; }
-    .card-info { flex:1; min-width:0; }
-    .card-name { font-weight:700; font-size:0.97rem; }
-    .card-sub { font-size:0.8rem; color:var(--muted); margin-top:2px; }
-    .fab { position:fixed; bottom:72px; right:18px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:1.8rem; z-index:200; box-shadow:0 4px 14px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; cursor:pointer; }
-    .btn { padding:10px 18px; border:none; border-radius:var(--radius); font-size:0.9rem; font-weight:600; cursor:pointer; }
+    .card-info { flex:1; overflow:hidden; }
+    .card-name { font-weight:700; font-size:1rem; margin-bottom:3px; }
+    .card-sub { font-size:0.85rem; color:var(--muted); }
+    .detail-header { display:flex; flex-direction:column; align-items:center; margin-bottom:25px; padding-top:10px; }
+    .detail-photo { width:120px; height:120px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:3rem; font-weight:700; margin-bottom:15px; overflow:hidden; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
+    .detail-photo img { width:100%; height:100%; object-fit:cover; }
+    .section-title { font-size:0.8rem; font-weight:700; color:var(--muted); text-transform:uppercase; border-bottom:1.5px solid var(--border); padding-bottom:5px; margin:20px 0 12px; letter-spacing:1px; }
+    .info-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
+    .info-label { color:var(--muted); font-size:0.9rem; font-weight:500; }
+    .info-value { font-weight:700; font-size:0.95rem; text-align:right; }
+    .notes-box { background:#fff; border-radius:12px; padding:15px; margin-top:5px; font-size:0.95rem; line-height:1.5; box-shadow:0 2px 5px rgba(0,0,0,0.03); white-space:pre-wrap; }
+    .btn { width:100%; padding:14px; border:none; border-radius:var(--radius); font-size:1rem; font-weight:600; cursor:pointer; margin-top:10px; }
+    .btn-ghost { background:transparent; border:1.5px solid var(--border); color:var(--text); margin-bottom:20px; display:inline-block; width:auto; padding:8px 15px; }
     .btn-primary { background:var(--secondary); color:#fff; }
-    .btn-danger { background:var(--danger); color:#fff; }
-    .btn-ghost { background:transparent; border:1.5px solid var(--border); color:var(--text); }
-    .form-section { margin-bottom:18px; }
-    .form-section h3 { font-size:0.82rem; font-weight:700; color:var(--muted); text-transform:uppercase; margin-bottom:8px; border-bottom:1.5px solid var(--border); padding-bottom:5px; }
-    .form-group { margin-bottom:12px; }
-    .form-group label { display:block; font-size:0.85rem; font-weight:600; color:var(--muted); margin-bottom:5px; }
-    .form-group input, .form-group textarea { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:12px; font-size:1rem; background:var(--card); font-family:inherit; color:var(--text); }
-    .photo-area { border:2px dashed var(--border); border-radius:var(--radius); padding:20px; text-align:center; color:var(--muted); font-size:0.9rem; margin-bottom:15px; background:#fff; cursor:pointer; }
-    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:10px 20px; border-radius:20px; font-size:0.88rem; z-index:999; opacity:0; transition:opacity 0.3s; pointer-events:none; }
-    .toast.show { opacity:1; }
+    .btn-danger { background:var(--danger); color:#fff; margin-top:20px; }
+    .fab { position:fixed; bottom:90px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:2rem; box-shadow:0 4px 15px rgba(0,0,0,0.2); z-index:90; cursor:pointer; }
+    .status-msg { text-align:center; padding:40px 20px; color:var(--muted); }
   </style>
 </head>
 <body>
 
-<div class="toast" id="toast"></div>
 <header>🛡️ Registro Policial</header>
 
-<nav>
-  <button class="active" id="tab-personas" onclick="showTab('personas')">👤 Personas</button>
-  <button id="tab-vehiculos" onclick="showTab('vehiculos')">🚗 Vehículos</button>
-  <button id="tab-buscar" onclick="showTab('buscar')">🔍 Buscar</button>
-</nav>
-
 <main>
-  <!-- VISTA LISTA -->
-  <div class="view active" id="view-personas">
-    <div class="search-bar"><input type="search" id="searchPersonas" placeholder="Buscar por nombre o CI..."></div>
-    <div id="listaPersonas"></div>
+  <!-- LISTA PRINCIPAL -->
+  <div class="view active" id="view-list">
+    <div class="search-bar">
+      <input type="search" id="mainSearch" placeholder="Buscar por nombre o CI..." oninput="filterData()">
+    </div>
+    <div id="listContainer"></div>
   </div>
 
-  <!-- VISTA FICHA DETALLE -->
-  <div class="view" id="view-form-persona">
-    <button class="btn btn-ghost" style="margin-bottom:15px" onclick="goBack()">← Volver</button>
-    
-    <div class="form-section">
-      <h3>FOTO</h3>
-      <div class="photo-area" id="photoArea" onclick="document.getElementById('photoInput').click()">
-        <div id="photoPreview">📷 Tocar para foto</div>
-      </div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none">
-    </div>
-
-    <div class="form-section">
-      <h3>DATOS</h3>
-      <div class="form-group"><label>Nombre completo *</label><input type="text" id="fpNombre"></div>
-      <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="fpCI"></div>
-      <div class="form-group"><label>Alias</label><input type="text" id="fpAlias"></div>
-      <div class="form-group"><label>Fecha de Nacimiento</label><input type="date" id="fpFechaNac"></div>
-      <div class="form-group"><label>Dirección</label><input type="text" id="fpDomicilio"></div>
-      <div class="form-group"><label>Teléfono 1</label><input type="tel" id="fpTelefono"></div>
-      <div class="form-group"><label>Teléfono 2</label><input type="tel" id="fpTelefono2"></div>
-      <div class="form-group"><label>Vínculo / Relación</label><input type="text" id="fpVinculo"></div>
-    </div>
-
-    <div class="form-section">
-      <h3>VEHÍCULOS</h3>
-      <div class="form-group"><label>Vehículo 1 (matrícula)</label><input type="text" id="fpVeh1" style="text-transform:uppercase;font-weight:700"></div>
-      <div class="form-group"><label>Vehículo 2 (matrícula)</label><input type="text" id="fpVeh2" style="text-transform:uppercase;font-weight:700"></div>
-    </div>
-
-    <div class="form-section">
-      <h3>NOTAS Y ANTECEDENTES</h3>
-      <div class="form-group"><textarea id="fpNotas" rows="4" placeholder="Notas adicionales..."></textarea></div>
-    </div>
-
-    <input type="hidden" id="fpId">
-    <button class="btn btn-primary" id="btnGuardarP" style="width:100%; padding:15px; font-size:1.1rem; margin-top:10px">Guardar Registro</button>
-    <button class="btn btn-danger" id="btnEliminarP" style="width:100%; margin-top:15px; display:none">Eliminar Registro</button>
-  </div>
-
-  <div class="view" id="view-vehiculos">
-    <div class="search-bar"><input type="search" placeholder="Buscar vehículo..."></div>
-    <div id="listaVehiculos"></div>
+  <!-- FICHA DE DETALLE -->
+  <div class="view" id="view-detail">
+    <button class="btn-ghost" onclick="showView('view-list')">← Volver</button>
+    <div id="detailContent"></div>
   </div>
 </main>
 
-<button class="fab" id="fab" onclick="abrirFormPersona()">+</button>
+<button class="fab" id="fabBtn" onclick="alert('Funcionalidad de agregar próximamente')">+</button>
+
+<nav>
+  <button class="active">👤 Personas</button>
+  <button>🚗 Vehículos</button>
+  <button>🔍 Buscar</button>
+</nav>
 
 <script>
+// CONFIGURACIÓN SUPABASE
 var SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
 var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
-function sbFetch(m, t, b, p) {
-  var u = SB + '/rest/v1/' + t + (p ? '?' + p : '');
-  var o = { method: m, headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' } };
-  if (b) o.body = JSON.stringify(b);
-  return fetch(u, o).then(r => r.json());
-}
+let allData = [];
 
-function toast(m) { var t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
-function ini(n) { return n ? n.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase() : '?'; }
-
-var viewStack = [];
-var currentFoto = null;
-
-function showTab(t) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById('view-'+t).classList.add('active');
-  viewStack = ['view-'+t];
-  if(t==='personas') loadPersonas();
-}
-
-function goBack() {
-  if(viewStack.length > 1) {
-    viewStack.pop();
-    var prev = viewStack[viewStack.length - 1];
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(prev).classList.add('active');
-  }
-}
-
-function loadPersonas(q) {
-  var l = document.getElementById('listaPersonas');
-  l.innerHTML = 'Cargando...';
-  sbFetch('GET', 'personas', null, 'select=*&order=nombre.asc').then(data => {
-    l.innerHTML = data.map(p => `
-      <div class="card" onclick="abrirFormPersona('${p.id}')">
-        <div class="avatar">\({p.foto ? `<img src="\){p.foto}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">` : ini(p.nombre)}</div>
-        <div class="card-info">
-          <div class="card-name">${p.nombre}</div>
-          <div class="card-sub">\({p.alias ? `"\){p.alias}"` : (p.ci ? 'CI: '+p.ci : '')}</div>
-        </div>
-      </div>
-    `).join('');
-  });
-}
-
-function abrirFormPersona(id) {
-  currentFoto = null;
-  document.getElementById('btnEliminarP').style.display = id ? 'block' : 'none';
+// Función para pedir datos a Supabase
+async function loadData() {
+  const container = document.getElementById('listContainer');
+  container.innerHTML = '<div class="status-msg">Cargando registros...</div>';
   
-  if(id) {
-    sbFetch('GET', 'personas', null, 'id=eq.'+id).then(r => {
-      var p = r[0];
-      document.getElementById('fpId').value = p.id;
-      document.getElementById('fpNombre').value = p.nombre || '';
-      document.getElementById('fpCI').value = p.ci || '';
-      document.getElementById('fpAlias').value = p.alias || '';
-      document.getElementById('fpFechaNac').value = p.fecha_nac || '';
-      document.getElementById('fpDomicilio').value = p.domicilio || '';
-      document.getElementById('fpTelefono').value = p.telefono || '';
-      document.getElementById('fpTelefono2').value = p.telefono2 || '';
-      document.getElementById('fpVinculo').value = p.vinculo || '';
-      document.getElementById('fpVeh1').value = p.vehiculo1 || '';
-      document.getElementById('fpVeh2').value = p.vehiculo2 || '';
-      document.getElementById('fpNotas').value = p.notas || '';
-      currentFoto = p.foto;
-      renderFoto();
-      
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById('view-form-persona').classList.add('active');
-      viewStack.push('view-form-persona');
-      window.scrollTo(0,0);
+  try {
+    const response = await fetch(`${SB}/rest/v1/personas?select=*&order=nombre.asc`, {
+      headers: {
+        'apikey': SK,
+        'Authorization': `Bearer ${SK}`
+      }
     });
-  } else {
-    ['fpId','fpNombre','fpCI','fpAlias','fpFechaNac','fpDomicilio','fpTelefono','fpTelefono2','fpVinculo','fpVeh1','fpVeh2','fpNotas'].forEach(i=>document.getElementById(i).value='');
-    renderFoto();
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById('view-form-persona').classList.add('active');
-    viewStack.push('view-form-persona');
+    
+    if (!response.ok) throw new Error('Error en la conexión con la base de datos');
+    
+    allData = await response.json();
+    renderList(allData);
+    
+  } catch (err) {
+    container.innerHTML = `<div class="status-msg" style="color:var(--danger)">⚠️ ${err.message}<br><small>Verificá la conexión</small></div>`;
   }
 }
 
-function renderFoto() {
-  document.getElementById('photoPreview').innerHTML = currentFoto ? `<img src="${currentFoto}" style="width:100px;height:100px;object-fit:cover;border-radius:50%">` : '📷 Tocar para foto';
+// Renderizar la lista de personas
+function renderList(data) {
+  const container = document.getElementById('listContainer');
+  if (data.length === 0) {
+    container.innerHTML = '<div class="status-msg">No se encontraron registros.</div>';
+    return;
+  }
+  
+  container.innerHTML = data.map(p => `
+    <div class="card" onclick="openDetail('${p.id}')">
+      <div class="avatar">\({p.foto ? `<img src="\){p.foto}">` : getInitials(p.nombre)}</div>
+      <div class="card-info">
+        <div class="card-name">${p.nombre}</div>
+        <div class="card-sub">CI: ${p.ci || '---'}</div>
+      </div>
+    </div>
+  `).join('');
 }
 
-document.getElementById('photoInput').onchange = function(e) {
-  var f = e.target.files[0];
-  if(!f) return;
-  var r = new FileReader();
-  r.onload = function(ev) {
-    var img = new Image();
-    img.onload = function() {
-      var c = document.createElement('canvas'), max = 300, w = img.width, h = img.height;
-      if(w > h) { if(w > max) { h = h * (max / w); w = max; } } else { if(h > max) { w = w * (max / h); h = max; } }
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      currentFoto = c.toDataURL('image/jpeg', 0.7);
-      renderFoto();
-    };
-    img.src = ev.target.result;
-  };
-  r.readAsDataURL(f);
-};
-
-document.getElementById('btnGuardarP').onclick = function() {
-  var id = document.getElementById('fpId').value;
-  var d = {
-    nombre: document.getElementById('fpNombre').value,
-    ci: document.getElementById('fpCI').value || null,
-    alias: document.getElementById('fpAlias').value || null,
-    fecha_nac: document.getElementById('fpFechaNac').value || null,
-    domicilio: document.getElementById('fpDomicilio').value || null,
-    telefono: document.getElementById('fpTelefono').value || null,
-    telefono2: document.getElementById('fpTelefono2').value || null,
-    vinculo: document.getElementById('fpVinculo').value || null,
-    notas: document.getElementById('fpNotas').value || null,
-    foto: currentFoto
-  };
+// Abrir la ficha de detalle
+function openDetail(id) {
+  const p = allData.find(x => x.id === id);
+  if (!p) return;
   
-  var method = id ? 'PATCH' : 'POST';
-  var param = id ? 'id=eq.'+id : '';
-  
-  sbFetch(method, 'personas', d, param).then(() => {
-    toast('✅ Guardado correctamente');
-    loadPersonas();
-    goBack();
-  });
-};
+  const content = document.getElementById('detailContent');
+  content.innerHTML = `
+    <div class="detail-header">
+      <div class="detail-photo">\({p.foto ? `<img src="\){p.foto}">` : getInitials(p.nombre)}</div>
+      <div style="text-align:center">
+        <h2 style="margin:0; font-size:1.4rem">${p.nombre}</h2>
+        <div style="color:var(--muted); margin-top:5px">CI: ${p.ci || '---'}</div>
+      </div>
+    </div>
 
-loadPersonas();
+    <div class="section-title">Datos Personales</div>
+    <div class="info-row"><span class="info-label">Alias / Apodo</span><span class="info-value" style="color:var(--accent)">${p.alias || '---'}</span></div>
+    <div class="info-row"><span class="info-label">F. de Nacimiento</span><span class="info-value">${formatDate(p.fecha_nac)}</span></div>
+    <div class="info-row"><span class="info-label">Dirección</span><span class="info-value">${p.domicilio || '---'}</span></div>
+    <div class="info-row"><span class="info-label">Teléfono</span><span class="info-value">${p.telefono || '---'}</span></div>
+
+    <div class="section-title">Vehículos Relacionados</div>
+    <div class="info-row"><span class="info-label">Matrícula 1</span><span class="info-value" style="letter-spacing:1px">${p.vehiculo1 || '---'}</span></div>
+    <div class="info-row"><span class="info-label">Matrícula 2</span><span class="info-value" style="letter-spacing:1px">${p.vehiculo2 || '---'}</span></div>
+
+    <div class="section-title">Notas / Antecedentes</div>
+    <div class="notes-box">${p.notas || 'Sin información adicional cargada.'}</div>
+
+    <button class="btn btn-primary" onclick="alert('Edición próximamente')">✏️ Editar Registro</button>
+    <button class="btn btn-danger" onclick="alert('Eliminación próximamente')">🗑️ Eliminar</button>
+  `;
+  
+  showView('view-detail');
+  window.scrollTo(0,0);
+}
+
+// Utilidades
+function showView(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  document.getElementById('fabBtn').style.display = viewId === 'view-list' ? 'block' : 'none';
+}
+
+function filterData() {
+  const q = document.getElementById('mainSearch').value.toLowerCase();
+  const filtered = allData.filter(p => 
+    p.nombre.toLowerCase().includes(q) || 
+    (p.ci && p.ci.includes(q)) ||
+    (p.alias && p.alias.toLowerCase().includes(q))
+  );
+  renderList(filtered);
+}
+
+function getInitials(name) {
+  return name ? name.split(' ').slice(0,2).map(n => n[0]).join('').toUpperCase() : '?';
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '---';
+  const parts = dateStr.split('-');
+  return parts.length === 3 ? `\({parts[2]}/\){parts[1]}/${parts[0]}` : dateStr;
+}
+
+// Carga inicial
+loadData();
 </script>
 </body>
 </html>
