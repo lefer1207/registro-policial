@@ -51,7 +51,7 @@
         .modal-item { padding: 13px 20px; border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 12px; cursor: pointer; }
         .modal-avatar { width: 36px; height: 36px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
         .form-content { padding: 20px; }
-        .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; background: #f7fafc; }
+        .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; background: #f7fafc; outline: none; }
         label { display: block; margin-bottom: 4px; color: #718096; font-size: 0.82rem; font-weight: 600; }
     </style>
 </head>
@@ -102,7 +102,7 @@
 
 <div class="modal-overlay" id="modalVinc" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal">
-        <div class="modal-header"><span>🔗 Vincular persona</span><span onclick="document.getElementById('modalVinc').classList.remove('open')" style="cursor:pointer;">✕</span></div>
+        <div class="modal-header"><span>🔗 Vincular persona</span><span onclick="document.getElementById('modalVinc').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
         <div class="modal-body" id="modalList"></div>
     </div>
 </div>
@@ -138,7 +138,7 @@ function dibujarPersonas(data) {
         html += '<div><div class="card-name">' + h(p.nombre) + '</div>';
         html += '<div class="card-sub">CI: ' + h(p.ci) + (p.vehiculo1 ? ' · 🚗 '+p.vehiculo1 : '') + '</div></div></div>';
     }
-    document.getElementById('listaPersonas').innerHTML = html || '<p style="text-align:center;padding:30px;">Sin registros.</p>';
+    document.getElementById('listaPersonas').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin registros.</p>';
 }
 
 function dibujarVehiculos(data) {
@@ -154,12 +154,12 @@ function dibujarVehiculos(data) {
         html += '<div class="v-plate">' + vehi[j].p.toUpperCase() + '</div>';
         html += '<div class="v-owner">' + h(vehi[j].o) + '</div></div>';
     }
-    document.getElementById('listaVehiculos').innerHTML = html || '<p style="text-align:center;padding:30px;">Sin vehículos.</p>';
+    document.getElementById('listaVehiculos').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin vehículos.</p>';
 }
 
 function verDetalle(id) {
     var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id === id) { p = db[i]; break; } }
+    for (var i = 0; i < db.length; i++) { if (db[i].id == id) { p = db[i]; break; } }
     if (!p) return;
     currentId = id;
     var vArr = (p.vinculo || '').split('|').filter(function(x){ return x; });
@@ -178,7 +178,7 @@ function verDetalle(id) {
     html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">' + h(p.vehiculo1) + '</span></div>';
     html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">' + h(p.vehiculo2) + '</span></div>';
     html += '<div class="section-title">VÍNCULOS</div>';
-    html += '<div style="padding:10px 15px;">' + (vHtml || '<span style="color:#a0aec0">Sin vínculos.</span>') + '</div>';
+    html += '<div style="padding:10px 15px;">' + (vHtml || '<span style="color:#a0aec0">Sin vínculos registrados.</span>') + '</div>';
     html += '<div class="section-title">NOTAS</div>';
     html += '<div class="notes-box">' + h(p.notas) + '</div>';
     html += '<div class="actions">';
@@ -200,18 +200,18 @@ function irAVinculo(n) {
 function abrirVincular() {
     var html = '';
     for (var i = 0; i < db.length; i++) {
-        if (db[i].id === currentId) continue;
+        if (db[i].id == currentId) continue;
         html += '<div class="modal-item" onclick="vincular(\'' + db[i].nombre.replace(/'/g,"\\'") + '\')">';
         html += '<div class="modal-avatar">' + (db[i].nombre||'??').substring(0,2).toUpperCase() + '</div>';
         html += '<div><div style="font-weight:600">' + h(db[i].nombre) + '</div><div style="font-size:0.8rem;color:#718096">CI: ' + h(db[i].ci) + '</div></div></div>';
     }
-    document.getElementById('modalList').innerHTML = html || '<p style="text-align:center;padding:20px;">Sin personas.</p>';
+    document.getElementById('modalList').innerHTML = html || '<p style="text-align:center;padding:20px;">Sin personas para vincular.</p>';
     document.getElementById('modalVinc').classList.add('open');
 }
 
 function vincular(n) {
     var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id === currentId) { p = db[i]; break; } }
+    for (var i = 0; i < db.length; i++) { if (db[i].id == currentId) { p = db[i]; break; } }
     if (!p) return;
     var v = (p.vinculo || '').split('|').filter(function(x){ return x; });
     if (v.indexOf(n) < 0) {
@@ -229,10 +229,10 @@ function agregarMatricula() {
     var plate = prompt('Ingresá la nueva matrícula:');
     if (!plate || !plate.trim()) return;
     var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id === currentId) { p = db[i]; break; } }
+    for (var i = 0; i < db.length; i++) { if (db[i].id == currentId) { p = db[i]; break; } }
     if (!p) return;
     var field = !p.vehiculo1 ? 'vehiculo1' : (!p.vehiculo2 ? 'vehiculo2' : null);
-    if (!field) { alert('Ya tiene 2 matrículas. Editá el registro para cambiarlas.'); return; }
+    if (!field) { alert('Esta persona ya tiene el límite de 2 matrículas cargadas.'); return; }
     var d = {};
     d[field] = plate.trim().toUpperCase();
     fetch(SB + '/rest/v1/personas?id=eq.' + currentId, {
@@ -252,7 +252,7 @@ function irA(v) {
 
 function abrirForm() {
     currentId = null;
-    document.getElementById('formTitle').innerText = 'Nueva Persona';
+    document.getElementById('formTitle').innerText = 'Nuevo Registro';
     var ids = ['nombre','ci','fecha_nac','domicilio','tel','tel2','veh1','veh2','notas'];
     for (var i = 0; i < ids.length; i++) document.getElementById('f-'+ids[i]).value = '';
     irA('view-form');
@@ -260,7 +260,7 @@ function abrirForm() {
 
 function editar() {
     var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id === currentId) { p = db[i]; break; } }
+    for (var i = 0; i < db.length; i++) { if (db[i].id == currentId) { p = db[i]; break; } }
     if (!p) return;
     document.getElementById('formTitle').innerText = 'Editar Registro';
     document.getElementById('f-nombre').value = p.nombre || '';
@@ -287,17 +287,17 @@ function guardar() {
         vehiculo2: document.getElementById('f-veh2').value,
         notas: document.getElementById('f-notas').value
     };
-    if (!d.nombre) { alert('El nombre es obligatorio'); return; }
+    if (!d.nombre) { alert('Nombre completo es obligatorio.'); return; }
     var url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
     fetch(url, {
         method: currentId ? 'PATCH' : 'POST',
-        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify(d)
     }).then(function(){ cargar(); irA('view-list'); });
 }
 
 function eliminar(id) {
-    if (!confirm('¿Eliminar este registro?')) return;
+    if (!confirm('¿Seguro que querés eliminar este registro?')) return;
     fetch(SB + '/rest/v1/personas?id=eq.' + id, {
         method: 'DELETE',
         headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY }
@@ -309,8 +309,7 @@ function filtrar() {
     dibujarPersonas(db.filter(function(p){
         return (p.nombre||'').toLowerCase().indexOf(t)>=0 ||
                (p.ci||'').indexOf(t)>=0 ||
-               (p.vehiculo1||'').toLowerCase().indexOf(t)>=0 ||
-               (p.vehiculo2||'').toLowerCase().indexOf(t)>=0;
+               (p.vehiculo1||'').toLowerCase().indexOf(t)>=0;
     }));
 }
 
@@ -324,10 +323,9 @@ function filtrarVehiculos() {
     var html = '';
     for (var j = 0; j < vehi.length; j++) {
         html += '<div class="v-card" onclick="verDetalle(\'' + vehi[j].id + '\')">';
-        html += '<div class="v-plate">' + vehi[j].p.toUpperCase() + '</div>';
-        html += '<div class="v-owner">' + h(vehi[j].o) + '</div></div>';
+        html += '<div class="v-plate">' + vehi[j].p.toUpperCase() + '</div><div class="v-owner">' + h(vehi[j].o) + '</div></div>';
     }
-    document.getElementById('listaVehiculos').innerHTML = html || '<p style="text-align:center;padding:30px;">Sin resultados.</p>';
+    document.getElementById('listaVehiculos').innerHTML = html;
 }
 
 window.onload = cargar;
