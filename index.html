@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Registro Policial Pro v1.2</title>
+    <title>Registro Policial Pro v1.3</title>
     <style>
         :root { --primary: #1a3a5c; --secondary: #2c5282; --bg: #f0f2f5; --text: #2d3748; --accent: #d69e2e; --danger: #c53030; --green: #276749; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -25,7 +25,7 @@
         .h-name { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
         .h-ci { color: #718096; font-size: 0.9rem; margin-top: 4px; }
         .section-title { background: #edf2f7; padding: 8px 20px; color: #718096; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .section-title .plus-btn { background: var(--accent); color: white; border-radius: 4px; padding: 2px 8px; font-size: 0.8rem; cursor: pointer; border: none; }
+        .section-title .plus-btn { background: var(--accent); color: white; border-radius: 4px; padding: 2px 10px; font-size: 0.9rem; cursor: pointer; border: none; font-weight: bold; }
         .data-row { background: white; padding: 14px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #f0f4f8; }
         .data-label { color: #a0aec0; font-size: 0.9rem; }
         .data-value { font-weight: 700; text-align: right; color: var(--text); }
@@ -52,17 +52,18 @@
         .modal-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
         .modal-body { overflow-y: auto; padding-bottom: 20px; }
         .modal-search { padding: 10px 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; }
-        .modal-search input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e0; outline: none; }
+        .modal-search input, .modal-body input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; outline: none; margin-bottom: 10px; }
         .modal-item { padding: 14px 20px; border-bottom: 1px solid #f0f4f8; cursor: pointer; }
         .form-content { padding: 20px; }
         .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; background: #f7fafc; outline: none; }
         label { display: block; margin-bottom: 4px; color: #718096; font-size: 0.82rem; font-weight: 600; }
+        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; margin-bottom: 15px; background: #f7fafc; }
     </style>
 </head>
 <body>
 
 <div id="view-list" class="view active">
-    <header>🛡️ Registro Policial Pro v1.2</header>
+    <header>🛡️ Registro Policial Pro v1.3</header>
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Nombre, CI o matrícula..." oninput="filtrar()">
         <button class="btn-direct" onclick="vehiculoDirecto()">🚗</button>
@@ -103,11 +104,29 @@
     </div>
 </div>
 
+<!-- Modal Vincular -->
 <div class="modal-overlay" id="modalVinc" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal">
         <div class="modal-header"><span>🔗 Vincular persona</span><span onclick="document.getElementById('modalVinc').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
-        <div class="modal-search"><input type="text" id="searchVinc" placeholder="Buscar persona para vincular..." oninput="filtrarVincular()"></div>
+        <div class="modal-search"><input type="text" id="searchVinc" placeholder="Buscar persona..." oninput="filtrarVincular()"></div>
         <div class="modal-body" id="modalList"></div>
+    </div>
+</div>
+
+<!-- Modal Nueva Matrícula -->
+<div class="modal-overlay" id="modalVeh" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal">
+        <div class="modal-header"><span>🚗 Agregar Matrícula</span><span onclick="document.getElementById('modalVeh').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
+        <div class="modal-body" style="padding:20px;">
+            <label>Posición</label>
+            <select id="v-pos">
+                <option value="1">Vehículo 1</option>
+                <option value="2">Vehículo 2</option>
+            </select>
+            <label>Matrícula</label>
+            <input type="text" id="v-plate" placeholder="Ej: ABC1234">
+            <button class="btn btn-accent" style="width:100%" onclick="guardarVehiculo()">💾 Guardar Matrícula</button>
+        </div>
     </div>
 </div>
 
@@ -175,15 +194,15 @@ function verDetalle(id) {
     html += '<div class="section-title">DATOS</div>';
     html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">'+h(p.domicilio)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">'+h(p.telefono)+'</span></div>';
-    html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="agregarMatricula()">+</button></div>';
+    html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
     html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">'+h(p.vehiculo2)+'</span></div>';
     html += '<div class="section-title">VÍNCULOS</div>';
     html += '<div style="padding:10px 15px;">'+(vHtml || '<span style="color:#a0aec0">Sin vínculos.</span>')+'</div>';
-    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notas)+'</div>';
+    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notes)+'</div>';
     html += '<div class="actions">';
     html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
-    html += '<button class="btn btn-accent" onclick="agregarMatricula()">🚗 Matrícula</button>';
+    html += '<button class="btn btn-accent" onclick="abrirVehiculo()">🚗 Matrícula</button>';
     html += '<button class="btn btn-primary" onclick="editar()">✏️ Editar</button>';
     html += '<button class="btn btn-danger" onclick="eliminar(\''+p.id+'\')">🗑️</button></div>';
     document.getElementById('detalleContent').innerHTML = html;
@@ -202,13 +221,18 @@ function borrarVinculo(n) {
     updatePersona({ vinculo: v.join('|') });
 }
 
-function agregarMatricula() {
-    var n = prompt('¿Qué matrícula? (1 o 2)');
-    if (n !== '1' && n !== '2') return;
-    var plate = prompt('Matrícula:');
-    if (!plate) return;
-    var d = {}; d['vehiculo' + n] = plate.toUpperCase().trim();
+function abrirVehiculo() {
+    document.getElementById('v-plate').value = '';
+    document.getElementById('modalVeh').classList.add('open');
+}
+
+function guardarVehiculo() {
+    var pos = document.getElementById('v-pos').value;
+    var plate = document.getElementById('v-plate').value.toUpperCase().trim();
+    if (!plate) return alert('Ingresá la matrícula.');
+    var d = {}; d['vehiculo' + pos] = plate;
     updatePersona(d);
+    document.getElementById('modalVeh').classList.remove('open');
 }
 
 function updatePersona(d) {
