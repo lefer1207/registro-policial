@@ -11,8 +11,9 @@
         header { background: var(--primary); color: white; padding: 16px 20px; font-weight: bold; font-size: 1.1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .view { display: none; }
         .view.active { display: block; }
-        .search-container { padding: 12px 15px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 55px; z-index: 90; }
-        .search-container input { width: 100%; padding: 10px 16px; border: 1px solid #cbd5e0; border-radius: 25px; font-size: 15px; outline: none; background: #f7fafc; }
+        .search-container { padding: 12px 15px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 55px; z-index: 90; display: flex; gap: 8px; }
+        .search-container input { flex: 1; padding: 10px 16px; border: 1px solid #cbd5e0; border-radius: 25px; font-size: 15px; outline: none; background: #f7fafc; }
+        .btn-direct { background: var(--accent); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .list-container { padding: 10px 12px; }
         .card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
         .avatar-s { width: 45px; height: 45px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 14px; flex-shrink: 0; }
@@ -60,7 +61,8 @@
 <div id="view-list" class="view active">
     <header>🛡️ Registro Policial</header>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre, CI o matrícula..." oninput="filtrar()">
+        <input type="text" id="searchInput" placeholder="Nombre, CI o matrícula..." oninput="filtrar()">
+        <button class="btn-direct" onclick="vehiculoDirecto()" title="Agregar Vehículo Directo">🚗</button>
     </div>
     <div class="list-container" id="listaPersonas"></div>
     <button class="fab" onclick="abrirForm()">+</button>
@@ -86,10 +88,8 @@
         <h3 id="formTitle" style="margin:0 0 16px;color:var(--primary);">Registro</h3>
         <label>Nombre completo *</label><input type="text" id="f-nombre">
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
-        <label>Fecha de Nacimiento</label><input type="date" id="f-fecha_nac">
         <label>Domicilio</label><input type="text" id="f-domicilio">
         <label>Teléfono 1</label><input type="text" id="f-tel">
-        <label>Teléfono 2</label><input type="text" id="f-tel2">
         <label>Matrícula 1</label><input type="text" id="f-veh1">
         <label>Matrícula 2</label><input type="text" id="f-veh2">
         <label>Notas</label><textarea id="f-notas" rows="4"></textarea>
@@ -133,7 +133,7 @@ function dibujarPersonas(data) {
     var html = '';
     for (var i = 0; i < data.length; i++) {
         var p = data[i];
-        html += '<div class="card" onclick="verDetalle(\'' + p.id + '\')">';
+        html += '<div class="card" onclick="verDetalle(' + p.id + ')">';
         html += '<div class="avatar-s">' + (p.nombre||'??').substring(0,2).toUpperCase() + '</div>';
         html += '<div><div class="card-name">' + h(p.nombre) + '</div>';
         html += '<div class="card-sub">CI: ' + h(p.ci) + (p.vehiculo1 ? ' · 🚗 '+p.vehiculo1 : '') + '</div></div></div>';
@@ -150,7 +150,7 @@ function dibujarVehiculos(data) {
     vehi.sort(function(a,b){ return a.p.localeCompare(b.p); });
     var html = '';
     for (var j = 0; j < vehi.length; j++) {
-        html += '<div class="v-card" onclick="verDetalle(\'' + vehi[j].id + '\')">';
+        html += '<div class="v-card" onclick="verDetalle(' + vehi[j].id + ')">';
         html += '<div class="v-plate">' + vehi[j].p.toUpperCase() + '</div>';
         html += '<div class="v-owner">' + h(vehi[j].o) + '</div></div>';
     }
@@ -158,8 +158,7 @@ function dibujarVehiculos(data) {
 }
 
 function verDetalle(id) {
-    var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id == id) { p = db[i]; break; } }
+    var p = db.find(function(x){ return x.id == id; });
     if (!p) return;
     currentId = id;
     var vArr = (p.vinculo || '').split('|').filter(function(x){ return x; });
@@ -170,10 +169,8 @@ function verDetalle(id) {
     var html = '<div class="profile-hero"><div class="avatar-l">' + (p.nombre||'??').substring(0,2).toUpperCase() + '</div>';
     html += '<div><div class="h-name">' + h(p.nombre) + '</div><div class="h-ci">CI: ' + h(p.ci) + '</div></div></div>';
     html += '<div class="section-title">DATOS</div>';
-    html += '<div class="data-row"><span class="data-label">Nacimiento</span><span class="data-value">' + h(p.fecha_nac) + '</span></div>';
     html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">' + h(p.domicilio) + '</span></div>';
-    html += '<div class="data-row"><span class="data-label">Teléfono 1</span><span class="data-value">' + h(p.telefono) + '</span></div>';
-    html += '<div class="data-row"><span class="data-label">Teléfono 2</span><span class="data-value">' + h(p.telefono2) + '</span></div>';
+    html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">' + h(p.telefono) + '</span></div>';
     html += '<div class="section-title">VEHÍCULOS</div>';
     html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">' + h(p.vehiculo1) + '</span></div>';
     html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">' + h(p.vehiculo2) + '</span></div>';
@@ -185,16 +182,15 @@ function verDetalle(id) {
     html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
     html += '<button class="btn btn-accent" onclick="agregarMatricula()">🚗 Matrícula</button>';
     html += '<button class="btn btn-primary" onclick="editar()">✏️ Editar</button>';
-    html += '<button class="btn btn-danger" onclick="eliminar(\'' + p.id + '\')">🗑️</button>';
+    html += '<button class="btn btn-danger" onclick="eliminar(' + p.id + ')">🗑️</button>';
     html += '</div>';
     document.getElementById('detalleContent').innerHTML = html;
     irA('view-detail');
 }
 
 function irAVinculo(n) {
-    for (var i = 0; i < db.length; i++) {
-        if (db[i].nombre && db[i].nombre.toLowerCase() === n.toLowerCase()) { verDetalle(db[i].id); return; }
-    }
+    var p = db.find(function(x){ return x.nombre && x.nombre.toLowerCase() === n.toLowerCase(); });
+    if (p) verDetalle(p.id);
 }
 
 function abrirVincular() {
@@ -205,13 +201,12 @@ function abrirVincular() {
         html += '<div class="modal-avatar">' + (db[i].nombre||'??').substring(0,2).toUpperCase() + '</div>';
         html += '<div><div style="font-weight:600">' + h(db[i].nombre) + '</div><div style="font-size:0.8rem;color:#718096">CI: ' + h(db[i].ci) + '</div></div></div>';
     }
-    document.getElementById('modalList').innerHTML = html || '<p style="text-align:center;padding:20px;">Sin personas para vincular.</p>';
+    document.getElementById('modalList').innerHTML = html;
     document.getElementById('modalVinc').classList.add('open');
 }
 
 function vincular(n) {
-    var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id == currentId) { p = db[i]; break; } }
+    var p = db.find(function(x){ return x.id == currentId; });
     if (!p) return;
     var v = (p.vinculo || '').split('|').filter(function(x){ return x; });
     if (v.indexOf(n) < 0) {
@@ -226,20 +221,30 @@ function vincular(n) {
 }
 
 function agregarMatricula() {
-    var plate = prompt('Ingresá la nueva matrícula:');
-    if (!plate || !plate.trim()) return;
-    var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id == currentId) { p = db[i]; break; } }
-    if (!p) return;
+    var plate = prompt('Matrícula a agregar:');
+    if (!plate) return;
+    var p = db.find(function(x){ return x.id == currentId; });
     var field = !p.vehiculo1 ? 'vehiculo1' : (!p.vehiculo2 ? 'vehiculo2' : null);
-    if (!field) { alert('Esta persona ya tiene el límite de 2 matrículas cargadas.'); return; }
-    var d = {};
-    d[field] = plate.trim().toUpperCase();
+    if (!field) return alert('Límite de 2 vehículos alcanzado.');
+    var d = {}; d[field] = plate.toUpperCase();
     fetch(SB + '/rest/v1/personas?id=eq.' + currentId, {
         method: 'PATCH',
         headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify(d)
     }).then(function(){ cargar(); setTimeout(function(){ verDetalle(currentId); }, 500); });
+}
+
+function vehiculoDirecto() {
+    var plate = prompt('Ingrese la Matrícula:');
+    if (!plate) return;
+    var owner = prompt('Nombre del Dueño:');
+    if (!owner) return;
+    var d = { nombre: owner, vehiculo1: plate.toUpperCase() };
+    fetch(SB + '/rest/v1/personas', {
+        method: 'POST',
+        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(d)
+    }).then(function(){ cargar(); alert('Vehículo guardado.'); });
 }
 
 function irA(v) {
@@ -253,22 +258,18 @@ function irA(v) {
 function abrirForm() {
     currentId = null;
     document.getElementById('formTitle').innerText = 'Nuevo Registro';
-    var ids = ['nombre','ci','fecha_nac','domicilio','tel','tel2','veh1','veh2','notas'];
-    for (var i = 0; i < ids.length; i++) document.getElementById('f-'+ids[i]).value = '';
+    ['nombre','ci','domicilio','tel','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
     irA('view-form');
 }
 
 function editar() {
-    var p = null;
-    for (var i = 0; i < db.length; i++) { if (db[i].id == currentId) { p = db[i]; break; } }
+    var p = db.find(function(x){ return x.id == currentId; });
     if (!p) return;
     document.getElementById('formTitle').innerText = 'Editar Registro';
     document.getElementById('f-nombre').value = p.nombre || '';
     document.getElementById('f-ci').value = p.ci || '';
-    document.getElementById('f-fecha_nac').value = p.fecha_nac || '';
     document.getElementById('f-domicilio').value = p.domicilio || '';
     document.getElementById('f-tel').value = p.telefono || '';
-    document.getElementById('f-tel2').value = p.telefono2 || '';
     document.getElementById('f-veh1').value = p.vehiculo1 || '';
     document.getElementById('f-veh2').value = p.vehiculo2 || '';
     document.getElementById('f-notas').value = p.notas || '';
@@ -279,15 +280,13 @@ function guardar() {
     var d = {
         nombre: document.getElementById('f-nombre').value,
         ci: document.getElementById('f-ci').value,
-        fecha_nac: document.getElementById('f-fecha_nac').value || null,
         domicilio: document.getElementById('f-domicilio').value,
         telefono: document.getElementById('f-tel').value,
-        telefono2: document.getElementById('f-tel2').value,
         vehiculo1: document.getElementById('f-veh1').value,
         vehiculo2: document.getElementById('f-veh2').value,
         notas: document.getElementById('f-notas').value
     };
-    if (!d.nombre) { alert('Nombre completo es obligatorio.'); return; }
+    if (!d.nombre) return alert('El nombre es obligatorio');
     var url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
     fetch(url, {
         method: currentId ? 'PATCH' : 'POST',
@@ -297,33 +296,28 @@ function guardar() {
 }
 
 function eliminar(id) {
-    if (!confirm('¿Seguro que querés eliminar este registro?')) return;
-    fetch(SB + '/rest/v1/personas?id=eq.' + id, {
-        method: 'DELETE',
-        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY }
-    }).then(function(){ cargar(); irA('view-list'); });
+    if (!confirm('¿Eliminar registro?')) return;
+    fetch(SB + '/rest/v1/personas?id=eq.' + id, { method: 'DELETE', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
+    .then(function(){ cargar(); irA('view-list'); });
 }
 
 function filtrar() {
     var t = document.getElementById('searchInput').value.toLowerCase();
     dibujarPersonas(db.filter(function(p){
-        return (p.nombre||'').toLowerCase().indexOf(t)>=0 ||
-               (p.ci||'').indexOf(t)>=0 ||
-               (p.vehiculo1||'').toLowerCase().indexOf(t)>=0;
+        return (p.nombre||'').toLowerCase().indexOf(t)>=0 || (p.ci||'').indexOf(t)>=0 || (p.vehiculo1||'').toLowerCase().indexOf(t)>=0;
     }));
 }
 
 function filtrarVehiculos() {
     var t = document.getElementById('searchVeh').value.toLowerCase();
-    var vehi = [];
+    var vList = [];
     for (var i = 0; i < db.length; i++) {
-        if ((db[i].vehiculo1||'').toLowerCase().indexOf(t)>=0) vehi.push({ p: db[i].vehiculo1, o: db[i].nombre, id: db[i].id });
-        if ((db[i].vehiculo2||'').toLowerCase().indexOf(t)>=0) vehi.push({ p: db[i].vehiculo2, o: db[i].nombre, id: db[i].id });
+        if ((db[i].vehiculo1||'').toLowerCase().indexOf(t)>=0) vList.push({ p: db[i].vehiculo1, o: db[i].nombre, id: db[i].id });
+        if ((db[i].vehiculo2||'').toLowerCase().indexOf(t)>=0) vList.push({ p: db[i].vehiculo2, o: db[i].nombre, id: db[i].id });
     }
     var html = '';
-    for (var j = 0; j < vehi.length; j++) {
-        html += '<div class="v-card" onclick="verDetalle(\'' + vehi[j].id + '\')">';
-        html += '<div class="v-plate">' + vehi[j].p.toUpperCase() + '</div><div class="v-owner">' + h(vehi[j].o) + '</div></div>';
+    for (var j = 0; j < vList.length; j++) {
+        html += '<div class="v-card" onclick="verDetalle(' + vList[j].id + ')"><div class="v-plate">' + vList[j].p.toUpperCase() + '</div><div class="v-owner">' + h(vList[j].o) + '</div></div>';
     }
     document.getElementById('listaVehiculos').innerHTML = html;
 }
