@@ -3,76 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Diagnóstico Registro Policial</title>
+    <title>Registro Policial</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; color: #1a3a5c; }
-        .box { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .status { font-weight: bold; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-        .ok { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        pre { background: #eee; padding: 10px; overflow: auto; max-height: 200px; font-size: 12px; }
+        :root { --primary: #1a3a5c; --secondary: #2c5282; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg); padding-bottom: 80px; }
+        header { background: var(--primary); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
+        .search-container { padding: 1rem; position: sticky; top: 60px; background: var(--bg); z-index: 90; }
+        #searchInput { width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 25px; box-sizing: border-box; font-size: 16px; outline: none; transition: border-color 0.3s; }
+        #searchInput:focus { border-color: var(--secondary); }
+        .container { padding: 1rem; display: grid; gap: 1rem; }
+        .card { background: white; border-radius: 12px; padding: 1rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
+        .card:active { transform: scale(0.98); }
+        .avatar { width: 50px; height: 50px; background: #edf2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; font-weight: bold; color: var(--primary); font-size: 1.2rem; }
+        .info h3 { margin: 0; color: #2d3748; font-size: 1.1rem; }
+        .info p { margin: 4px 0 0; color: #718096; font-size: 0.9rem; }
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 0.8rem 0; border-top: 1px solid #e2e8f0; z-index: 100; }
+        .nav-item { border: none; background: none; color: #718096; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; cursor: pointer; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item span { font-size: 1.4rem; margin-bottom: 4px; }
     </style>
 </head>
 <body>
-    <h1>🛠️ Diagnóstico de Conexión</h1>
+
+<header>
+    <h2 style="margin:0">🛡️ Registro Policial</h2>
+</header>
+
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Buscar por nombre o CI..." oninput="filterData()">
+</div>
+
+<div class="container" id="personList">
+    <div style="text-align:center; color:#718096; padding:2rem;">Cargando personas...</div>
+</div>
+
+<nav>
+    <button class="nav-item active"><span>👤</span>Personas</button>
+    <button class="nav-item"><span>🚗</span>Vehículos</button>
+    <button class="nav-item"><span>🔍</span>Buscar</button>
+</nav>
+
+<script>
+    const SB_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
     
-    <div id="statusBox" class="box">
-        <div id="statusMsg" class="status">Cargando...</div>
-        <div id="debugInfo"></div>
-    </div>
+    let allData = [];
 
-    <div id="dataBox" class="box" style="display:none;">
-        <h3>Registros Encontrados: <span id="count">0</span></h3>
-        <ul id="list"></ul>
-    </div>
-
-    <script>
-        // Datos de conexión de tu Supabase
-        const SB_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
-        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
-
-        async function diagnostico() {
-            const statusMsg = document.getElementById('statusMsg');
-            const debugInfo = document.getElementById('debugInfo');
-            
-            try {
-                debugInfo.innerHTML += "<p>1. Intentando conectar a Supabase...</p>";
-                
-                // Consultamos la tabla personas
-                const res = await fetch(`${SB_URL}/rest/v1/personas?select=nombre,ci&limit=10`, {
-                    headers: { 
-                        'apikey': SB_KEY, 
-                        'Authorization': 'Bearer ' + SB_KEY 
-                    }
-                });
-
-                debugInfo.innerHTML += `<p>2. Respuesta del servidor: ${res.status}</p>`;
-
-                if (!res.ok) {
-                    throw new Error(`Error \({res.status}: \){res.statusText}`);
-                }
-
-                const data = await res.json();
-                debugInfo.innerHTML += `<p>3. Datos recibidos correctamente.</p>`;
-
-                statusMsg.innerText = "✅ CONEXIÓN EXITOSA";
-                statusMsg.className = "status ok";
-                
-                document.getElementById('dataBox').style.display = "block";
-                document.getElementById('count').innerText = data.length;
-                
-                const list = document.getElementById('list');
-                list.innerHTML = data.map(p => `<li><b>\({p.nombre}</b> (CI: \){p.ci || '---'})</li>`).join('');
-
-            } catch (err) {
-                statusMsg.innerText = "❌ ERROR DE CONEXIÓN";
-                statusMsg.className = "status error";
-                debugInfo.innerHTML += `<p style="color:red"><b>Detalle:</b> ${err.message}</p>`;
-                console.error("Detalle técnico:", err);
-            }
+    async function loadData() {
+        try {
+            const res = await fetch(`${SB_URL}/rest/v1/personas?select=*&order=nombre.asc`, {
+                headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+            });
+            allData = await res.json();
+            renderCards(allData);
+        } catch (err) {
+            document.getElementById('personList').innerHTML = '<div style="color:red; text-align:center;">Error al cargar datos</div>';
         }
+    }
 
-        diagnostico();
-    </script>
+    function renderCards(data) {
+        const list = document.getElementById('personList');
+        if (data.length === 0) {
+            list.innerHTML = '<div style="text-align:center; color:#718096;">No se encontraron resultados</div>';
+            return;
+        }
+        
+        list.innerHTML = data.map(p => `
+            <div class="card">
+                <div class="avatar">${p.nombre ? p.nombre.substring(0,2).toUpperCase() : '??'}</div>
+                <div class="info">
+                    <h3>${p.nombre || 'Sin nombre'}</h3>
+                    <p>CI: ${p.ci || '---'}</p>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterData() {
+        const term = document.getElementById('searchInput').value.toLowerCase();
+        const filtered = allData.filter(p => 
+            (p.nombre && p.nombre.toLowerCase().includes(term)) || 
+            (p.ci && p.ci.toString().includes(term))
+        );
+        renderCards(filtered);
+    }
+
+    window.onload = loadData;
+</script>
+
 </body>
 </html>
