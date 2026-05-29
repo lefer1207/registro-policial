@@ -8,36 +8,29 @@
     :root { --primary:#1a3a5c; --secondary:#2c5f8a; --accent:#e8a020; --bg:#f0f2f5; --card:#fff; --text:#1a1a2e; --muted:#6c7a8d; --border:#d0d7e3; --radius:10px; }
     * { box-sizing:border-box; margin:0; padding:0; }
     body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; padding-bottom:80px; }
-    header { background:var(--primary); color:#fff; padding:16px; font-weight:700; position:sticky; top:0; z-index:100; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    nav { position:fixed; bottom:0; left:0; right:0; background:var(--primary); display:flex; z-index:100; border-top:1px solid rgba(255,255,255,0.1); }
+    header { background:var(--primary); color:#fff; padding:16px; font-weight:700; position:sticky; top:0; z-index:100; text-align:center; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    nav { position:fixed; bottom:0; left:0; right:0; background:var(--primary); display:flex; z-index:100; }
     nav button { flex:1; background:none; border:none; color:rgba(255,255,255,0.6); padding:14px 5px; font-size:0.75rem; cursor:pointer; }
     nav button.active { color:var(--accent); font-weight:700; border-top:3px solid var(--accent); }
     main { padding:15px; max-width:600px; margin:0 auto; }
     .view { display:none; }
     .view.active { display:block; }
-    .search-bar { margin-bottom:15px; }
-    .search-bar input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:1rem; outline:none; }
-    .card { background:var(--card); border-radius:var(--radius); padding:15px; margin-bottom:12px; display:flex; align-items:center; gap:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05); cursor:pointer; transition:transform 0.1s; }
-    .card:active { transform:scale(0.98); }
-    .avatar { width:55px; height:55px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:700; flex-shrink:0; overflow:hidden; }
+    .search-bar input { width:100%; padding:12px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:1rem; margin-bottom:15px; outline:none; }
+    .card { background:var(--card); border-radius:var(--radius); padding:15px; margin-bottom:12px; display:flex; align-items:center; gap:15px; box-shadow:0 2px 8px rgba(0,0,0,0.05); cursor:pointer; }
+    .avatar { width:50px; height:50px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; overflow:hidden; }
     .avatar img { width:100%; height:100%; object-fit:cover; }
     .card-info { flex:1; overflow:hidden; }
-    .card-name { font-weight:700; font-size:1rem; margin-bottom:3px; color:var(--primary); }
+    .card-name { font-weight:700; font-size:1rem; color:var(--primary); }
     .card-sub { font-size:0.85rem; color:var(--muted); }
-    .detail-header { display:flex; flex-direction:column; align-items:center; margin-bottom:25px; padding-top:10px; }
-    .detail-photo { width:110px; height:110px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:2.8rem; font-weight:700; margin-bottom:15px; overflow:hidden; border:4px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,0.1); }
-    .detail-photo img { width:100%; height:100%; object-fit:cover; }
-    .section-title { font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; border-bottom:1.5px solid var(--border); padding-bottom:5px; margin:20px 0 10px; letter-spacing:1px; }
-    .info-row { display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; }
-    .info-label { color:var(--muted); font-size:0.85rem; }
-    .info-value { font-weight:700; font-size:0.9rem; text-align:right; color:var(--primary); }
-    .notes-box { background:#fff; border-radius:12px; padding:15px; margin-top:5px; font-size:0.9rem; line-height:1.5; border:1px solid var(--border); white-space:pre-wrap; }
-    .btn { width:100%; padding:14px; border:none; border-radius:var(--radius); font-size:1rem; font-weight:600; cursor:pointer; margin-top:10px; }
-    .btn-ghost { background:transparent; border:1.5px solid var(--border); color:var(--text); margin-bottom:20px; display:inline-block; width:auto; padding:8px 15px; font-size:0.9rem; }
-    .btn-primary { background:var(--secondary); color:#fff; }
-    .btn-danger { background:var(--danger); color:#fff; margin-top:30px; }
-    .fab { position:fixed; bottom:90px; right:20px; width:60px; height:60px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:2rem; box-shadow:0 4px 15px rgba(0,0,0,0.2); z-index:90; cursor:pointer; }
-    .status-msg { text-align:center; padding:40px 20px; color:var(--muted); font-size:0.9rem; }
+    .detail-header { text-align:center; margin-bottom:20px; }
+    .detail-photo { width:100px; height:100px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:2.5rem; margin:0 auto 15px; border:3px solid #fff; box-shadow:0 4px 10px rgba(0,0,0,0.1); overflow:hidden; }
+    .section-title { font-size:0.75rem; font-weight:700; color:var(--muted); text-transform:uppercase; border-bottom:1.5px solid var(--border); padding-bottom:5px; margin:20px 0 10px; }
+    .info-row { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid #eee; font-size:0.9rem; }
+    .info-label { color:var(--muted); }
+    .info-value { font-weight:700; color:var(--primary); }
+    .notes-box { background:#fff; border-radius:8px; padding:12px; margin-top:5px; font-size:0.9rem; border:1px solid var(--border); white-space:pre-wrap; min-height:60px; }
+    .btn-back { background:none; border:none; color:var(--primary); font-weight:700; cursor:pointer; margin-bottom:15px; padding:0; }
+    .status-msg { text-align:center; padding:50px 20px; color:var(--muted); }
   </style>
 </head>
 <body>
@@ -45,22 +38,16 @@
 <header>🛡️ Registro Policial</header>
 
 <main>
-  <!-- VISTA LISTA -->
   <div class="view active" id="view-list">
-    <div class="search-bar">
-      <input type="search" id="mainSearch" placeholder="Buscar por nombre o CI..." oninput="filterData()">
-    </div>
+    <input type="search" id="mainSearch" placeholder="Buscar por nombre o CI..." oninput="filterData()">
     <div id="listContainer"></div>
   </div>
 
-  <!-- VISTA DETALLE -->
   <div class="view" id="view-detail">
-    <button class="btn-ghost" onclick="showView('view-list')">← Volver</button>
+    <button class="btn-back" onclick="showView('view-list')">← VOLVER</button>
     <div id="detailContent"></div>
   </div>
 </main>
-
-<button class="fab" id="fabBtn" onclick="alert('Próximamente')">+</button>
 
 <nav>
   <button class="active">👤 Personas</button>
@@ -69,6 +56,7 @@
 </nav>
 
 <script>
+// Datos grounded de tu configuración de Supabase
 var SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
 var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
@@ -76,30 +64,31 @@ let allData = [];
 
 async function loadData() {
   const container = document.getElementById('listContainer');
-  container.innerHTML = '<div class="status-msg">Cargando...</div>';
+  container.innerHTML = '<div class="status-msg">Cargando registros...</div>';
   
   try {
     const res = await fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', {
       headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK }
     });
+    if(!res.ok) throw new Error("Error " + res.status);
     allData = await res.json();
     renderList(allData);
   } catch (err) {
-    container.innerHTML = '<div class="status-msg">Error al cargar datos.</div>';
+    container.innerHTML = `<div class="status-msg">⚠️ No se pudo conectar con la base de datos.</div>`;
   }
 }
 
 function renderList(data) {
   const container = document.getElementById('listContainer');
   if (!data || data.length === 0) {
-    container.innerHTML = '<div class="status-msg">No hay registros.</div>';
+    container.innerHTML = '<div class="status-msg">No hay registros disponibles.</div>';
     return;
   }
   container.innerHTML = data.map(p => `
     <div class="card" onclick="openDetail('${p.id}')">
       <div class="avatar">\({p.foto ? `<img src="\){p.foto}">` : getInitials(p.nombre)}</div>
       <div class="card-info">
-        <div class="card-name">${p.nombre}</div>
+        <div class="card-name">${p.nombre || 'Sin nombre'}</div>
         <div class="card-sub">CI: ${p.ci || '---'}</div>
       </div>
     </div>
@@ -113,40 +102,41 @@ function openDetail(id) {
   document.getElementById('detailContent').innerHTML = `
     <div class="detail-header">
       <div class="detail-photo">\({p.foto ? `<img src="\){p.foto}">` : getInitials(p.nombre)}</div>
-      <div style="text-align:center">
-        <h2 style="margin:0; font-size:1.3rem">${p.nombre}</h2>
-        <div style="color:var(--muted); margin-top:4px">CI: ${p.ci || '---'}</div>
-      </div>
+      <h2 style="margin:0">${p.nombre}</h2>
+      <div style="color:var(--muted)">CI: ${p.ci || '---'}</div>
     </div>
 
-    <div class="section-title">Datos Personales</div>
-    <div class="info-row"><span class="info-label">Alias</span><span class="info-value" style="color:var(--accent)">${p.alias || '---'}</span></div>
-    <div class="info-row"><span class="info-label">Nacimiento</span><span class="info-value">${p.fecha_nac || '---'}</span></div>
+    <div class="section-title">Información Principal</div>
     <div class="info-row"><span class="info-label">Dirección</span><span class="info-value">${p.domicilio || '---'}</span></div>
+    <div class="info-row"><span class="info-label">Teléfono</span><span class="info-value">${p.telefono || '---'}</span></div>
 
     <div class="section-title">Vehículos</div>
     <div class="info-row"><span class="info-label">Matrícula 1</span><span class="info-value">${p.vehiculo1 || '---'}</span></div>
     <div class="info-row"><span class="info-label">Matrícula 2</span><span class="info-value">${p.vehiculo2 || '---'}</span></div>
 
     <div class="section-title">Notas</div>
-    <div class="notes-box">${p.notas || 'Sin notas.'}</div>
+    <div class="notes-box">${p.notes || p.notas || 'Sin observaciones.'}</div>
   `;
   showView('view-detail');
 }
 
-function showView(id) {
+function showView(viewId) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.getElementById('fabBtn').style.display = id === 'view-list' ? 'block' : 'none';
+  document.getElementById(viewId).classList.add('active');
   window.scrollTo(0,0);
 }
 
 function filterData() {
   const q = document.getElementById('mainSearch').value.toLowerCase();
-  renderList(allData.filter(p => p.nombre.toLowerCase().includes(q) || (p.ci && p.ci.includes(q))));
+  renderList(allData.filter(p => 
+    (p.nombre && p.nombre.toLowerCase().includes(q)) || 
+    (p.ci && p.ci.includes(q))
+  ));
 }
 
-function getInitials(n) { return n ? n.split(' ').slice(0,2).map(x => x[0]).join('').toUpperCase() : '?'; }
+function getInitials(n) { 
+  return n ? n.split(' ').slice(0,2).map(x => x[0]).join('').toUpperCase() : '?'; 
+}
 
 loadData();
 </script>
