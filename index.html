@@ -5,400 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Registro Policial</title>
   <style>
-    :root {
-      --primary: #1a3a5c;
-      --secondary: #2c5f8a;
-      --accent: #e8a020;
-      --danger: #c0392b;
-      --bg: #f0f2f5;
-      --card: #ffffff;
-      --text: #1a1a2e;
-      --muted: #6c7a8d;
-      --border: #d0d7e3;
-      --radius: 10px;
-      --shadow: 0 2px 12px rgba(0,0,0,0.10);
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-    header {
-      background: var(--primary);
-      color: #fff;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    }
-    header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
-
-    /* LOADER */
-    .loader-overlay {
-      position: fixed; inset: 0;
-      background: rgba(26,58,92,0.18);
-      z-index: 999;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .loader-overlay.hidden { display: none; pointer-events: none; }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 4px solid rgba(255,255,255,0.4);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* TOAST */
-    .toast {
-      position: fixed;
-      bottom: 80px; left: 50%; transform: translateX(-50%);
-      background: #222;
-      color: #fff;
-      padding: 10px 20px;
-      border-radius: 20px;
-      font-size: 0.88rem;
-      z-index: 998;
-      opacity: 0;
-      transition: opacity 0.3s;
-      pointer-events: none;
-      white-space: nowrap;
-    }
-    .toast.show { opacity: 1; }
-
-    nav {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: var(--primary);
-      display: flex;
-      z-index: 100;
-      box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
-    }
-    nav button {
-      flex: 1;
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.65);
-      padding: 12px 4px 10px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      transition: color 0.2s;
-    }
-    nav button.active { color: var(--accent); }
-    nav button span.icon { font-size: 1.4rem; }
-
-    main { padding: 16px 14px 80px; max-width: 600px; margin: 0 auto; }
-
-    .view { display: none; }
-    .view.active { display: block; }
-
-    .search-bar { display: flex; gap: 8px; margin-bottom: 14px; }
-    .search-bar input {
-      flex: 1;
-      padding: 10px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 0.95rem;
-      background: var(--card);
-      color: var(--text);
-    }
-    .search-bar input:focus { outline: none; border-color: var(--secondary); }
-
-    .btn {
-      padding: 10px 18px;
-      border: none;
-      border-radius: var(--radius);
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.2s;
-    }
-    .btn:active { opacity: 0.75; }
-    .btn-primary { background: var(--secondary); color: #fff; }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-ghost { background: transparent; border: 1.5px solid var(--border); color: var(--text); }
-    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
-
-    .fab {
-      position: fixed;
-      bottom: 72px; right: 18px;
-      width: 52px; height: 52px;
-      border-radius: 50%;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      font-size: 1.7rem;
-      cursor: pointer;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
-      display: flex; align-items: center; justify-content: center;
-      z-index: 99;
-      transition: transform 0.2s;
-    }
-    .fab:active { transform: scale(0.92); } .fab { touch-action: manipulation !important; -webkit-tap-highlight-color: rgba(0,0,0,0.2); } .fab { touch-action: manipulation; }
-
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-    .avatar {
-      width: 46px; height: 46px;
-      border-radius: 50%;
-      background: var(--secondary);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .card-info { flex: 1; min-width: 0; }
-    .card-name { font-weight: 700; font-size: 0.97rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-sub { font-size: 0.8rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .card-arrow { color: var(--muted); font-size: 1.1rem; }
-    .vehicle-card { border-left: 4px solid var(--accent); }
-    .vehicle-plate { font-size: 1.05rem; font-weight: 800; letter-spacing: 2px; color: var(--primary); }
-
-    .form-section { margin-bottom: 20px; }
-    .form-section h3 { font-size: 0.85rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; border-bottom: 1.5px solid var(--border); padding-bottom: 6px; }
-    .form-group { margin-bottom: 12px; }
-    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid var(--border);
-      border-radius: var(--radius);
-      font-size: 0.93rem;
-      background: var(--card);
-      color: var(--text);
-      font-family: inherit;
-    }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: var(--secondary); }
-    .form-group textarea { resize: vertical; min-height: 80px; }
-    .form-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .form-actions .btn { flex: 1; }
-
-    .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-    .detail-avatar {
-      width: 72px; height: 72px;
-      border-radius: 50%;
-      background: var(--secondary);
-      color: #fff;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2rem;
-      font-weight: 700;
-      flex-shrink: 0;
-      overflow: hidden;
-    }
-    .detail-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .detail-name { font-size: 1.2rem; font-weight: 800; }
-    .detail-ci { font-size: 0.88rem; color: var(--muted); margin-top: 2px; }
-    .detail-section { margin-bottom: 18px; }
-    .detail-section h3 { font-size: 0.82rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; border-bottom: 1.5px solid var(--border); padding-bottom: 5px; }
-    .detail-row { display: flex; margin-bottom: 7px; gap: 8px; }
-    .detail-label { font-size: 0.82rem; color: var(--muted); min-width: 110px; flex-shrink: 0; }
-    .detail-value { font-size: 0.9rem; font-weight: 500; }
-    .detail-notes { font-size: 0.9rem; background: #f7f9fc; border-radius: 8px; padding: 10px 12px; line-height: 1.5; white-space: pre-wrap; }
-
-    .chip {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 600;
-      background: var(--secondary);
-      color: #fff;
-      margin: 2px;
-    }
-    .chip span { cursor: pointer; margin-left: 4px; }
-
-    .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); }
-    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
-
-    .back-btn {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: none;
-      border: none;
-      color: var(--accent);
-      font-size: 0.95rem;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 0;
-      margin-bottom: 16px;
-    }
-
-    .modal-overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 200;
-      display: flex;
-      align-items: flex-end;
-      justify-content: center;
-    }
-    .modal-overlay.hidden { display: none; }
-    .modal {
-      background: var(--card);
-      border-radius: 18px 18px 0 0;
-      padding: 20px 16px 30px;
-      width: 100%;
-      max-width: 600px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
-    .modal h2 { font-size: 1rem; font-weight: 700; margin-bottom: 14px; }
-    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
-    .modal-actions .btn { flex: 1; }
-
-    .relation-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
-    .relation-item:last-child { border-bottom: none; }
-    .relation-item .rel-name { flex: 1; font-weight: 600; font-size: 0.92rem; }
-    .relation-item .rel-type { font-size: 0.78rem; color: var(--muted); }
-    .relation-item .rel-go { background: none; border: none; color: var(--secondary); font-size: 0.82rem; font-weight: 600; cursor: pointer; }
-
-    .section-title { font-size: 1rem; font-weight: 700; margin-bottom: 12px; color: var(--primary); }
-
-    .photo-upload-area {
-      border: 2px dashed var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      text-align: center;
-      cursor: pointer;
-      color: var(--muted);
-      font-size: 0.88rem;
-      margin-bottom: 10px;
-    }
-    .photo-preview { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; margin-bottom: 8px; }
-    #photoInput { display: none; }
-
-    .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 10px; padding: 8px 0; }
-    .pagination button { background: var(--secondary); color: #fff; border: none; border-radius: 8px; padding: 7px 16px; font-size: 0.85rem; cursor: pointer; }
-    .pagination button:disabled { opacity: 0.4; cursor: default; }
-    .pagination span { font-size: 0.85rem; color: var(--muted); }
+    :root { --primary:#1a3a5c; --secondary:#2c5f8a; --accent:#e8a020; --danger:#c0392b; --bg:#f0f2f5; --card:#fff; --text:#1a1a2e; --muted:#6c7a8d; --border:#d0d7e3; --radius:10px; }
+    * { box-sizing:border-box; margin:0; padding:0; }
+    body { font-family:'Segoe UI',Arial,sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    header { background:var(--primary); color:#fff; padding:14px 18px; position:sticky; top:0; z-index:50; font-size:1.1rem; font-weight:700; }
+    nav { position:fixed; bottom:0; left:0; right:0; background:var(--primary); display:flex; z-index:50; box-shadow:0 -2px 8px rgba(0,0,0,0.15); }
+    nav button { flex:1; background:none; border:none; color:rgba(255,255,255,0.65); padding:12px 4px 10px; font-size:0.7rem; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:3px; }
+    nav button.active { color:var(--accent); }
+    nav button .icon { font-size:1.4rem; }
+    main { padding:14px 14px 80px; max-width:600px; margin:0 auto; }
+    .view { display:none; }
+    .view.active { display:block; }
+    .search-bar { margin-bottom:14px; }
+    .search-bar input { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:0.95rem; background:var(--card); }
+    .search-bar input:focus { outline:none; border-color:var(--secondary); }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:0 2px 10px rgba(0,0,0,0.08); padding:14px 16px; margin-bottom:10px; display:flex; align-items:center; gap:14px; cursor:pointer; }
+    .vehicle-card { border-left:4px solid var(--accent); }
+    .avatar { width:46px; height:46px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.1rem; font-weight:700; flex-shrink:0; overflow:hidden; }
+    .avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .card-info { flex:1; min-width:0; }
+    .card-name { font-weight:700; font-size:0.97rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .card-sub { font-size:0.8rem; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .card-arrow { color:var(--muted); }
+    .vehicle-plate { font-size:1.05rem; font-weight:800; letter-spacing:2px; color:var(--primary); }
+    .fab { position:fixed; bottom:72px; right:18px; width:54px; height:54px; border-radius:50%; background:var(--accent); color:#fff; border:none; font-size:1.8rem; z-index:200; box-shadow:0 4px 14px rgba(0,0,0,0.3); display:flex; align-items:center; justify-content:center; cursor:pointer; touch-action:manipulation; -webkit-tap-highlight-color:rgba(0,0,0,0.1); }
+    .btn { padding:10px 18px; border:none; border-radius:var(--radius); font-size:0.9rem; font-weight:600; cursor:pointer; touch-action:manipulation; }
+    .btn-primary { background:var(--secondary); color:#fff; }
+    .btn-danger { background:var(--danger); color:#fff; }
+    .btn-ghost { background:transparent; border:1.5px solid var(--border); color:var(--text); }
+    .btn-sm { padding:6px 12px; font-size:0.8rem; }
+    .form-section { margin-bottom:18px; }
+    .form-section h3 { font-size:0.82rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; border-bottom:1.5px solid var(--border); padding-bottom:5px; }
+    .form-group { margin-bottom:10px; }
+    .form-group label { display:block; font-size:0.82rem; font-weight:600; color:var(--muted); margin-bottom:3px; }
+    .form-group input, .form-group textarea, .form-group select { width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:var(--radius); font-size:0.93rem; background:var(--card); color:var(--text); font-family:inherit; }
+    .form-group textarea { resize:vertical; min-height:80px; }
+    .form-actions { display:flex; gap:10px; margin-top:18px; }
+    .form-actions .btn { flex:1; }
+    .back-btn { display:flex; align-items:center; gap:6px; background:none; border:none; color:var(--accent); font-size:0.95rem; font-weight:600; cursor:pointer; padding:0; margin-bottom:16px; touch-action:manipulation; }
+    .section-title { font-size:1rem; font-weight:700; margin-bottom:12px; color:var(--primary); }
+    .detail-header { display:flex; align-items:center; gap:14px; margin-bottom:18px; }
+    .detail-avatar { width:72px; height:72px; border-radius:50%; background:var(--secondary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:2rem; font-weight:700; flex-shrink:0; overflow:hidden; }
+    .detail-avatar img { width:100%; height:100%; object-fit:cover; border-radius:50%; }
+    .detail-name { font-size:1.2rem; font-weight:800; }
+    .detail-ci { font-size:0.88rem; color:var(--muted); }
+    .detail-section { margin-bottom:16px; }
+    .detail-section h3 { font-size:0.82rem; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:8px; border-bottom:1.5px solid var(--border); padding-bottom:5px; }
+    .detail-row { display:flex; margin-bottom:6px; gap:8px; }
+    .detail-label { font-size:0.82rem; color:var(--muted); min-width:110px; flex-shrink:0; }
+    .detail-value { font-size:0.9rem; font-weight:500; }
+    .detail-notes { font-size:0.9rem; background:#f7f9fc; border-radius:8px; padding:10px 12px; line-height:1.5; white-space:pre-wrap; }
+    .chip { display:inline-block; padding:3px 10px; border-radius:20px; font-size:0.78rem; font-weight:600; background:var(--secondary); color:#fff; margin:2px; }
+    .chip .rm { cursor:pointer; margin-left:4px; }
+    .empty-state { text-align:center; padding:50px 20px; color:var(--muted); }
+    .empty-state .icon { font-size:3rem; margin-bottom:10px; }
+    .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:300; display:flex; align-items:flex-end; justify-content:center; }
+    .modal-overlay.hidden { display:none; }
+    .modal { background:var(--card); border-radius:18px 18px 0 0; padding:20px 16px 30px; width:100%; max-width:600px; max-height:80vh; overflow-y:auto; }
+    .modal h2 { font-size:1rem; font-weight:700; margin-bottom:12px; }
+    .modal-actions { display:flex; gap:10px; margin-top:14px; }
+    .modal-actions .btn { flex:1; }
+    .rel-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); cursor:pointer; }
+    .rel-item:last-child { border-bottom:none; }
+    .rel-name { flex:1; font-weight:600; font-size:0.92rem; }
+    .rel-type { font-size:0.78rem; color:var(--muted); }
+    .rel-go { background:none; border:none; color:var(--secondary); font-size:0.82rem; font-weight:600; cursor:pointer; }
+    .photo-area { border:2px dashed var(--border); border-radius:var(--radius); padding:18px; text-align:center; cursor:pointer; color:var(--muted); font-size:0.88rem; margin-bottom:8px; }
+    .photo-preview { width:80px; height:80px; border-radius:50%; object-fit:cover; margin-bottom:6px; }
+    #photoInput { display:none; }
+    .pagination { display:flex; align-items:center; justify-content:center; gap:12px; margin-top:8px; }
+    .pagination button { background:var(--secondary); color:#fff; border:none; border-radius:8px; padding:7px 16px; font-size:0.85rem; cursor:pointer; touch-action:manipulation; }
+    .pagination button:disabled { opacity:0.4; }
+    .pagination span { font-size:0.85rem; color:var(--muted); }
+    .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:10px 20px; border-radius:20px; font-size:0.88rem; z-index:999; opacity:0; transition:opacity 0.3s; pointer-events:none; white-space:nowrap; }
+    .toast.show { opacity:1; }
+    .loading { text-align:center; padding:30px; color:var(--muted); }
   </style>
 </head>
 <body>
 
-<div class="loader-overlay hidden" id="loader" style="display:none;"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
-<header>
-  <h1>🛡️ Registro Policial</h1>
-</header>
+<header>🛡️ Registro Policial</header>
 
 <nav>
-  <button class="active" onclick="showTab('personas')" id="tab-personas">
-    <span class="icon">👤</span>Personas
-  </button>
-  <button onclick="showTab('vehiculos')" id="tab-vehiculos">
-    <span class="icon">🚗</span>Vehículos
-  </button>
-  <button onclick="showTab('buscar')" id="tab-buscar">
-    <span class="icon">🔍</span>Buscar
-  </button>
+  <button class="active" id="tab-personas"><span class="icon">👤</span>Personas</button>
+  <button id="tab-vehiculos"><span class="icon">🚗</span>Vehículos</button>
+  <button id="tab-buscar"><span class="icon">🔍</span>Buscar</button>
 </nav>
 
 <main>
-  <!-- PERSONAS -->
   <div class="view active" id="view-personas">
-    <div class="search-bar">
-      <input type="search" id="searchPersonas" placeholder="Buscar por nombre o CI..." oninput="buscarPersonas()">
-    </div>
+    <div class="search-bar"><input type="search" id="searchPersonas" placeholder="Buscar por nombre o CI..."></div>
     <div id="listaPersonas"></div>
-    <div class="pagination" id="paginacionPersonas"></div>
+    <div class="pagination" id="pagPersonas"></div>
   </div>
 
-  <!-- VEHÍCULOS -->
   <div class="view" id="view-vehiculos">
-    <div class="search-bar">
-      <input type="search" id="searchVehiculos" placeholder="Buscar por matrícula o marca..." oninput="buscarVehiculos()">
-    </div>
+    <div class="search-bar"><input type="search" id="searchVehiculos" placeholder="Buscar por matrícula o marca..."></div>
     <div id="listaVehiculos"></div>
-    <div class="pagination" id="paginacionVehiculos"></div>
+    <div class="pagination" id="pagVehiculos"></div>
   </div>
 
-  <!-- BÚSQUEDA GLOBAL -->
   <div class="view" id="view-buscar">
-    <div class="search-bar">
-      <input type="search" id="searchGlobal" placeholder="Buscar en todo el registro..." oninput="buscarGlobal()">
-    </div>
-    <div id="resultadosBusqueda"></div>
+    <div class="search-bar"><input type="search" id="searchGlobal" placeholder="Buscar en todo el registro..."></div>
+    <div id="resultBusqueda"></div>
   </div>
 
-  <!-- DETALLE PERSONA -->
   <div class="view" id="view-detalle-persona">
-    <button class="back-btn" onclick="goBack()">← Volver</button>
-    <div id="detallePersonaContent"></div>
+    <button class="back-btn" id="backDesdePersona">← Volver</button>
+    <div id="detallePersona"></div>
   </div>
 
-  <!-- DETALLE VEHÍCULO -->
   <div class="view" id="view-detalle-vehiculo">
-    <button class="back-btn" onclick="goBack()">← Volver</button>
-    <div id="detalleVehiculoContent"></div>
+    <button class="back-btn" id="backDesdeVehiculo">← Volver</button>
+    <div id="detalleVehiculo"></div>
   </div>
 
-  <!-- FORM PERSONA -->
   <div class="view" id="view-form-persona">
-    <button class="back-btn" onclick="goBack()">← Cancelar</button>
-    <div class="section-title" id="formPersonaTitulo">Nueva Persona</div>
+    <button class="back-btn" id="backDesdeFormP">← Cancelar</button>
+    <div class="section-title" id="tituloFormP">Nueva Persona</div>
     <div class="form-section">
       <h3>Foto</h3>
-      <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()">
-        <div id="photoPreviewContainer">
-          <div style="font-size:2rem;margin-bottom:6px">📷</div>
-          <div>Tocar para agregar foto</div>
-        </div>
-      </div>
-      <input type="file" id="photoInput" accept="image/*" onchange="handlePhoto(event)">
+      <div class="photo-area" id="photoArea"><div id="photoPreview"><div style="font-size:2rem;margin-bottom:6px">📷</div><div>Tocar para agregar foto</div></div></div>
+      <input type="file" id="photoInput" accept="image/*">
     </div>
     <div class="form-section">
       <h3>Datos Personales</h3>
       <div class="form-group"><label>Nombre completo *</label><input type="text" id="fpNombre" placeholder="Ej: Juan Pérez García"></div>
       <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="fpCI" placeholder="Ej: 1.234.567-8"></div>
-      <div class="form-group"><label>Fecha de nacimiento</label><input type="date" id="fpFechaNac"></div>
-      <div class="form-group"><label>Domicilio</label><input type="text" id="fpDomicilio" placeholder="Ej: Av. 18 de Julio 1234, Montevideo"></div>
-      <div class="form-group"><label>Teléfono</label><input type="tel" id="fpTelefono" placeholder="Ej: 099 123 456"></div>
+      <div class="form-group"><label>Fecha de nacimiento</label><input type="date" id="fpFecha"></div>
+      <div class="form-group"><label>Domicilio</label><input type="text" id="fpDomicilio"></div>
+      <div class="form-group"><label>Teléfono</label><input type="tel" id="fpTelefono"></div>
     </div>
     <div class="form-section">
       <h3>Vehículos asociados</h3>
-      <div id="fpVehiculosSeleccionados" style="margin-bottom:8px;"></div>
-      <button class="btn btn-ghost btn-sm" onclick="openModalVehiculos()">+ Asociar vehículo</button>
+      <div id="fpVehs" style="margin-bottom:8px;"></div>
+      <button class="btn btn-ghost btn-sm" id="btnAsociarVeh">+ Asociar vehículo</button>
     </div>
     <div class="form-section">
-      <h3>Vínculos con otras personas</h3>
-      <div id="fpVinculosSeleccionados" style="margin-bottom:8px;"></div>
-      <button class="btn btn-ghost btn-sm" onclick="openModalVinculos()">+ Agregar vínculo</button>
+      <h3>Vínculos con personas</h3>
+      <div id="fpVinculos" style="margin-bottom:8px;"></div>
+      <button class="btn btn-ghost btn-sm" id="btnAgregarVinculo">+ Agregar vínculo</button>
     </div>
     <div class="form-section">
       <h3>Notas / Antecedentes</h3>
-      <div class="form-group"><textarea id="fpNotas" placeholder="Antecedentes, observaciones, etc."></textarea></div>
+      <div class="form-group"><textarea id="fpNotas" placeholder="Antecedentes, observaciones..."></textarea></div>
     </div>
     <input type="hidden" id="fpId">
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="goBack()">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarPersona()">Guardar</button>
+      <button class="btn btn-ghost" id="btnCancelarP">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarP">Guardar</button>
     </div>
   </div>
 
-  <!-- FORM VEHÍCULO -->
   <div class="view" id="view-form-vehiculo">
-    <button class="back-btn" onclick="goBack()">← Cancelar</button>
-    <div class="section-title" id="formVehiculoTitulo">Nuevo Vehículo</div>
+    <button class="back-btn" id="backDesdeFormV">← Cancelar</button>
+    <div class="section-title" id="tituloFormV">Nuevo Vehículo</div>
     <div class="form-section">
       <h3>Datos del Vehículo</h3>
       <div class="form-group"><label>Matrícula *</label><input type="text" id="fvMatricula" placeholder="Ej: ABC 1234" style="text-transform:uppercase;font-weight:700;letter-spacing:2px;"></div>
@@ -407,804 +170,490 @@
     </div>
     <div class="form-section">
       <h3>Personas asociadas</h3>
-      <div id="fvPersonasSeleccionadas" style="margin-bottom:8px;"></div>
-      <button class="btn btn-ghost btn-sm" onclick="openModalPersonasVehiculo()">+ Asociar persona</button>
+      <div id="fvPersonas" style="margin-bottom:8px;"></div>
+      <button class="btn btn-ghost btn-sm" id="btnAsociarPers">+ Asociar persona</button>
     </div>
     <input type="hidden" id="fvId">
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="goBack()">Cancelar</button>
-      <button class="btn btn-primary" onclick="guardarVehiculo()">Guardar</button>
+      <button class="btn btn-ghost" id="btnCancelarV">Cancelar</button>
+      <button class="btn btn-primary" id="btnGuardarV">Guardar</button>
     </div>
   </div>
 </main>
 
-<button class="fab" id="fabBtn" style="display:flex;">+</button>
+<button class="fab" id="fab">+</button>
 
-<!-- MODAL: VEHÍCULOS PARA PERSONA -->
-<div class="modal-overlay hidden" id="modalVehiculos">
+<!-- MODALES -->
+<div class="modal-overlay hidden" id="modalVehs">
   <div class="modal">
     <h2>Seleccionar vehículo</h2>
-    <input type="search" placeholder="Buscar matrícula..." style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:0.9rem;" oninput="filtrarModalVehiculos(this.value)">
-    <div id="modalVehiculosLista"></div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modalVehiculos')">Cerrar</button></div>
+    <input type="search" id="buscarModalVeh" placeholder="Buscar..." style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:0.9rem;">
+    <div id="listaModalVehs"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="cerrarModalVehs">Cerrar</button></div>
   </div>
 </div>
 
-<!-- MODAL: VINCULOS -->
 <div class="modal-overlay hidden" id="modalVinculos">
   <div class="modal">
     <h2>Agregar vínculo</h2>
-    <div class="form-group">
-      <label>Buscar persona</label>
-      <input type="search" id="modalVinculoBuscar" placeholder="Nombre o CI..." oninput="filtrarModalVinculos(this.value)" style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;">
-    </div>
-    <div id="modalVinculosLista" style="max-height:200px;overflow-y:auto;margin-bottom:10px;"></div>
+    <input type="search" id="buscarModalVinc" placeholder="Buscar persona..." style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:0.9rem;">
+    <div id="listaModalVinc" style="max-height:180px;overflow-y:auto;margin-bottom:10px;"></div>
     <div class="form-group">
       <label>Tipo de relación</label>
-      <select id="modalVinculoTipo">
-        <option>Familiar</option><option>Conocido</option><option>Cómplice</option>
-        <option>Asociado</option><option>Testigo</option><option>Víctima</option><option>Otro</option>
-      </select>
+      <select id="tipoVinculo"><option>Familiar</option><option>Conocido</option><option>Cómplice</option><option>Asociado</option><option>Testigo</option><option>Víctima</option><option>Otro</option></select>
     </div>
-    <input type="hidden" id="modalVinculoPersonaId">
-    <input type="hidden" id="modalVinculoPersonaNombre">
+    <input type="hidden" id="vincPersonaId">
+    <input type="hidden" id="vincPersonaNombre">
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modalVinculos')">Cancelar</button>
-      <button class="btn btn-primary" onclick="agregarVinculo()">Agregar</button>
+      <button class="btn btn-ghost" id="cerrarModalVinc">Cancelar</button>
+      <button class="btn btn-primary" id="confirmarVinculo">Agregar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL: PERSONAS PARA VEHÍCULO -->
-<div class="modal-overlay hidden" id="modalPersonasVehiculo">
+<div class="modal-overlay hidden" id="modalPersVeh">
   <div class="modal">
     <h2>Asociar persona</h2>
-    <input type="search" placeholder="Buscar persona..." style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:0.9rem;" oninput="filtrarModalPersonasVehiculo(this.value)">
-    <div id="modalPersonasVehiculoLista"></div>
-    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modalPersonasVehiculo')">Cerrar</button></div>
+    <input type="search" id="buscarModalPersVeh" placeholder="Buscar..." style="width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;margin-bottom:10px;font-size:0.9rem;">
+    <div id="listaModalPersVeh"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="cerrarModalPersVeh">Cerrar</button></div>
   </div>
 </div>
 
-<!-- MODAL: CONFIRMAR ELIMINACIÓN -->
-<div class="modal-overlay hidden" id="modalConfirmDelete">
+<div class="modal-overlay hidden" id="modalEliminar">
   <div class="modal">
     <h2>¿Eliminar registro?</h2>
     <p style="color:var(--muted);font-size:0.9rem;margin-bottom:12px;">Esta acción no se puede deshacer.</p>
     <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modalConfirmDelete')">Cancelar</button>
-      <button class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+      <button class="btn btn-ghost" id="cancelarEliminar">Cancelar</button>
+      <button class="btn btn-danger" id="confirmarEliminar">Eliminar</button>
     </div>
   </div>
 </div>
 
 <script>
-// ============================================================
-// SUPABASE CONFIG
-// ============================================================
-const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
+var SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
+var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
-const api = async (method, table, body, params) => {
-  let url = `${SUPABASE_URL}/rest/v1/${table}`;
-  if (params) url += '?' + params;
-  const opts = {
-    method,
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Content-Type': 'application/json',
-      'Prefer': method === 'POST' ? 'return=representation' : 'return=representation'
-    }
-  };
+function sbFetch(method, table, body, params) {
+  var url = SB + '/rest/v1/' + table + (params ? '?' + params : '');
+  var opts = { method: method, headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json', 'Prefer': 'return=representation' } };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
-};
+  return fetch(url, opts).then(function(r) { return r.text().then(function(t) { if (!r.ok) throw new Error(t); return t ? JSON.parse(t) : []; }); });
+}
 
-const sb = {
-  get: (table, params) => api('GET', table, null, params),
-  post: (table, body) => api('POST', table, body),
-  patch: (table, body, params) => api('PATCH', table, body, params),
-  delete: (table, params) => api('DELETE', table, null, params),
-};
+function toast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2500);
+}
 
-// ============================================================
+function ini(n) { return n.split(' ').slice(0,2).map(function(w){return w[0];}).join('').toUpperCase(); }
+function fFecha(s) { if (!s) return ''; var p=s.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function edad(s) { var h=new Date(),n=new Date(s),e=h.getFullYear()-n.getFullYear(); if(h.getMonth()<n.getMonth()||(h.getMonth()===n.getMonth()&&h.getDate()<n.getDate()))e--; return e; }
+
 // STATE
-// ============================================================
-let currentTab = 'personas';
-let viewStack = [];
-let editingPersonaVehiculos = []; // [{id, matricula, marca}]
-let editingPersonaVinculos = [];  // [{persona_id, nombre, tipo}]
-let editingVehiculoPersonas = []; // [{id, nombre}]
-let tempPhoto = null;
-let allVehiculos = [];
-let allPersonasCache = [];
-let personasPage = 0;
-let vehiculosPage = 0;
-const PAGE_SIZE = 30;
+var currentTab = 'personas';
+var viewStack = [];
+var editVehs = [];
+var editVinculos = [];
+var editPersVeh = [];
+var tempFoto = null;
+var persPage = 0;
+var vehPage = 0;
+var PAGE = 30;
+var allVehsModal = [];
+var allPersModal = [];
+var allPersVehModal = [];
 
-// ============================================================
-// UI HELPERS
-// ============================================================
-function showLoader() { const l=document.getElementById('loader'); l.classList.remove('hidden'); l.style.display='flex'; }
-function hideLoader() { var l=document.getElementById('loader'); l.classList.add('hidden'); l.style.display='none'; }
-
-function showToast(msg, duration=2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
-}
-
-function iniciales(nombre) {
-  return nombre.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
-}
-function formatFecha(iso) {
-  if (!iso) return '';
-  const [y,m,d] = iso.split('-');
-  return `${d}/${m}/${y}`;
-}
-function calcEdad(iso) {
-  const hoy = new Date(), nac = new Date(iso);
-  let e = hoy.getFullYear() - nac.getFullYear();
-  if (hoy.getMonth() < nac.getMonth() || (hoy.getMonth()===nac.getMonth() && hoy.getDate()<nac.getDate())) e--;
-  return e;
-}
-
-// ============================================================
-// NAVIGATION
-// ============================================================
+// NAV
 function showTab(tab) {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  document.querySelectorAll('nav button').forEach(function(b){b.classList.remove('active');});
   document.getElementById('view-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
-  currentTab = tab; viewStack = []; updateFab(); window.scrollTo(0,0);
-  if (tab==='personas') { personasPage=0; renderPersonas();
-var fabEl = document.getElementById('fabBtn');
-fabEl.addEventListener('click', function(){ onFabClick(); });
-fabEl.addEventListener('touchend', function(e){ e.preventDefault(); onFabClick(); }); }
-  if (tab==='vehiculos') { vehiculosPage=0; renderVehiculos(); }
+  currentTab = tab; viewStack = []; fabVisible(true); window.scrollTo(0,0);
+  if (tab==='personas') { persPage=0; loadPersonas(); }
+  if (tab==='vehiculos') { vehPage=0; loadVehiculos(); }
 }
 
-function showView(id, stackFrom) {
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+function showView(id, from) {
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  if (stackFrom) viewStack.push(stackFrom);
-  updateFab(); window.scrollTo(0,0);
+  if (from) viewStack.push(from);
+  var formViews = ['view-form-persona','view-form-vehiculo','view-detalle-persona','view-detalle-vehiculo'];
+  fabVisible(formViews.indexOf(id) === -1);
+  window.scrollTo(0,0);
 }
 
 function goBack() {
-  const prev = viewStack.pop();
+  var prev = viewStack.pop();
   if (prev) {
-    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
     document.getElementById(prev).classList.add('active');
-    updateFab();
-    if (prev==='view-personas') renderPersonas();
-var fabEl = document.getElementById('fabBtn');
-fabEl.addEventListener('click', function(){ onFabClick(); });
-fabEl.addEventListener('touchend', function(e){ e.preventDefault(); onFabClick(); });
-    if (prev==='view-vehiculos') renderVehiculos();
+    fabVisible(true);
+    if (prev==='view-personas') loadPersonas();
+    if (prev==='view-vehiculos') loadVehiculos();
   } else { showTab(currentTab); }
 }
 
-function updateFab() {
-  const fab = document.getElementById('fabBtn');
-  const cur = document.querySelector('.view.active')?.id;
-  const hidden = ['view-form-persona','view-form-vehiculo','view-detalle-persona','view-detalle-vehiculo'];
-  fab.style.display = hidden.includes(cur) ? 'none' : 'flex';
+function fabVisible(show) {
+  document.getElementById('fab').style.display = show ? 'flex' : 'none';
 }
 
-function onFabClick() {
-  const cur = document.querySelector('.view.active')?.id;
-  if (cur==='view-vehiculos') abrirFormVehiculo(); else abrirFormPersona();
+// LOAD PERSONAS
+function loadPersonas(q) {
+  var lista = document.getElementById('listaPersonas');
+  lista.innerHTML = '<div class="loading">Cargando...</div>';
+  var p = 'select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit='+PAGE+'&offset='+(persPage*PAGE);
+  if (q) p += '&or=(nombre.ilike.*'+encodeURIComponent(q)+'*,ci.ilike.*'+encodeURIComponent(q)+'*)';
+  sbFetch('GET','personas',null,p).then(function(data) {
+    if (!data.length) { lista.innerHTML='<div class="empty-state"><div class="icon">👤</div><p>'+(q?'Sin resultados.':'No hay personas.<br>Tocá + para agregar.')+'</p></div>'; document.getElementById('pagPersonas').innerHTML=''; return; }
+    lista.innerHTML = data.map(function(p) { return '<div class="card" data-id="'+p.id+'" data-type="persona"><div class="avatar">'+(p.foto?'<img src="'+p.foto+'" alt="">':ini(p.nombre))+'</div><div class="card-info"><div class="card-name">'+p.nombre+'</div><div class="card-sub">'+(p.ci?'CI: '+p.ci:'')+(p.domicilio?' • '+p.domicilio:'')+'</div></div><div class="card-arrow">›</div></div>'; }).join('');
+    document.getElementById('pagPersonas').innerHTML = '<button '+(persPage===0?'disabled':'')+' id="pagPAnterior">← Anterior</button><span>Pág. '+(persPage+1)+'</span><button '+(data.length<PAGE?'disabled':'')+' id="pagPSiguiente">Siguiente →</button>';
+    document.getElementById('pagPAnterior') && document.getElementById('pagPAnterior').addEventListener('click', function(){ persPage--; loadPersonas(document.getElementById('searchPersonas').value); });
+    document.getElementById('pagPSiguiente') && document.getElementById('pagPSiguiente').addEventListener('click', function(){ persPage++; loadPersonas(document.getElementById('searchPersonas').value); });
+    lista.querySelectorAll('.card').forEach(function(c){ c.addEventListener('click', function(){ verPersona(this.dataset.id); }); });
+  }).catch(function(e){ lista.innerHTML='<div class="empty-state"><p style="color:red">Error: '+e.message+'</p></div>'; });
 }
 
-// ============================================================
-// RENDER PERSONAS
-// ============================================================
-async function renderPersonas(q='') {
-  showLoader();
-  try {
-    const from = personasPage * PAGE_SIZE;
-    const to = from + PAGE_SIZE - 1;
-    let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=${PAGE_SIZE}&offset=${from}`;
-    if (q) params += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*)`;
-    const personas = await sb.get('personas', params);
-    const lista = document.getElementById('listaPersonas');
-
-    if (!personas.length) {
-      lista.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>${q?'Sin resultados.':'No hay personas registradas.'}<br>Tocá el + para agregar.</p></div>`;
-      document.getElementById('paginacionPersonas').innerHTML='';
-      return;
-    }
-
-    lista.innerHTML = personas.map(p=>`
-      <div class="card" onclick="verPersona('${p.id}')">
-        <div class="avatar">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
-        <div class="card-info">
-          <div class="card-name">${p.nombre}</div>
-          <div class="card-sub">${p.ci?'CI: '+p.ci:''} ${p.domicilio?'• '+p.domicilio:''}</div>
-        </div>
-        <div class="card-arrow">›</div>
-      </div>`).join('');
-
-    // Paginación
-    const pag = document.getElementById('paginacionPersonas');
-    pag.innerHTML = `
-      <button onclick="cambiarPaginaPersonas(-1)" ${personasPage===0?'disabled':''}>← Anterior</button>
-      <span>Pág. ${personasPage+1}</span>
-      <button onclick="cambiarPaginaPersonas(1)" ${personas.length<PAGE_SIZE?'disabled':''}>Siguiente →</button>`;
-  } catch(e) {
-    showToast('Error al cargar personas');
-  } finally { hideLoader(); }
+// LOAD VEHICULOS
+function loadVehiculos(q) {
+  var lista = document.getElementById('listaVehiculos');
+  lista.innerHTML = '<div class="loading">Cargando...</div>';
+  var p = 'select=id,matricula,marca&order=matricula.asc&limit='+PAGE+'&offset='+(vehPage*PAGE);
+  if (q) p += '&or=(matricula.ilike.*'+encodeURIComponent(q)+'*,marca.ilike.*'+encodeURIComponent(q)+'*)';
+  sbFetch('GET','vehiculos',null,p).then(function(data) {
+    if (!data.length) { lista.innerHTML='<div class="empty-state"><div class="icon">🚗</div><p>'+(q?'Sin resultados.':'No hay vehículos.<br>Tocá + para agregar.')+'</p></div>'; document.getElementById('pagVehiculos').innerHTML=''; return; }
+    lista.innerHTML = data.map(function(v){ return '<div class="card vehicle-card" data-id="'+v.id+'" data-type="vehiculo"><div class="avatar" style="background:var(--primary);font-size:1.4rem;">🚗</div><div class="card-info"><div class="vehicle-plate">'+v.matricula+'</div><div class="card-sub">'+(v.marca||'')+'</div></div><div class="card-arrow">›</div></div>'; }).join('');
+    document.getElementById('pagVehiculos').innerHTML = '<button '+(vehPage===0?'disabled':'')+' id="pagVAnterior">← Anterior</button><span>Pág. '+(vehPage+1)+'</span><button '+(data.length<PAGE?'disabled':'')+' id="pagVSiguiente">Siguiente →</button>';
+    document.getElementById('pagVAnterior') && document.getElementById('pagVAnterior').addEventListener('click', function(){ vehPage--; loadVehiculos(document.getElementById('searchVehiculos').value); });
+    document.getElementById('pagVSiguiente') && document.getElementById('pagVSiguiente').addEventListener('click', function(){ vehPage++; loadVehiculos(document.getElementById('searchVehiculos').value); });
+    lista.querySelectorAll('.card').forEach(function(c){ c.addEventListener('click', function(){ verVehiculo(this.dataset.id); }); });
+  }).catch(function(e){ lista.innerHTML='<div class="empty-state"><p style="color:red">Error: '+e.message+'</p></div>'; });
 }
 
-function cambiarPaginaPersonas(dir) {
-  personasPage = Math.max(0, personasPage + dir);
-  renderPersonas(document.getElementById('searchPersonas').value);
-}
-
-let buscarPersonasTimer;
-function buscarPersonas() {
-  clearTimeout(buscarPersonasTimer);
-  personasPage = 0;
-  buscarPersonasTimer = setTimeout(()=>renderPersonas(document.getElementById('searchPersonas').value), 350);
-}
-
-// ============================================================
-// RENDER VEHÍCULOS
-// ============================================================
-async function renderVehiculos(q='') {
-  showLoader();
-  try {
-    const from = vehiculosPage * PAGE_SIZE;
-    let params = `select=id,matricula,marca&order=matricula.asc&limit=${PAGE_SIZE}&offset=${from}`;
-    if (q) params += `&or=(matricula.ilike.*${encodeURIComponent(q)}*,marca.ilike.*${encodeURIComponent(q)}*)`;
-    const vehiculos = await sb.get('vehiculos', params);
-    const lista = document.getElementById('listaVehiculos');
-
-    if (!vehiculos.length) {
-      lista.innerHTML = `<div class="empty-state"><div class="icon">🚗</div><p>${q?'Sin resultados.':'No hay vehículos registrados.'}<br>Tocá el + para agregar.</p></div>`;
-      document.getElementById('paginacionVehiculos').innerHTML='';
-      return;
-    }
-
-    // Obtener personas de cada vehículo
-    const vIds = vehiculos.map(v=>`vehiculo_id.eq.${v.id}`).join(',');
-    let pvs = [];
-    try { pvs = await sb.get('persona_vehiculo', `select=vehiculo_id,personas(id,nombre)&or=(${vIds})`); } catch(e){}
-
-    lista.innerHTML = vehiculos.map(v => {
-      const ps = pvs.filter(pv=>pv.vehiculo_id===v.id).map(pv=>pv.personas?.nombre).filter(Boolean);
-      return `<div class="card vehicle-card" onclick="verVehiculo('${v.id}')">
-        <div class="avatar" style="background:var(--primary);font-size:1.4rem;">🚗</div>
-        <div class="card-info">
-          <div class="vehicle-plate">${v.matricula}</div>
-          <div class="card-sub">${v.marca||''} ${ps.length?'• '+ps.join(', '):''}</div>
-        </div>
-        <div class="card-arrow">›</div>
-      </div>`;
-    }).join('');
-
-    const pag = document.getElementById('paginacionVehiculos');
-    pag.innerHTML = `
-      <button onclick="cambiarPaginaVehiculos(-1)" ${vehiculosPage===0?'disabled':''}>← Anterior</button>
-      <span>Pág. ${vehiculosPage+1}</span>
-      <button onclick="cambiarPaginaVehiculos(1)" ${vehiculos.length<PAGE_SIZE?'disabled':''}>Siguiente →</button>`;
-  } catch(e) {
-    showToast('Error al cargar vehículos');
-  } finally { hideLoader(); }
-}
-
-function cambiarPaginaVehiculos(dir) {
-  vehiculosPage = Math.max(0, vehiculosPage + dir);
-  renderVehiculos(document.getElementById('searchVehiculos').value);
-}
-
-let buscarVehiculosTimer;
-function buscarVehiculos() {
-  clearTimeout(buscarVehiculosTimer);
-  vehiculosPage = 0;
-  buscarVehiculosTimer = setTimeout(()=>renderVehiculos(document.getElementById('searchVehiculos').value), 350);
-}
-
-// ============================================================
 // BÚSQUEDA GLOBAL
-// ============================================================
-let buscarGlobalTimer;
-async function buscarGlobal() {
-  clearTimeout(buscarGlobalTimer);
-  buscarGlobalTimer = setTimeout(async ()=>{
-    const q = document.getElementById('searchGlobal').value.trim();
-    const res = document.getElementById('resultadosBusqueda');
+var busqTimer;
+function doBusqueda() {
+  clearTimeout(busqTimer);
+  busqTimer = setTimeout(function() {
+    var q = document.getElementById('searchGlobal').value.trim();
+    var res = document.getElementById('resultBusqueda');
     if (!q) { res.innerHTML=''; return; }
-    showLoader();
-    try {
-      const [personas, vehiculos] = await Promise.all([
-        sb.get('personas', `select=id,nombre,ci,foto&or=(nombre.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*,domicilio.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*)&limit=20`),
-        sb.get('vehiculos', `select=id,matricula,marca&or=(matricula.ilike.*${encodeURIComponent(q)}*,marca.ilike.*${encodeURIComponent(q)}*)&limit=20`)
-      ]);
-      let html = '';
-      if (personas.length) {
-        html += `<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:8px 0 6px;">Personas</div>`;
-        html += personas.map(p=>`<div class="card" onclick="verPersona('${p.id}')">
-          <div class="avatar">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
-          <div class="card-info"><div class="card-name">${p.nombre}</div><div class="card-sub">${p.ci?'CI: '+p.ci:''}</div></div>
-          <div class="card-arrow">›</div></div>`).join('');
-      }
-      if (vehiculos.length) {
-        html += `<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px;">Vehículos</div>`;
-        html += vehiculos.map(v=>`<div class="card vehicle-card" onclick="verVehiculo('${v.id}')">
-          <div class="avatar" style="background:var(--primary);font-size:1.4rem;">🚗</div>
-          <div class="card-info"><div class="vehicle-plate">${v.matricula}</div><div class="card-sub">${v.marca||''}</div></div>
-          <div class="card-arrow">›</div></div>`).join('');
-      }
-      if (!html) html = `<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados para "${q}"</p></div>`;
-      res.innerHTML = html;
-    } catch(e){ showToast('Error en búsqueda'); }
-    finally { hideLoader(); }
+    res.innerHTML='<div class="loading">Buscando...</div>';
+    Promise.all([
+      sbFetch('GET','personas',null,'select=id,nombre,ci,foto&or=(nombre.ilike.*'+encodeURIComponent(q)+'*,ci.ilike.*'+encodeURIComponent(q)+'*,domicilio.ilike.*'+encodeURIComponent(q)+'*,notas.ilike.*'+encodeURIComponent(q)+'*)&limit=20'),
+      sbFetch('GET','vehiculos',null,'select=id,matricula,marca&or=(matricula.ilike.*'+encodeURIComponent(q)+'*,marca.ilike.*'+encodeURIComponent(q)+'*)&limit=20')
+    ]).then(function(results) {
+      var ps = results[0], vs = results[1], html='';
+      if (ps.length) { html+='<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:8px 0 6px;">Personas</div>'+ps.map(function(p){return '<div class="card" data-id="'+p.id+'" data-type="persona"><div class="avatar">'+(p.foto?'<img src="'+p.foto+'" alt="">':ini(p.nombre))+'</div><div class="card-info"><div class="card-name">'+p.nombre+'</div><div class="card-sub">'+(p.ci?'CI: '+p.ci:'')+'</div></div><div class="card-arrow">›</div></div>';}).join(''); }
+      if (vs.length) { html+='<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px;">Vehículos</div>'+vs.map(function(v){return '<div class="card vehicle-card" data-id="'+v.id+'" data-type="vehiculo"><div class="avatar" style="background:var(--primary);font-size:1.4rem;">🚗</div><div class="card-info"><div class="vehicle-plate">'+v.matricula+'</div><div class="card-sub">'+(v.marca||'')+'</div></div><div class="card-arrow">›</div></div>';}).join(''); }
+      if (!html) html='<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados para "'+q+'"</p></div>';
+      res.innerHTML=html;
+      res.querySelectorAll('.card').forEach(function(c){ c.addEventListener('click', function(){ if(this.dataset.type==='persona') verPersona(this.dataset.id); else verVehiculo(this.dataset.id); }); });
+    }).catch(function(){ res.innerHTML='<div class="empty-state"><p>Error en búsqueda</p></div>'; });
   }, 400);
 }
 
-// ============================================================
-// VER DETALLE PERSONA
-// ============================================================
-async function verPersona(id) {
-  showLoader();
-  const cur = document.querySelector('.view.active')?.id;
-  try {
-    const [personas, pvs, vinculos] = await Promise.all([
-      sb.get('personas', `select=*&id=eq.${id}`),
-      sb.get('persona_vehiculo', `select=vehiculo_id,vehiculos(id,matricula,marca)&persona_id=eq.${id}`),
-      sb.get('vinculos', `select=*,personas!vinculos_persona_vinculada_id_fkey(id,nombre)&persona_id=eq.${id}`)
-    ]);
-    const p = personas[0]; if (!p) return;
-    const vehiculos = pvs.map(pv=>pv.vehiculos).filter(Boolean);
-    const edad = p.fecha_nac ? calcEdad(p.fecha_nac) : null;
-
-    showView('view-detalle-persona', cur);
-    document.getElementById('detallePersonaContent').innerHTML = `
-      <div class="detail-header">
-        <div class="detail-avatar">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
-        <div>
-          <div class="detail-name">${p.nombre}</div>
-          ${p.ci?`<div class="detail-ci">CI: ${p.ci}</div>`:''}
-        </div>
-      </div>
-      <div class="detail-section">
-        <h3>Datos Personales</h3>
-        ${p.fecha_nac?`<div class="detail-row"><span class="detail-label">Nacimiento</span><span class="detail-value">${formatFecha(p.fecha_nac)}${edad?' ('+edad+' años)':''}</span></div>`:''}
-        ${p.domicilio?`<div class="detail-row"><span class="detail-label">Domicilio</span><span class="detail-value">${p.domicilio}</span></div>`:''}
-        ${p.telefono?`<div class="detail-row"><span class="detail-label">Teléfono</span><span class="detail-value">${p.telefono}</span></div>`:''}
-      </div>
-      ${vehiculos.length?`<div class="detail-section"><h3>Vehículos</h3>${vehiculos.map(v=>`
-        <div class="card vehicle-card" onclick="verVehiculo('${v.id}')" style="margin-bottom:8px;">
-          <div class="avatar" style="background:var(--primary);font-size:1.2rem;width:38px;height:38px;">🚗</div>
-          <div class="card-info"><div class="vehicle-plate" style="font-size:.95rem;">${v.matricula}</div><div class="card-sub">${v.marca||''}</div></div>
-          <div class="card-arrow">›</div></div>`).join('')}</div>`:''}
-      ${vinculos.length?`<div class="detail-section"><h3>Vínculos</h3>${vinculos.map(v=>`
-        <div class="relation-item">
-          <div class="avatar" style="width:36px;height:36px;font-size:.9rem;">${iniciales(v.personas?.nombre||'?')}</div>
-          <div style="flex:1;"><div class="rel-name">${v.personas?.nombre||''}</div><div class="rel-type">${v.tipo}</div></div>
-          <button class="rel-go" onclick="verPersona('${v.persona_vinculada_id}')">Ver →</button>
-        </div>`).join('')}</div>`:''}
-      ${p.notas?`<div class="detail-section"><h3>Notas / Antecedentes</h3><div class="detail-notes">${p.notas}</div></div>`:''}
-      <div class="form-actions" style="margin-top:24px;">
-        <button class="btn btn-ghost" onclick="editarPersona('${p.id}')">✏️ Editar</button>
-        <button class="btn btn-danger" onclick="confirmarEliminar('persona','${p.id}')">🗑️ Eliminar</button>
-      </div>`;
-  } catch(e){ showToast('Error al cargar persona'); }
-  finally { hideLoader(); }
+// VER PERSONA
+function verPersona(id) {
+  var cur = document.querySelector('.view.active').id;
+  showView('view-detalle-persona', cur);
+  document.getElementById('detallePersona').innerHTML='<div class="loading">Cargando...</div>';
+  Promise.all([
+    sbFetch('GET','personas',null,'select=*&id=eq.'+id),
+    sbFetch('GET','persona_vehiculo',null,'select=vehiculo_id,vehiculos(id,matricula,marca)&persona_id=eq.'+id),
+    sbFetch('GET','vinculos',null,'select=*,personas!vinculos_persona_vinculada_id_fkey(id,nombre)&persona_id=eq.'+id)
+  ]).then(function(r) {
+    var p=r[0][0], vehs=r[1].map(function(x){return x.vehiculos;}).filter(Boolean), vincs=r[2];
+    var e = p.fecha_nac ? edad(p.fecha_nac) : null;
+    var html = '<div class="detail-header"><div class="detail-avatar">'+(p.foto?'<img src="'+p.foto+'" alt="">':ini(p.nombre))+'</div><div><div class="detail-name">'+p.nombre+'</div>'+(p.ci?'<div class="detail-ci">CI: '+p.ci+'</div>':'')+'</div></div>';
+    html += '<div class="detail-section"><h3>Datos</h3>';
+    if (p.fecha_nac) html+='<div class="detail-row"><span class="detail-label">Nacimiento</span><span class="detail-value">'+fFecha(p.fecha_nac)+(e?' ('+e+' años)':'')+'</span></div>';
+    if (p.domicilio) html+='<div class="detail-row"><span class="detail-label">Domicilio</span><span class="detail-value">'+p.domicilio+'</span></div>';
+    if (p.telefono) html+='<div class="detail-row"><span class="detail-label">Teléfono</span><span class="detail-value">'+p.telefono+'</span></div>';
+    html += '</div>';
+    if (vehs.length) { html+='<div class="detail-section"><h3>Vehículos</h3>'+vehs.map(function(v){return '<div class="card vehicle-card" data-id="'+v.id+'" data-type="vehiculo" style="margin-bottom:8px;"><div class="avatar" style="background:var(--primary);font-size:1.2rem;width:38px;height:38px;">🚗</div><div class="card-info"><div class="vehicle-plate" style="font-size:.95rem;">'+v.matricula+'</div><div class="card-sub">'+(v.marca||'')+'</div></div><div class="card-arrow">›</div></div>';}).join('')+'</div>'; }
+    if (vincs.length) { html+='<div class="detail-section"><h3>Vínculos</h3>'+vincs.map(function(v){return '<div class="rel-item"><div class="avatar" style="width:36px;height:36px;font-size:.9rem;">'+ini(v.personas?v.personas.nombre:'?')+'</div><div style="flex:1;"><div class="rel-name">'+(v.personas?v.personas.nombre:'')+'</div><div class="rel-type">'+v.tipo+'</div></div><button class="rel-go" data-id="'+(v.personas?v.personas.id:'')+'">Ver →</button></div>';}).join('')+'</div>'; }
+    if (p.notas) html+='<div class="detail-section"><h3>Notas</h3><div class="detail-notes">'+p.notas+'</div></div>';
+    html += '<div class="form-actions" style="margin-top:20px;"><button class="btn btn-ghost" data-edit="'+id+'" data-etype="persona">✏️ Editar</button><button class="btn btn-danger" data-del="'+id+'" data-dtype="persona">🗑️ Eliminar</button></div>';
+    document.getElementById('detallePersona').innerHTML=html;
+    document.getElementById('detallePersona').querySelectorAll('.card').forEach(function(c){ c.addEventListener('click', function(){ verVehiculo(this.dataset.id); }); });
+    document.getElementById('detallePersona').querySelectorAll('.rel-go').forEach(function(b){ b.addEventListener('click', function(){ verPersona(this.dataset.id); }); });
+    document.getElementById('detallePersona').querySelector('[data-edit]').addEventListener('click', function(){ abrirFormPersona(this.dataset.edit); });
+    document.getElementById('detallePersona').querySelector('[data-del]').addEventListener('click', function(){ pedirEliminar(this.dataset.dtype, this.dataset.del); });
+  }).catch(function(e){ document.getElementById('detallePersona').innerHTML='<p style="color:red">Error: '+e.message+'</p>'; });
 }
 
-// ============================================================
-// VER DETALLE VEHÍCULO
-// ============================================================
-async function verVehiculo(id) {
-  showLoader();
-  const cur = document.querySelector('.view.active')?.id;
-  try {
-    const [vehiculos, pvs] = await Promise.all([
-      sb.get('vehiculos', `select=*&id=eq.${id}`),
-      sb.get('persona_vehiculo', `select=persona_id,personas(id,nombre,ci,foto)&vehiculo_id=eq.${id}`)
-    ]);
-    const v = vehiculos[0]; if (!v) return;
-    const personas = pvs.map(pv=>pv.personas).filter(Boolean);
-
-    showView('view-detalle-vehiculo', cur);
-    document.getElementById('detalleVehiculoContent').innerHTML = `
-      <div class="detail-header">
-        <div class="detail-avatar" style="background:var(--primary);font-size:2rem;">🚗</div>
-        <div>
-          <div class="detail-name" style="letter-spacing:2px;">${v.matricula}</div>
-          ${v.marca?`<div class="detail-ci">${v.marca}</div>`:''}
-        </div>
-      </div>
-      ${v.notas?`<div class="detail-section"><h3>Notas</h3><div class="detail-notes">${v.notas}</div></div>`:''}
-      ${personas.length?`<div class="detail-section"><h3>Personas asociadas</h3>${personas.map(p=>`
-        <div class="card" onclick="verPersona('${p.id}')" style="margin-bottom:8px;">
-          <div class="avatar" style="width:38px;height:38px;font-size:.9rem;">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
-          <div class="card-info"><div class="card-name">${p.nombre}</div><div class="card-sub">${p.ci?'CI: '+p.ci:''}</div></div>
-          <div class="card-arrow">›</div></div>`).join('')}</div>`:''}
-      <div class="form-actions" style="margin-top:24px;">
-        <button class="btn btn-ghost" onclick="editarVehiculo('${v.id}')">✏️ Editar</button>
-        <button class="btn btn-danger" onclick="confirmarEliminar('vehiculo','${v.id}')">🗑️ Eliminar</button>
-      </div>`;
-  } catch(e){ showToast('Error al cargar vehículo'); }
-  finally { hideLoader(); }
+// VER VEHICULO
+function verVehiculo(id) {
+  var cur = document.querySelector('.view.active').id;
+  showView('view-detalle-vehiculo', cur);
+  document.getElementById('detalleVehiculo').innerHTML='<div class="loading">Cargando...</div>';
+  Promise.all([
+    sbFetch('GET','vehiculos',null,'select=*&id=eq.'+id),
+    sbFetch('GET','persona_vehiculo',null,'select=persona_id,personas(id,nombre,ci,foto)&vehiculo_id=eq.'+id)
+  ]).then(function(r) {
+    var v=r[0][0], pers=r[1].map(function(x){return x.personas;}).filter(Boolean);
+    var html='<div class="detail-header"><div class="detail-avatar" style="background:var(--primary);font-size:2rem;">🚗</div><div><div class="detail-name" style="letter-spacing:2px;">'+v.matricula+'</div>'+(v.marca?'<div class="detail-ci">'+v.marca+'</div>':'')+'</div></div>';
+    if (v.notas) html+='<div class="detail-section"><h3>Notas</h3><div class="detail-notes">'+v.notas+'</div></div>';
+    if (pers.length) { html+='<div class="detail-section"><h3>Personas asociadas</h3>'+pers.map(function(p){return '<div class="card" data-id="'+p.id+'" data-type="persona" style="margin-bottom:8px;"><div class="avatar" style="width:38px;height:38px;font-size:.9rem;">'+(p.foto?'<img src="'+p.foto+'" alt="">':ini(p.nombre))+'</div><div class="card-info"><div class="card-name">'+p.nombre+'</div><div class="card-sub">'+(p.ci?'CI: '+p.ci:'')+'</div></div><div class="card-arrow">›</div></div>';}).join('')+'</div>'; }
+    html += '<div class="form-actions" style="margin-top:20px;"><button class="btn btn-ghost" data-edit="'+id+'" data-etype="vehiculo">✏️ Editar</button><button class="btn btn-danger" data-del="'+id+'" data-dtype="vehiculo">🗑️ Eliminar</button></div>';
+    document.getElementById('detalleVehiculo').innerHTML=html;
+    document.getElementById('detalleVehiculo').querySelectorAll('.card').forEach(function(c){ c.addEventListener('click', function(){ verPersona(this.dataset.id); }); });
+    document.getElementById('detalleVehiculo').querySelector('[data-edit]').addEventListener('click', function(){ abrirFormVehiculo(this.dataset.edit); });
+    document.getElementById('detalleVehiculo').querySelector('[data-del]').addEventListener('click', function(){ pedirEliminar(this.dataset.dtype, this.dataset.del); });
+  }).catch(function(e){ document.getElementById('detalleVehiculo').innerHTML='<p style="color:red">Error: '+e.message+'</p>'; });
 }
 
-// ============================================================
 // FORM PERSONA
-// ============================================================
-async function abrirFormPersona(id) {
-  editingPersonaVehiculos = [];
-  editingPersonaVinculos = [];
-  tempPhoto = null;
-  const cur = document.querySelector('.view.active')?.id;
-
+function abrirFormPersona(id) {
+  editVehs=[]; editVinculos=[]; tempFoto=null;
+  var cur = document.querySelector('.view.active').id;
   if (id) {
-    showLoader();
-    try {
-      const [personas, pvs, vinculos] = await Promise.all([
-        sb.get('personas', `select=*&id=eq.${id}`),
-        sb.get('persona_vehiculo', `select=vehiculo_id,vehiculos(id,matricula,marca)&persona_id=eq.${id}`),
-        sb.get('vinculos', `select=*,personas!vinculos_persona_vinculada_id_fkey(id,nombre)&persona_id=eq.${id}`)
-      ]);
-      const p = personas[0];
-      document.getElementById('formPersonaTitulo').textContent = 'Editar Persona';
-      document.getElementById('fpId').value = p.id;
-      document.getElementById('fpNombre').value = p.nombre;
-      document.getElementById('fpCI').value = p.ci||'';
-      document.getElementById('fpFechaNac').value = p.fecha_nac||'';
-      document.getElementById('fpDomicilio').value = p.domicilio||'';
-      document.getElementById('fpTelefono').value = p.telefono||'';
-      document.getElementById('fpNotas').value = p.notas||'';
-      tempPhoto = p.foto||null;
-      editingPersonaVehiculos = pvs.map(pv=>({id:pv.vehiculos?.id, matricula:pv.vehiculos?.matricula, marca:pv.vehiculos?.marca})).filter(v=>v.id);
-      editingPersonaVinculos = vinculos.map(v=>({persona_id:v.persona_vinculada_id, nombre:v.personas?.nombre, tipo:v.tipo}));
-    } catch(e){ showToast('Error al cargar datos'); return; }
-    finally { hideLoader(); }
+    Promise.all([
+      sbFetch('GET','personas',null,'select=*&id=eq.'+id),
+      sbFetch('GET','persona_vehiculo',null,'select=vehiculo_id,vehiculos(id,matricula,marca)&persona_id=eq.'+id),
+      sbFetch('GET','vinculos',null,'select=*,personas!vinculos_persona_vinculada_id_fkey(id,nombre)&persona_id=eq.'+id)
+    ]).then(function(r) {
+      var p=r[0][0];
+      document.getElementById('tituloFormP').textContent='Editar Persona';
+      document.getElementById('fpId').value=p.id;
+      document.getElementById('fpNombre').value=p.nombre;
+      document.getElementById('fpCI').value=p.ci||'';
+      document.getElementById('fpFecha').value=p.fecha_nac||'';
+      document.getElementById('fpDomicilio').value=p.domicilio||'';
+      document.getElementById('fpTelefono').value=p.telefono||'';
+      document.getElementById('fpNotas').value=p.notas||'';
+      tempFoto=p.foto||null;
+      editVehs=r[1].map(function(x){return {id:x.vehiculos&&x.vehiculos.id,matricula:x.vehiculos&&x.vehiculos.matricula,marca:x.vehiculos&&x.vehiculos.marca};}).filter(function(v){return v.id;});
+      editVinculos=r[2].map(function(v){return {pid:v.persona_vinculada_id,nombre:v.personas&&v.personas.nombre,tipo:v.tipo};});
+      renderFoto(); renderEditVehs(); renderEditVinculos();
+      showView('view-form-persona', cur);
+    }).catch(function(e){ toast('Error: '+e.message); });
   } else {
-    document.getElementById('formPersonaTitulo').textContent = 'Nueva Persona';
-    document.getElementById('fpId').value = '';
-    document.getElementById('fpNombre').value = '';
-    document.getElementById('fpCI').value = '';
-    document.getElementById('fpFechaNac').value = '';
-    document.getElementById('fpDomicilio').value = '';
-    document.getElementById('fpTelefono').value = '';
-    document.getElementById('fpNotas').value = '';
-    tempPhoto = null;
+    document.getElementById('tituloFormP').textContent='Nueva Persona';
+    document.getElementById('fpId').value='';
+    document.getElementById('fpNombre').value='';
+    document.getElementById('fpCI').value='';
+    document.getElementById('fpFecha').value='';
+    document.getElementById('fpDomicilio').value='';
+    document.getElementById('fpTelefono').value='';
+    document.getElementById('fpNotas').value='';
+    tempFoto=null;
+    renderFoto(); renderEditVehs(); renderEditVinculos();
+    showView('view-form-persona', cur);
   }
-  renderPhotoPreview();
-  renderFpVehiculos();
-  renderFpVinculos();
-  showView('view-form-persona', cur);
 }
 
-function editarPersona(id) { abrirFormPersona(id); }
-
-function handlePhoto(e) {
-  const file = e.target.files[0]; if (!file) return;
-  // Redimensionar antes de guardar
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const max = 300;
-      let w=img.width, h=img.height;
-      if (w>h) { if(w>max){h=h*(max/w);w=max;} } else { if(h>max){w=w*(max/h);h=max;} }
-      canvas.width=w; canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      tempPhoto = canvas.toDataURL('image/jpeg', 0.7);
-      renderPhotoPreview();
-    };
-    img.src = ev.target.result;
-  };
-  reader.readAsDataURL(file);
+function renderFoto() {
+  document.getElementById('photoPreview').innerHTML = tempFoto
+    ? '<img src="'+tempFoto+'" class="photo-preview"><br><span style="font-size:.78rem;color:var(--muted)">Tocar para cambiar</span>'
+    : '<div style="font-size:2rem;margin-bottom:6px">📷</div><div>Tocar para agregar foto</div>';
 }
 
-function renderPhotoPreview() {
-  const c = document.getElementById('photoPreviewContainer');
-  c.innerHTML = tempPhoto
-    ? `<img src="${tempPhoto}" class="photo-preview"><br><span style="font-size:.78rem;color:var(--muted)">Tocar para cambiar</span>`
-    : `<div style="font-size:2rem;margin-bottom:6px">📷</div><div>Tocar para agregar foto</div>`;
+function renderEditVehs() {
+  document.getElementById('fpVehs').innerHTML = editVehs.map(function(v,i){ return '<span class="chip">'+v.matricula+(v.marca?' '+v.marca:'')+'<span class="rm" data-i="'+i+'"> ✕</span></span>'; }).join('');
+  document.getElementById('fpVehs').querySelectorAll('.rm').forEach(function(el){ el.addEventListener('click', function(){ editVehs.splice(parseInt(this.dataset.i),1); renderEditVehs(); }); });
 }
 
-function renderFpVehiculos() {
-  document.getElementById('fpVehiculosSeleccionados').innerHTML =
-    editingPersonaVehiculos.map(v=>`<span class="chip">${v.matricula}${v.marca?' '+v.marca:''}<span onclick="removeVehiculoFromPersona('${v.id}')"> ✕</span></span>`).join('');
-}
-function removeVehiculoFromPersona(id) {
-  editingPersonaVehiculos = editingPersonaVehiculos.filter(v=>v.id!==id);
-  renderFpVehiculos();
+function renderEditVinculos() {
+  document.getElementById('fpVinculos').innerHTML = editVinculos.map(function(v,i){ return '<span class="chip">'+v.nombre+' ('+v.tipo+')<span class="rm" data-i="'+i+'"> ✕</span></span>'; }).join('');
+  document.getElementById('fpVinculos').querySelectorAll('.rm').forEach(function(el){ el.addEventListener('click', function(){ editVinculos.splice(parseInt(this.dataset.i),1); renderEditVinculos(); }); });
 }
 
-function renderFpVinculos() {
-  document.getElementById('fpVinculosSeleccionados').innerHTML =
-    editingPersonaVinculos.map((v,i)=>`<span class="chip">${v.nombre} (${v.tipo})<span onclick="removeVinculo(${i})"> ✕</span></span>`).join('');
-}
-function removeVinculo(i) {
-  editingPersonaVinculos.splice(i,1);
-  renderFpVinculos();
-}
-
-async function guardarPersona() {
-  const nombre = document.getElementById('fpNombre').value.trim();
-  if (!nombre) { showToast('El nombre es obligatorio'); return; }
-  showLoader();
-  try {
-    const id = document.getElementById('fpId').value;
-    const data = {
-      nombre,
-      ci: document.getElementById('fpCI').value.trim()||null,
-      fecha_nac: document.getElementById('fpFechaNac').value||null,
-      domicilio: document.getElementById('fpDomicilio').value.trim()||null,
-      telefono: document.getElementById('fpTelefono').value.trim()||null,
-      notas: document.getElementById('fpNotas').value.trim()||null,
-      foto: tempPhoto||null,
-    };
-
-    let personaId = id;
-    if (id) {
-      await sb.patch('personas', data, `id=eq.${id}`);
-    } else {
-      const res = await sb.post('personas', data);
-      personaId = res[0].id;
-    }
-
-    // Sincronizar vehículos
-    await sb.delete('persona_vehiculo', `persona_id=eq.${personaId}`);
-    for (const v of editingPersonaVehiculos) {
-      await sb.post('persona_vehiculo', {persona_id:personaId, vehiculo_id:v.id});
-    }
-
-    // Sincronizar vínculos
-    await sb.delete('vinculos', `persona_id=eq.${personaId}`);
-    for (const v of editingPersonaVinculos) {
-      await sb.post('vinculos', {persona_id:personaId, persona_vinculada_id:v.persona_id, tipo:v.tipo});
-    }
-
-    showToast('✅ Guardado correctamente');
-    showTab('personas');
-  } catch(e){ showToast('Error al guardar: '+e.message); }
-  finally { hideLoader(); }
+function guardarPersona() {
+  var nombre = document.getElementById('fpNombre').value.trim();
+  if (!nombre) { toast('El nombre es obligatorio'); return; }
+  var id = document.getElementById('fpId').value;
+  var data = { nombre:nombre, ci:document.getElementById('fpCI').value.trim()||null, fecha_nac:document.getElementById('fpFecha').value||null, domicilio:document.getElementById('fpDomicilio').value.trim()||null, telefono:document.getElementById('fpTelefono').value.trim()||null, notas:document.getElementById('fpNotas').value.trim()||null, foto:tempFoto||null };
+  var promise = id ? sbFetch('PATCH','personas',data,'id=eq.'+id).then(function(){return [{id:id}];}) : sbFetch('POST','personas',data);
+  promise.then(function(r) {
+    var pid = r[0].id||id;
+    return sbFetch('DELETE','persona_vehiculo',null,'persona_id=eq.'+pid).then(function() {
+      var ps = editVehs.map(function(v){ return sbFetch('POST','persona_vehiculo',{persona_id:pid,vehiculo_id:v.id}); });
+      return Promise.all(ps);
+    }).then(function() {
+      return sbFetch('DELETE','vinculos',null,'persona_id=eq.'+pid);
+    }).then(function() {
+      var vs = editVinculos.map(function(v){ return sbFetch('POST','vinculos',{persona_id:pid,persona_vinculada_id:v.pid,tipo:v.tipo}); });
+      return Promise.all(vs);
+    });
+  }).then(function(){ toast('✅ Guardado'); showTab('personas'); })
+  .catch(function(e){ toast('Error: '+e.message); });
 }
 
-// ============================================================
-// FORM VEHÍCULO
-// ============================================================
-async function abrirFormVehiculo(id) {
-  editingVehiculoPersonas = [];
-  const cur = document.querySelector('.view.active')?.id;
-
+// FORM VEHICULO
+function abrirFormVehiculo(id) {
+  editPersVeh=[];
+  var cur = document.querySelector('.view.active').id;
   if (id) {
-    showLoader();
-    try {
-      const [vehiculos, pvs] = await Promise.all([
-        sb.get('vehiculos', `select=*&id=eq.${id}`),
-        sb.get('persona_vehiculo', `select=persona_id,personas(id,nombre)&vehiculo_id=eq.${id}`)
-      ]);
-      const v = vehiculos[0];
-      document.getElementById('formVehiculoTitulo').textContent = 'Editar Vehículo';
-      document.getElementById('fvId').value = v.id;
-      document.getElementById('fvMatricula').value = v.matricula;
-      document.getElementById('fvMarca').value = v.marca||'';
-      document.getElementById('fvNotas').value = v.notas||'';
-      editingVehiculoPersonas = pvs.map(pv=>({id:pv.personas?.id, nombre:pv.personas?.nombre})).filter(p=>p.id);
-    } catch(e){ showToast('Error al cargar'); return; }
-    finally { hideLoader(); }
+    Promise.all([
+      sbFetch('GET','vehiculos',null,'select=*&id=eq.'+id),
+      sbFetch('GET','persona_vehiculo',null,'select=persona_id,personas(id,nombre)&vehiculo_id=eq.'+id)
+    ]).then(function(r) {
+      var v=r[0][0];
+      document.getElementById('tituloFormV').textContent='Editar Vehículo';
+      document.getElementById('fvId').value=v.id;
+      document.getElementById('fvMatricula').value=v.matricula;
+      document.getElementById('fvMarca').value=v.marca||'';
+      document.getElementById('fvNotas').value=v.notas||'';
+      editPersVeh=r[1].map(function(x){return {id:x.personas&&x.personas.id,nombre:x.personas&&x.personas.nombre};}).filter(function(p){return p.id;});
+      renderEditPersVeh();
+      showView('view-form-vehiculo', cur);
+    }).catch(function(e){ toast('Error: '+e.message); });
   } else {
-    document.getElementById('formVehiculoTitulo').textContent = 'Nuevo Vehículo';
-    document.getElementById('fvId').value = '';
-    document.getElementById('fvMatricula').value = '';
-    document.getElementById('fvMarca').value = '';
-    document.getElementById('fvNotas').value = '';
+    document.getElementById('tituloFormV').textContent='Nuevo Vehículo';
+    document.getElementById('fvId').value='';
+    document.getElementById('fvMatricula').value='';
+    document.getElementById('fvMarca').value='';
+    document.getElementById('fvNotas').value='';
+    renderEditPersVeh();
+    showView('view-form-vehiculo', cur);
   }
-  renderFvPersonas();
-  showView('view-form-vehiculo', cur);
 }
 
-function editarVehiculo(id) { abrirFormVehiculo(id); }
-
-function renderFvPersonas() {
-  document.getElementById('fvPersonasSeleccionadas').innerHTML =
-    editingVehiculoPersonas.map(p=>`<span class="chip">${p.nombre}<span onclick="removePersonaFromVehiculo('${p.id}')"> ✕</span></span>`).join('');
-}
-function removePersonaFromVehiculo(id) {
-  editingVehiculoPersonas = editingVehiculoPersonas.filter(p=>p.id!==id);
-  renderFvPersonas();
+function renderEditPersVeh() {
+  document.getElementById('fvPersonas').innerHTML = editPersVeh.map(function(p,i){ return '<span class="chip">'+p.nombre+'<span class="rm" data-i="'+i+'"> ✕</span></span>'; }).join('');
+  document.getElementById('fvPersonas').querySelectorAll('.rm').forEach(function(el){ el.addEventListener('click', function(){ editPersVeh.splice(parseInt(this.dataset.i),1); renderEditPersVeh(); }); });
 }
 
-async function guardarVehiculo() {
-  const matricula = document.getElementById('fvMatricula').value.trim().toUpperCase();
-  if (!matricula) { showToast('La matrícula es obligatoria'); return; }
-  showLoader();
-  try {
-    const id = document.getElementById('fvId').value;
-    const data = {
-      matricula,
-      marca: document.getElementById('fvMarca').value.trim()||null,
-      notas: document.getElementById('fvNotas').value.trim()||null,
-    };
-    let vehiculoId = id;
-    if (id) {
-      await sb.patch('vehiculos', data, `id=eq.${id}`);
-    } else {
-      const res = await sb.post('vehiculos', data);
-      vehiculoId = res[0].id;
-    }
-    // Sincronizar personas
-    await sb.delete('persona_vehiculo', `vehiculo_id=eq.${vehiculoId}`);
-    for (const p of editingVehiculoPersonas) {
-      await sb.post('persona_vehiculo', {persona_id:p.id, vehiculo_id:vehiculoId});
-    }
-    showToast('✅ Guardado correctamente');
-    showTab('vehiculos');
-  } catch(e){ showToast('Error al guardar: '+e.message); }
-  finally { hideLoader(); }
+function guardarVehiculo() {
+  var mat = document.getElementById('fvMatricula').value.trim().toUpperCase();
+  if (!mat) { toast('La matrícula es obligatoria'); return; }
+  var id = document.getElementById('fvId').value;
+  var data = { matricula:mat, marca:document.getElementById('fvMarca').value.trim()||null, notas:document.getElementById('fvNotas').value.trim()||null };
+  var promise = id ? sbFetch('PATCH','vehiculos',data,'id=eq.'+id).then(function(){return [{id:id}];}) : sbFetch('POST','vehiculos',data);
+  promise.then(function(r) {
+    var vid = r[0].id||id;
+    return sbFetch('DELETE','persona_vehiculo',null,'vehiculo_id=eq.'+vid).then(function() {
+      var ps = editPersVeh.map(function(p){ return sbFetch('POST','persona_vehiculo',{persona_id:p.id,vehiculo_id:vid}); });
+      return Promise.all(ps);
+    });
+  }).then(function(){ toast('✅ Guardado'); showTab('vehiculos'); })
+  .catch(function(e){ toast('Error: '+e.message); });
 }
 
-// ============================================================
-// MODALES
-// ============================================================
-let allVehiculosModal = [];
-async function openModalVehiculos() {
-  showLoader();
-  try {
-    allVehiculosModal = await sb.get('vehiculos', 'select=id,matricula,marca&order=matricula.asc&limit=200');
-    renderModalVehiculos(allVehiculosModal);
-    openModal('modalVehiculos');
-  } catch(e){ showToast('Error'); }
-  finally { hideLoader(); }
+// MODALES VEHICULOS
+function abrirModalVehs() {
+  sbFetch('GET','vehiculos',null,'select=id,matricula,marca&order=matricula.asc&limit=200').then(function(data) {
+    allVehsModal=data; renderModalVehs(data);
+    document.getElementById('modalVehs').classList.remove('hidden');
+  }).catch(function(){ toast('Error cargando vehículos'); });
+}
+function renderModalVehs(data) {
+  var ya=editVehs.map(function(v){return v.id;});
+  document.getElementById('listaModalVehs').innerHTML=data.map(function(v){ return '<div class="rel-item" data-id="'+v.id+'" data-matricula="'+v.matricula+'" data-marca="'+(v.marca||'')+'"><div style="font-size:1.2rem;">🚗</div><div style="flex:1;"><div class="vehicle-plate" style="font-size:.9rem;">'+v.matricula+'</div><div style="font-size:.78rem;color:var(--muted)">'+(v.marca||'')+'</div></div><div style="font-size:1.2rem;">'+(ya.indexOf(v.id)>=0?'✅':'⬜')+'</div></div>'; }).join('')||'<p style="color:var(--muted);font-size:.9rem;">No hay vehículos.</p>';
+  document.getElementById('listaModalVehs').querySelectorAll('.rel-item').forEach(function(el){ el.addEventListener('click', function(){ var id=this.dataset.id,mat=this.dataset.matricula,marca=this.dataset.marca; var idx=editVehs.findIndex(function(v){return v.id===id;}); if(idx>=0)editVehs.splice(idx,1);else editVehs.push({id:id,matricula:mat,marca:marca}); renderEditVehs(); renderModalVehs(allVehsModal); }); });
 }
 
-function filtrarModalVehiculos(q) {
-  const f = allVehiculosModal.filter(v=>v.matricula.toLowerCase().includes(q.toLowerCase())||(v.marca||'').toLowerCase().includes(q.toLowerCase()));
-  renderModalVehiculos(f);
+// MODALES VINCULOS
+function abrirModalVinculos() {
+  var editId=document.getElementById('fpId').value;
+  var p='select=id,nombre,ci&order=nombre.asc&limit=500'+(editId?'&id=neq.'+editId:'');
+  sbFetch('GET','personas',null,p).then(function(data) {
+    allPersModal=data; renderModalVinc(data);
+    document.getElementById('modalVinculos').classList.remove('hidden');
+  }).catch(function(){ toast('Error'); });
+}
+function renderModalVinc(data) {
+  document.getElementById('listaModalVinc').innerHTML=data.map(function(p){ return '<div class="rel-item" data-id="'+p.id+'" data-nombre="'+p.nombre.replace(/"/g,'&quot;')+'"><div style="flex:1;"><div class="rel-name">'+p.nombre+'</div><div class="rel-type">'+(p.ci?'CI: '+p.ci:'')+'</div></div></div>'; }).join('')||'<p style="color:var(--muted);font-size:.9rem;">Sin resultados.</p>';
+  document.getElementById('listaModalVinc').querySelectorAll('.rel-item').forEach(function(el){ el.addEventListener('click', function(){ document.getElementById('vincPersonaId').value=this.dataset.id; document.getElementById('vincPersonaNombre').value=this.dataset.nombre; document.getElementById('listaModalVinc').querySelectorAll('.rel-item').forEach(function(x){x.style.background='';}); this.style.background='#e8f0fe'; }); });
 }
 
-function renderModalVehiculos(vehiculos) {
-  const ya = editingPersonaVehiculos.map(v=>v.id);
-  document.getElementById('modalVehiculosLista').innerHTML = vehiculos.map(v=>`
-    <div class="relation-item" onclick="toggleVehiculoEnPersona('${v.id}','${v.matricula}','${v.marca||''}')">
-      <div style="font-size:1.2rem;">🚗</div>
-      <div style="flex:1;"><div class="vehicle-plate" style="font-size:.9rem;">${v.matricula}</div><div style="font-size:.78rem;color:var(--muted)">${v.marca||''}</div></div>
-      <div style="font-size:1.2rem;">${ya.includes(v.id)?'✅':'⬜'}</div>
-    </div>`).join('') || '<p style="color:var(--muted);font-size:.9rem;">No hay vehículos.</p>';
+// MODALES PERSONAS PARA VEHICULO
+function abrirModalPersVeh() {
+  sbFetch('GET','personas',null,'select=id,nombre,ci,foto&order=nombre.asc&limit=500').then(function(data) {
+    allPersVehModal=data; renderModalPersVeh(data);
+    document.getElementById('modalPersVeh').classList.remove('hidden');
+  }).catch(function(){ toast('Error'); });
+}
+function renderModalPersVeh(data) {
+  var ya=editPersVeh.map(function(p){return p.id;});
+  document.getElementById('listaModalPersVeh').innerHTML=data.map(function(p){ return '<div class="rel-item" data-id="'+p.id+'" data-nombre="'+p.nombre.replace(/"/g,'&quot;')+'"><div class="avatar" style="width:36px;height:36px;font-size:.85rem;">'+(p.foto?'<img src="'+p.foto+'" alt="">':ini(p.nombre))+'</div><div style="flex:1;"><div class="rel-name">'+p.nombre+'</div><div class="rel-type">'+(p.ci?'CI: '+p.ci:'')+'</div></div><div style="font-size:1.2rem;">'+(ya.indexOf(p.id)>=0?'✅':'⬜')+'</div></div>'; }).join('')||'<p style="color:var(--muted);font-size:.9rem;">No hay personas.</p>';
+  document.getElementById('listaModalPersVeh').querySelectorAll('.rel-item').forEach(function(el){ el.addEventListener('click', function(){ var id=this.dataset.id,nombre=this.dataset.nombre; var idx=editPersVeh.findIndex(function(p){return p.id===id;}); if(idx>=0)editPersVeh.splice(idx,1);else editPersVeh.push({id:id,nombre:nombre}); renderEditPersVeh(); renderModalPersVeh(allPersVehModal); }); });
 }
 
-function toggleVehiculoEnPersona(id, matricula, marca) {
-  const idx = editingPersonaVehiculos.findIndex(v=>v.id===id);
-  if (idx>=0) editingPersonaVehiculos.splice(idx,1);
-  else editingPersonaVehiculos.push({id,matricula,marca});
-  renderFpVehiculos();
-  renderModalVehiculos(allVehiculosModal);
+// ELIMINAR
+var elimTipo, elimId;
+function pedirEliminar(tipo, id) {
+  elimTipo=tipo; elimId=id;
+  document.getElementById('modalEliminar').classList.remove('hidden');
+}
+function hacerEliminar() {
+  document.getElementById('modalEliminar').classList.add('hidden');
+  var table = elimTipo==='persona'?'personas':'vehiculos';
+  sbFetch('DELETE',table,null,'id=eq.'+elimId).then(function(){
+    toast(elimTipo==='persona'?'Persona eliminada':'Vehículo eliminado');
+    showTab(elimTipo==='persona'?'personas':'vehiculos');
+  }).catch(function(e){ toast('Error: '+e.message); });
 }
 
-let allPersonasModal = [];
-async function openModalVinculos() {
-  showLoader();
-  try {
-    const editId = document.getElementById('fpId').value;
-    allPersonasModal = await sb.get('personas', `select=id,nombre,ci&order=nombre.asc&limit=500${editId?'&id=neq.'+editId:''}`);
-    renderModalVinculos(allPersonasModal);
-    openModal('modalVinculos');
-  } catch(e){ showToast('Error'); }
-  finally { hideLoader(); }
-}
-
-function filtrarModalVinculos(q) {
-  const f = allPersonasModal.filter(p=>p.nombre.toLowerCase().includes(q.toLowerCase())||(p.ci||'').includes(q));
-  renderModalVinculos(f);
-}
-
-function renderModalVinculos(personas) {
-  document.getElementById('modalVinculosLista').innerHTML = personas.map(p=>`
-    <div class="relation-item" onclick="seleccionarPersonaVinculo('${p.id}','${p.nombre.replace(/'/g,'\\'')}')">
-      <div style="flex:1;"><div class="rel-name">${p.nombre}</div><div class="rel-type">${p.ci?'CI: '+p.ci:''}</div></div>
-    </div>`).join('') || '<p style="color:var(--muted);font-size:.9rem;">Sin resultados.</p>';
-}
-
-function seleccionarPersonaVinculo(id, nombre) {
-  document.getElementById('modalVinculoPersonaId').value = id;
-  document.getElementById('modalVinculoPersonaNombre').value = nombre;
-  document.getElementById('modalVinculosLista').querySelectorAll('.relation-item').forEach(el=>{
-    el.style.background = el.onclick?.toString().includes(id) ? '#e8f0fe' : '';
-  });
-}
-
-function agregarVinculo() {
-  const personaId = document.getElementById('modalVinculoPersonaId').value;
-  const nombre = document.getElementById('modalVinculoPersonaNombre').value;
-  const tipo = document.getElementById('modalVinculoTipo').value;
-  if (!personaId) { showToast('Seleccioná una persona'); return; }
-  if (editingPersonaVinculos.find(v=>v.persona_id===personaId)) { showToast('Ya existe ese vínculo'); return; }
-  editingPersonaVinculos.push({persona_id:personaId, nombre, tipo});
-  renderFpVinculos();
-  closeModal('modalVinculos');
-}
-
-let allPersonasVehModal = [];
-async function openModalPersonasVehiculo() {
-  showLoader();
-  try {
-    allPersonasVehModal = await sb.get('personas', 'select=id,nombre,ci,foto&order=nombre.asc&limit=500');
-    renderModalPersonasVehiculo(allPersonasVehModal);
-    openModal('modalPersonasVehiculo');
-  } catch(e){ showToast('Error'); }
-  finally { hideLoader(); }
-}
-
-function filtrarModalPersonasVehiculo(q) {
-  const f = allPersonasVehModal.filter(p=>p.nombre.toLowerCase().includes(q.toLowerCase())||(p.ci||'').includes(q));
-  renderModalPersonasVehiculo(f);
-}
-
-function renderModalPersonasVehiculo(personas) {
-  const ya = editingVehiculoPersonas.map(p=>p.id);
-  document.getElementById('modalPersonasVehiculoLista').innerHTML = personas.map(p=>`
-    <div class="relation-item" onclick="togglePersonaEnVehiculo('${p.id}','${p.nombre.replace(/'/g,'\\'')}')">
-      <div class="avatar" style="width:36px;height:36px;font-size:.85rem;">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
-      <div style="flex:1;"><div class="rel-name">${p.nombre}</div><div class="rel-type">${p.ci?'CI: '+p.ci:''}</div></div>
-      <div style="font-size:1.2rem;">${ya.includes(p.id)?'✅':'⬜'}</div>
-    </div>`).join('') || '<p style="color:var(--muted);font-size:.9rem;">No hay personas.</p>';
-}
-
-function togglePersonaEnVehiculo(id, nombre) {
-  const idx = editingVehiculoPersonas.findIndex(p=>p.id===id);
-  if (idx>=0) editingVehiculoPersonas.splice(idx,1);
-  else editingVehiculoPersonas.push({id,nombre});
-  renderFvPersonas();
-  renderModalPersonasVehiculo(allPersonasVehModal);
-}
-
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
-function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
-
-document.querySelectorAll('.modal-overlay').forEach(overlay=>{
-  overlay.addEventListener('click', e=>{ if(e.target===overlay) closeModal(overlay.id); });
+// EVENT LISTENERS - todo con addEventListener, sin onclick en HTML
+document.getElementById('fab').addEventListener('click', function() {
+  var cur = document.querySelector('.view.active').id;
+  if (cur==='view-vehiculos') abrirFormVehiculo(null); else abrirFormPersona(null);
 });
 
-// ============================================================
-// ELIMINAR
-// ============================================================
-function confirmarEliminar(tipo, id) {
-  openModal('modalConfirmDelete');
-  document.getElementById('confirmDeleteBtn').onclick = async () => {
-    closeModal('modalConfirmDelete');
-    showLoader();
-    try {
-      if (tipo==='persona') {
-        await sb.delete('personas', `id=eq.${id}`);
-        showToast('Persona eliminada');
-        showTab('personas');
-      } else {
-        await sb.delete('vehiculos', `id=eq.${id}`);
-        showToast('Vehículo eliminado');
-        showTab('vehiculos');
-      }
-    } catch(e){ showToast('Error al eliminar'); }
-    finally { hideLoader(); }
-  };
-}
+document.getElementById('tab-personas').addEventListener('click', function(){ showTab('personas'); });
+document.getElementById('tab-vehiculos').addEventListener('click', function(){ showTab('vehiculos'); });
+document.getElementById('tab-buscar').addEventListener('click', function(){ showTab('buscar'); });
 
-// ============================================================
+document.getElementById('backDesdePersona').addEventListener('click', goBack);
+document.getElementById('backDesdeVehiculo').addEventListener('click', goBack);
+document.getElementById('backDesdeFormP').addEventListener('click', goBack);
+document.getElementById('backDesdeFormV').addEventListener('click', goBack);
+document.getElementById('btnCancelarP').addEventListener('click', goBack);
+document.getElementById('btnCancelarV').addEventListener('click', goBack);
+document.getElementById('btnGuardarP').addEventListener('click', guardarPersona);
+document.getElementById('btnGuardarV').addEventListener('click', guardarVehiculo);
+document.getElementById('btnAsociarVeh').addEventListener('click', abrirModalVehs);
+document.getElementById('btnAgregarVinculo').addEventListener('click', abrirModalVinculos);
+document.getElementById('btnAsociarPers').addEventListener('click', abrirModalPersVeh);
+
+document.getElementById('photoArea').addEventListener('click', function(){ document.getElementById('photoInput').click(); });
+document.getElementById('photoInput').addEventListener('change', function(e) {
+  var file=e.target.files[0]; if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(ev){ var img=new Image(); img.onload=function(){ var c=document.createElement('canvas'),max=300,w=img.width,h=img.height; if(w>h){if(w>max){h=h*(max/w);w=max;}}else{if(h>max){w=w*(max/h);h=max;}} c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);tempFoto=c.toDataURL('image/jpeg',0.7);renderFoto();}; img.src=ev.target.result; };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('cerrarModalVehs').addEventListener('click', function(){ document.getElementById('modalVehs').classList.add('hidden'); });
+document.getElementById('cerrarModalVinc').addEventListener('click', function(){ document.getElementById('modalVinculos').classList.add('hidden'); });
+document.getElementById('cerrarModalPersVeh').addEventListener('click', function(){ document.getElementById('modalPersVeh').classList.add('hidden'); });
+document.getElementById('cancelarEliminar').addEventListener('click', function(){ document.getElementById('modalEliminar').classList.add('hidden'); });
+document.getElementById('confirmarEliminar').addEventListener('click', hacerEliminar);
+
+document.getElementById('confirmarVinculo').addEventListener('click', function() {
+  var pid=document.getElementById('vincPersonaId').value;
+  var nombre=document.getElementById('vincPersonaNombre').value;
+  var tipo=document.getElementById('tipoVinculo').value;
+  if (!pid) { toast('Seleccioná una persona'); return; }
+  if (editVinculos.find(function(v){return v.pid===pid;})) { toast('Ya existe ese vínculo'); return; }
+  editVinculos.push({pid:pid,nombre:nombre,tipo:tipo});
+  renderEditVinculos();
+  document.getElementById('modalVinculos').classList.add('hidden');
+});
+
+var busqVehTimer;
+document.getElementById('buscarModalVeh').addEventListener('input', function(){ clearTimeout(busqVehTimer); var q=this.value; busqVehTimer=setTimeout(function(){ renderModalVehs(allVehsModal.filter(function(v){return v.matricula.toLowerCase().includes(q.toLowerCase())||(v.marca||'').toLowerCase().includes(q.toLowerCase());})); },300); });
+var busqVincTimer;
+document.getElementById('buscarModalVinc').addEventListener('input', function(){ clearTimeout(busqVincTimer); var q=this.value; busqVincTimer=setTimeout(function(){ renderModalVinc(allPersModal.filter(function(p){return p.nombre.toLowerCase().includes(q.toLowerCase())||(p.ci||'').includes(q);})); },300); });
+var busqPVTimer;
+document.getElementById('buscarModalPersVeh').addEventListener('input', function(){ clearTimeout(busqPVTimer); var q=this.value; busqPVTimer=setTimeout(function(){ renderModalPersVeh(allPersVehModal.filter(function(p){return p.nombre.toLowerCase().includes(q.toLowerCase())||(p.ci||'').includes(q);})); },300); });
+
+var searchPTimer;
+document.getElementById('searchPersonas').addEventListener('input', function(){ clearTimeout(searchPTimer); var q=this.value; persPage=0; searchPTimer=setTimeout(function(){ loadPersonas(q); },350); });
+var searchVTimer;
+document.getElementById('searchVehiculos').addEventListener('input', function(){ clearTimeout(searchVTimer); var q=this.value; vehPage=0; searchVTimer=setTimeout(function(){ loadVehiculos(q); },350); });
+document.getElementById('searchGlobal').addEventListener('input', doBusqueda);
+
+document.querySelectorAll('.modal-overlay').forEach(function(o){ o.addEventListener('click', function(e){ if(e.target===o) o.classList.add('hidden'); }); });
+
 // INIT
-// ============================================================
-renderPersonas();
-var fabEl = document.getElementById('fabBtn');
-fabEl.addEventListener('click', function(){ onFabClick(); });
-fabEl.addEventListener('touchend', function(e){ e.preventDefault(); onFabClick(); });
-document.getElementById("fabBtn").addEventListener("touchend", function(e){ e.preventDefault(); onFabClick(); });
-document.getElementById("fabBtn").addEventListener("click", function(e){ onFabClick(); });
+loadPersonas();
 </script>
 </body>
 </html>
