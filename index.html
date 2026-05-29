@@ -44,7 +44,6 @@
 <header>🛡️ Registro Policial</header>
 
 <main>
-  <!-- LISTA PRINCIPAL -->
   <div class="view active" id="view-list">
     <div class="search-bar">
       <input type="search" id="mainSearch" placeholder="Buscar por nombre o CI..." oninput="filterData()">
@@ -52,7 +51,6 @@
     <div id="listContainer"></div>
   </div>
 
-  <!-- FICHA DE DETALLE -->
   <div class="view" id="view-detail">
     <button class="btn-ghost" onclick="showView('view-list')">← Volver</button>
     <div id="detailContent"></div>
@@ -74,7 +72,6 @@ var SK = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6I
 
 let allData = [];
 
-// Función para pedir datos a Supabase
 async function loadData() {
   const container = document.getElementById('listContainer');
   container.innerHTML = '<div class="status-msg">Cargando registros...</div>';
@@ -87,17 +84,16 @@ async function loadData() {
       }
     });
     
-    if (!response.ok) throw new Error('Error en la conexión con la base de datos');
+    if (!response.ok) throw new Error('Error en la conexión (' + response.status + ')');
     
     allData = await response.json();
     renderList(allData);
     
   } catch (err) {
-    container.innerHTML = `<div class="status-msg" style="color:var(--danger)">⚠️ ${err.message}<br><small>Verificá la conexión</small></div>`;
+    container.innerHTML = `<div class="status-msg" style="color:var(--danger)">⚠️ Error: ${err.message}</div>`;
   }
 }
 
-// Renderizar la lista de personas
 function renderList(data) {
   const container = document.getElementById('listContainer');
   if (data.length === 0) {
@@ -116,7 +112,6 @@ function renderList(data) {
   `).join('');
 }
 
-// Abrir la ficha de detalle
 function openDetail(id) {
   const p = allData.find(x => x.id === id);
   if (!p) return;
@@ -142,7 +137,7 @@ function openDetail(id) {
     <div class="info-row"><span class="info-label">Matrícula 2</span><span class="info-value" style="letter-spacing:1px">${p.vehiculo2 || '---'}</span></div>
 
     <div class="section-title">Notas / Antecedentes</div>
-    <div class="notes-box">${p.notas || 'Sin información adicional cargada.'}</div>
+    <div class="notes-box">${p.notas || 'Sin información adicional.'}</div>
 
     <button class="btn btn-primary" onclick="alert('Edición próximamente')">✏️ Editar Registro</button>
     <button class="btn btn-danger" onclick="alert('Eliminación próximamente')">🗑️ Eliminar</button>
@@ -152,7 +147,6 @@ function openDetail(id) {
   window.scrollTo(0,0);
 }
 
-// Utilidades
 function showView(viewId) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.getElementById(viewId).classList.add('active');
@@ -179,7 +173,6 @@ function formatDate(dateStr) {
   return parts.length === 3 ? `\({parts[2]}/\){parts[1]}/${parts[0]}` : dateStr;
 }
 
-// Carga inicial
 loadData();
 </script>
 </body>
