@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Registro Policial</title>
+    <title>Registro Policial Pro</title>
     <style>
         :root { --primary: #1a3a5c; --secondary: #2c5282; --bg: #f0f2f5; --text: #2d3748; --accent: #d69e2e; --danger: #c53030; --green: #276749; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -29,7 +29,8 @@
         .data-label { color: #a0aec0; font-size: 0.9rem; }
         .data-value { font-weight: 700; text-align: right; color: var(--text); }
         .notes-box { background: white; padding: 20px; line-height: 1.6; font-size: 0.95rem; }
-        .chip { display: inline-flex; align-items: center; background: #ebf8ff; color: #2c5282; border-radius: 20px; padding: 6px 14px; margin: 4px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bee3f8; cursor: pointer; }
+        .chip { display: inline-flex; align-items: center; background: #ebf8ff; color: #2c5282; border-radius: 20px; padding: 6px 14px; margin: 4px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bee3f8; cursor: pointer; gap: 5px; }
+        .chip-del { color: var(--danger); font-weight: bold; padding: 2px 5px; border-radius: 50%; }
         .v-card { background: white; padding: 15px; margin-bottom: 8px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
         .v-plate { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
         .v-owner { font-size: 0.85rem; color: #718096; text-align: right; }
@@ -50,7 +51,6 @@
         .modal-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; font-weight: bold; display: flex; justify-content: space-between; }
         .modal-body { overflow-y: auto; }
         .modal-item { padding: 13px 20px; border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 12px; cursor: pointer; }
-        .modal-avatar { width: 36px; height: 36px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: bold; }
         .form-content { padding: 20px; }
         .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; background: #f7fafc; outline: none; }
         label { display: block; margin-bottom: 4px; color: #718096; font-size: 0.82rem; font-weight: 600; }
@@ -59,10 +59,10 @@
 <body>
 
 <div id="view-list" class="view active">
-    <header>🛡️ Registro Policial</header>
+    <header>🛡️ Registro Policial Pro</header>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Nombre, CI o matrícula..." oninput="filtrar()">
-        <button class="btn-direct" onclick="vehiculoDirecto()" title="Agregar Vehículo Directo">🚗</button>
+        <input type="text" id="searchInput" placeholder="Nombre, CI, Matrícula..." oninput="filtrar()">
+        <button class="btn-direct" onclick="vehiculoDirecto()">🚗</button>
     </div>
     <div class="list-container" id="listaPersonas"></div>
     <button class="fab" onclick="abrirForm()">+</button>
@@ -83,13 +83,13 @@
 </div>
 
 <div id="view-form" class="view">
-    <header>🛡️ Registro Policial</header>
+    <header>🛡️ Formulario</header>
     <div class="form-content">
         <h3 id="formTitle" style="margin:0 0 16px;color:var(--primary);">Registro</h3>
         <label>Nombre completo *</label><input type="text" id="f-nombre">
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
         <label>Domicilio</label><input type="text" id="f-domicilio">
-        <label>Teléfono 1</label><input type="text" id="f-tel">
+        <label>Teléfono</label><input type="text" id="f-tel">
         <label>Matrícula 1</label><input type="text" id="f-veh1">
         <label>Matrícula 2</label><input type="text" id="f-veh2">
         <label>Notas</label><textarea id="f-notas" rows="4"></textarea>
@@ -122,7 +122,7 @@ function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') 
 
 function cargar() {
     fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
-    .then(function(r){ return r.json(); }).then(function(data){
+    .then(r => r.json()).then(data => {
         db = Array.isArray(data) ? data : [];
         dibujarPersonas(db);
         dibujarVehiculos(db);
@@ -130,125 +130,121 @@ function cargar() {
 }
 
 function dibujarPersonas(data) {
-    var html = '';
-    for (var i = 0; i < data.length; i++) {
-        var p = data[i];
-        html += '<div class="card" onclick="verDetalle(' + p.id + ')">';
-        html += '<div class="avatar-s">' + (p.nombre||'??').substring(0,2).toUpperCase() + '</div>';
-        html += '<div><div class="card-name">' + h(p.nombre) + '</div>';
-        html += '<div class="card-sub">CI: ' + h(p.ci) + (p.vehiculo1 ? ' · 🚗 '+p.vehiculo1 : '') + '</div></div></div>';
-    }
+    let html = '';
+    data.forEach(p => {
+        html += `<div class="card" onclick="verDetalle(${p.id})">
+            <div class="avatar-s">${(p.nombre||'??').substring(0,2).toUpperCase()}</div>
+            <div><div class="card-name">${h(p.nombre)}</div>
+            <div class="card-sub">CI: \({h(p.ci)}\){p.vehiculo1 ? ' · 🚗 '+p.vehiculo1 : ''}</div></div></div>`;
+    });
     document.getElementById('listaPersonas').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin registros.</p>';
 }
 
 function dibujarVehiculos(data) {
-    var vehi = [];
-    for (var i = 0; i < data.length; i++) {
-        if (data[i].vehiculo1) vehi.push({ p: data[i].vehiculo1, o: data[i].nombre, id: data[i].id });
-        if (data[i].vehiculo2) vehi.push({ p: data[i].vehiculo2, o: data[i].nombre, id: data[i].id });
-    }
-    vehi.sort(function(a,b){ return a.p.localeCompare(b.p); });
-    var html = '';
-    for (var j = 0; j < vehi.length; j++) {
-        html += '<div class="v-card" onclick="verDetalle(' + vehi[j].id + ')">';
-        html += '<div class="v-plate">' + vehi[j].p.toUpperCase() + '</div>';
-        html += '<div class="v-owner">' + h(vehi[j].o) + '</div></div>';
-    }
+    let vehi = [];
+    data.forEach(p => {
+        if (p.vehiculo1) vehi.push({ p: p.vehiculo1, o: p.nombre, id: p.id });
+        if (p.vehiculo2) vehi.push({ p: p.vehiculo2, o: p.nombre, id: p.id });
+    });
+    vehi.sort((a,b) => a.p.localeCompare(b.p));
+    let html = '';
+    vehi.forEach(v => {
+        html += `<div class="v-card" onclick="verDetalle(\({v.id})"><div class="v-plate">\){v.p.toUpperCase()}</div><div class="v-owner">${h(v.o)}</div></div>`;
+    });
     document.getElementById('listaVehiculos').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin vehículos.</p>';
 }
 
 function verDetalle(id) {
-    var p = db.find(function(x){ return x.id == id; });
+    let p = db.find(x => x.id == id);
     if (!p) return;
     currentId = id;
-    var vArr = (p.vinculo || '').split('|').filter(function(x){ return x; });
-    var vHtml = '';
-    for (var j = 0; j < vArr.length; j++) {
-        vHtml += '<span class="chip" onclick="irAVinculo(\'' + vArr[j].replace(/'/g,"\\'") + '\')">🔗 ' + h(vArr[j]) + '</span>';
-    }
-    var html = '<div class="profile-hero"><div class="avatar-l">' + (p.nombre||'??').substring(0,2).toUpperCase() + '</div>';
-    html += '<div><div class="h-name">' + h(p.nombre) + '</div><div class="h-ci">CI: ' + h(p.ci) + '</div></div></div>';
-    html += '<div class="section-title">DATOS</div>';
-    html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">' + h(p.domicilio) + '</span></div>';
-    html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">' + h(p.telefono) + '</span></div>';
-    html += '<div class="section-title">VEHÍCULOS</div>';
-    html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">' + h(p.vehiculo1) + '</span></div>';
-    html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">' + h(p.vehiculo2) + '</span></div>';
-    html += '<div class="section-title">VÍNCULOS</div>';
-    html += '<div style="padding:10px 15px;">' + (vHtml || '<span style="color:#a0aec0">Sin vínculos registrados.</span>') + '</div>';
-    html += '<div class="section-title">NOTAS</div>';
-    html += '<div class="notes-box">' + h(p.notas) + '</div>';
-    html += '<div class="actions">';
-    html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
-    html += '<button class="btn btn-accent" onclick="agregarMatricula()">🚗 Matrícula</button>';
-    html += '<button class="btn btn-primary" onclick="editar()">✏️ Editar</button>';
-    html += '<button class="btn btn-danger" onclick="eliminar(' + p.id + ')">🗑️</button>';
-    html += '</div>';
+    let vArr = (p.vinculo || '').split('|').filter(x => x);
+    let vHtml = '';
+    vArr.forEach(vName => {
+        vHtml += `<span class="chip" onclick="irAVinculo('${vName.replace(/'/g,"\\'")}')">
+            🔗 \({h(vName)} <span class="chip-del" onclick="event.stopPropagation(); borrarVinculo('\){vName.replace(/'/g,"\\'")}')">✕</span>
+        </span>`;
+    });
+    let html = `<div class="profile-hero"><div class="avatar-l">${(p.nombre||'??').substring(0,2).toUpperCase()}</div>
+        <div><div class="h-name">\({h(p.nombre)}</div><div class="h-ci">CI: \){h(p.ci)}</div></div></div>
+        <div class="section-title">DATOS</div>
+        <div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">${h(p.domicilio)}</span></div>
+        <div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">${h(p.telefono)}</span></div>
+        <div class="section-title">VEHÍCULOS</div>
+        <div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">${h(p.vehiculo1)}</span></div>
+        <div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">${h(p.vehiculo2)}</span></div>
+        <div class="section-title">VÍNCULOS</div>
+        <div style="padding:10px 15px;">${vHtml || '<span style="color:#a0aec0">Sin vínculos registrados.</span>'}</div>
+        <div class="section-title">NOTAS</div><div class="notes-box">${h(p.notas)}</div>
+        <div class="actions">
+            <button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>
+            <button class="btn btn-accent" onclick="agregarMatricula()">🚗 Matrícula</button>
+            <button class="btn btn-primary" onclick="editar()">✏️ Editar</button>
+            <button class="btn btn-danger" onclick="eliminar(${p.id})">🗑️</button>
+        </div>`;
     document.getElementById('detalleContent').innerHTML = html;
     irA('view-detail');
 }
 
 function irAVinculo(n) {
-    var p = db.find(function(x){ return x.nombre && x.nombre.toLowerCase() === n.toLowerCase(); });
+    let p = db.find(x => x.nombre && x.nombre.toLowerCase() === n.toLowerCase());
     if (p) verDetalle(p.id);
 }
 
+function borrarVinculo(n) {
+    if (!confirm('¿Quitar este vínculo?')) return;
+    let p = db.find(x => x.id == currentId);
+    let v = (p.vinculo || '').split('|').filter(x => x && x !== n);
+    updatePersona({ vinculo: v.join('|') });
+}
+
+function agregarMatricula() {
+    let n = prompt('¿Qué matrícula querés actualizar?\n1: Matrícula 1\n2: Matrícula 2');
+    if (n !== '1' && n !== '2') return;
+    let plate = prompt('Ingresá la matrícula:');
+    if (!plate) return;
+    let d = {}; d['vehiculo' + n] = plate.toUpperCase().trim();
+    updatePersona(d);
+}
+
+function updatePersona(d) {
+    fetch(SB + '/rest/v1/personas?id=eq.' + currentId, {
+        method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify(d)
+    }).then(() => { cargar(); setTimeout(() => verDetalle(currentId), 500); });
+}
+
 function abrirVincular() {
-    var html = '';
-    for (var i = 0; i < db.length; i++) {
-        if (db[i].id == currentId) continue;
-        html += '<div class="modal-item" onclick="vincular(\'' + db[i].nombre.replace(/'/g,"\\'") + '\')">';
-        html += '<div class="modal-avatar">' + (db[i].nombre||'??').substring(0,2).toUpperCase() + '</div>';
-        html += '<div><div style="font-weight:600">' + h(db[i].nombre) + '</div><div style="font-size:0.8rem;color:#718096">CI: ' + h(db[i].ci) + '</div></div></div>';
-    }
+    let html = '';
+    db.filter(x => x.id != currentId).forEach(p => {
+        html += `<div class="modal-item" onclick="vincular('${p.nombre.replace(/'/g,"\\'")}')">
+            <div style="font-weight:600">\({h(p.nombre)}</div><div style="font-size:0.8rem;color:#718096">CI: \){h(p.ci)}</div></div>`;
+    });
     document.getElementById('modalList').innerHTML = html;
     document.getElementById('modalVinc').classList.add('open');
 }
 
 function vincular(n) {
-    var p = db.find(function(x){ return x.id == currentId; });
-    if (!p) return;
-    var v = (p.vinculo || '').split('|').filter(function(x){ return x; });
+    let p = db.find(x => x.id == currentId);
+    let v = (p.vinculo || '').split('|').filter(x => x);
     if (v.indexOf(n) < 0) {
         v.push(n);
-        fetch(SB + '/rest/v1/personas?id=eq.' + currentId, {
-            method: 'PATCH',
-            headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ vinculo: v.join('|') })
-        }).then(function(){ cargar(); setTimeout(function(){ verDetalle(currentId); }, 500); });
+        updatePersona({ vinculo: v.join('|') });
     }
     document.getElementById('modalVinc').classList.remove('open');
 }
 
-function agregarMatricula() {
-    var plate = prompt('Matrícula a agregar:');
-    if (!plate) return;
-    var p = db.find(function(x){ return x.id == currentId; });
-    var field = !p.vehiculo1 ? 'vehiculo1' : (!p.vehiculo2 ? 'vehiculo2' : null);
-    if (!field) return alert('Límite de 2 vehículos alcanzado.');
-    var d = {}; d[field] = plate.toUpperCase();
-    fetch(SB + '/rest/v1/personas?id=eq.' + currentId, {
-        method: 'PATCH',
-        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(d)
-    }).then(function(){ cargar(); setTimeout(function(){ verDetalle(currentId); }, 500); });
-}
-
 function vehiculoDirecto() {
-    var plate = prompt('Ingrese la Matrícula:');
-    if (!plate) return;
-    var owner = prompt('Nombre del Dueño:');
-    if (!owner) return;
-    var d = { nombre: owner, vehiculo1: plate.toUpperCase() };
+    let plate = prompt('Matrícula:'); if (!plate) return;
+    let owner = prompt('Dueño:'); if (!owner) return;
     fetch(SB + '/rest/v1/personas', {
-        method: 'POST',
-        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(d)
-    }).then(function(){ cargar(); alert('Vehículo guardado.'); });
+        method: 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: owner, vehiculo1: plate.toUpperCase().trim() })
+    }).then(() => { cargar(); alert('Cargado.'); });
 }
 
 function irA(v) {
-    document.querySelectorAll('.view').forEach(function(x){ x.classList.remove('active'); });
+    document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
     document.getElementById(v).classList.add('active');
     document.getElementById('nav-p').classList.toggle('active', v==='view-list' || v==='view-detail');
     document.getElementById('nav-v').classList.toggle('active', v==='view-vehicles');
@@ -258,12 +254,12 @@ function irA(v) {
 function abrirForm() {
     currentId = null;
     document.getElementById('formTitle').innerText = 'Nuevo Registro';
-    ['nombre','ci','domicilio','tel','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
+    ['nombre','ci','domicilio','tel','veh1','veh2','notas'].forEach(id => document.getElementById('f-'+id).value = '');
     irA('view-form');
 }
 
 function editar() {
-    var p = db.find(function(x){ return x.id == currentId; });
+    let p = db.find(x => x.id == currentId);
     if (!p) return;
     document.getElementById('formTitle').innerText = 'Editar Registro';
     document.getElementById('f-nombre').value = p.nombre || '';
@@ -277,7 +273,7 @@ function editar() {
 }
 
 function guardar() {
-    var d = {
+    let d = {
         nombre: document.getElementById('f-nombre').value,
         ci: document.getElementById('f-ci').value,
         domicilio: document.getElementById('f-domicilio').value,
@@ -286,39 +282,39 @@ function guardar() {
         vehiculo2: document.getElementById('f-veh2').value,
         notas: document.getElementById('f-notas').value
     };
-    if (!d.nombre) return alert('El nombre es obligatorio');
-    var url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
+    if (!d.nombre) return alert('Nombre obligatorio');
+    let url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
     fetch(url, {
-        method: currentId ? 'PATCH' : 'POST',
-        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+        method: currentId ? 'PATCH' : 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify(d)
-    }).then(function(){ cargar(); irA('view-list'); });
+    }).then(() => { cargar(); irA('view-list'); });
 }
 
 function eliminar(id) {
-    if (!confirm('¿Eliminar registro?')) return;
+    if (!confirm('¿Eliminar?')) return;
     fetch(SB + '/rest/v1/personas?id=eq.' + id, { method: 'DELETE', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
-    .then(function(){ cargar(); irA('view-list'); });
+    .then(() => { cargar(); irA('view-list'); });
 }
 
 function filtrar() {
-    var t = document.getElementById('searchInput').value.toLowerCase();
-    dibujarPersonas(db.filter(function(p){
-        return (p.nombre||'').toLowerCase().indexOf(t)>=0 || (p.ci||'').indexOf(t)>=0 || (p.vehiculo1||'').toLowerCase().indexOf(t)>=0;
-    }));
+    let t = document.getElementById('searchInput').value.toLowerCase();
+    dibujarPersonas(db.filter(p => 
+        (p.nombre||'').toLowerCase().includes(t) || (p.ci||'').includes(t) || 
+        (p.vehiculo1||'').toLowerCase().includes(t) || (p.vehiculo2||'').toLowerCase().includes(t) || (p.notas||'').toLowerCase().includes(t)
+    ));
 }
 
 function filtrarVehiculos() {
-    var t = document.getElementById('searchVeh').value.toLowerCase();
-    var vList = [];
-    for (var i = 0; i < db.length; i++) {
-        if ((db[i].vehiculo1||'').toLowerCase().indexOf(t)>=0) vList.push({ p: db[i].vehiculo1, o: db[i].nombre, id: db[i].id });
-        if ((db[i].vehiculo2||'').toLowerCase().indexOf(t)>=0) vList.push({ p: db[i].vehiculo2, o: db[i].nombre, id: db[i].id });
-    }
-    var html = '';
-    for (var j = 0; j < vList.length; j++) {
-        html += '<div class="v-card" onclick="verDetalle(' + vList[j].id + ')"><div class="v-plate">' + vList[j].p.toUpperCase() + '</div><div class="v-owner">' + h(vList[j].o) + '</div></div>';
-    }
+    let t = document.getElementById('searchVeh').value.toLowerCase();
+    let vList = [];
+    db.forEach(p => {
+        if ((p.vehiculo1||'').toLowerCase().includes(t)) vList.push({ p: p.vehiculo1, o: p.nombre, id: p.id });
+        if ((p.vehiculo2||'').toLowerCase().includes(t)) vList.push({ p: p.vehiculo2, o: p.nombre, id: p.id });
+    });
+    let html = '';
+    vList.forEach(v => {
+        html += `<div class="v-card" onclick="verDetalle(\({v.id})"><div class="v-plate">\){v.p.toUpperCase()}</div><div class="v-owner">${h(v.o)}</div></div>`;
+    });
     document.getElementById('listaVehiculos').innerHTML = html;
 }
 
