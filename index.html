@@ -6,28 +6,34 @@
     <title>Registro Policial</title>
     <style>
         :root { --primary: #1a3a5c; --secondary: #2c5282; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: var(--bg); padding-bottom: 80px; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); padding-bottom: 90px; }
+        
         header { background: var(--primary); color: white; padding: 1rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); position: sticky; top: 0; z-index: 100; }
+        
         .search-container { padding: 1rem; position: sticky; top: 60px; background: var(--bg); z-index: 90; }
-        #searchInput { width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 25px; box-sizing: border-box; font-size: 16px; outline: none; transition: border-color 0.3s; }
-        #searchInput:focus { border-color: var(--secondary); }
+        #searchInput { width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 25px; box-sizing: border-box; font-size: 16px; outline: none; }
+        
         .container { padding: 1rem; display: grid; gap: 1rem; }
-        .card { background: white; border-radius: 12px; padding: 1rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.2s; }
-        .card:active { transform: scale(0.98); }
+        .card { background: white; border-radius: 12px; padding: 1rem; display: flex; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; }
         .avatar { width: 50px; height: 50px; background: #edf2f7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; font-weight: bold; color: var(--primary); font-size: 1.2rem; }
         .info h3 { margin: 0; color: #2d3748; font-size: 1.1rem; }
         .info p { margin: 4px 0 0; color: #718096; font-size: 0.9rem; }
-        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 0.8rem 0; border-top: 1px solid #e2e8f0; z-index: 100; }
-        .nav-item { border: none; background: none; color: #718096; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; cursor: pointer; }
+        
+        .fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); cursor: pointer; z-index: 101; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 200; }
+        .modal { background: white; width: 90%; max-width: 400px; padding: 2rem; border-radius: 15px; }
+        .modal input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        
+        nav { position: fixed; bottom: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 0.8rem 0; border-top: 1px solid #e2e8f0; }
+        .nav-item { border: none; background: none; color: #718096; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; }
         .nav-item.active { color: var(--primary); }
-        .nav-item span { font-size: 1.4rem; margin-bottom: 4px; }
     </style>
 </head>
 <body>
 
-<header>
-    <h2 style="margin:0">🛡️ Registro Policial</h2>
-</header>
+<header><h2>🛡️ Registro Policial</h2></header>
 
 <div class="search-container">
     <input type="text" id="searchInput" placeholder="Buscar por nombre o CI..." oninput="filterData()">
@@ -35,6 +41,20 @@
 
 <div class="container" id="personList">
     <div style="text-align:center; color:#718096; padding:2rem;">Cargando personas...</div>
+</div>
+
+<button class="fab" onclick="showModal()">+</button>
+
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <h3>Nueva Persona</h3>
+        <input type="text" id="newName" placeholder="Nombre completo">
+        <input type="number" id="newCI" placeholder="Cédula de Identidad">
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button class="btn" style="background:#e2e8f0" onclick="hideModal()">Cancelar</button>
+            <button class="btn" style="background:var(--primary); color:white;" onclick="addPerson()">Guardar</button>
+        </div>
+    </div>
 </div>
 
 <nav>
@@ -57,17 +77,12 @@
             allData = await res.json();
             renderCards(allData);
         } catch (err) {
-            document.getElementById('personList').innerHTML = '<div style="color:red; text-align:center;">Error al cargar datos</div>';
+            document.getElementById('personList').innerHTML = '<div style="color:red; text-align:center;">Error al cargar</div>';
         }
     }
 
     function renderCards(data) {
         const list = document.getElementById('personList');
-        if (data.length === 0) {
-            list.innerHTML = '<div style="text-align:center; color:#718096;">No se encontraron resultados</div>';
-            return;
-        }
-        
         list.innerHTML = data.map(p => `
             <div class="card">
                 <div class="avatar">${p.nombre ? p.nombre.substring(0,2).toUpperCase() : '??'}</div>
@@ -88,8 +103,32 @@
         renderCards(filtered);
     }
 
+    function showModal() { document.getElementById('modalOverlay').style.display = 'flex'; }
+    function hideModal() { 
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.getElementById('newName').value = '';
+        document.getElementById('newCI').value = '';
+    }
+
+    async function addPerson() {
+        const nombre = document.getElementById('newName').value;
+        const ci = document.getElementById('newCI').value;
+        if (!nombre) return alert('El nombre es obligatorio');
+
+        try {
+            const res = await fetch(`${SB_URL}/rest/v1/personas`, {
+                method: 'POST',
+                headers: { 
+                    'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY,
+                    'Content-Type': 'application/json', 'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({ nombre, ci })
+            });
+            if (res.ok) { hideModal(); loadData(); }
+        } catch (err) { alert('Error al guardar'); }
+    }
+
     window.onload = loadData;
 </script>
-
 </body>
 </html>
