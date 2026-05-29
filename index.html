@@ -141,7 +141,7 @@
       z-index: 99;
       transition: transform 0.2s;
     }
-    .fab:active { transform: scale(0.92); }
+    .fab:active { transform: scale(0.92); } .fab { touch-action: manipulation; }
 
     .card {
       background: var(--card);
@@ -418,7 +418,7 @@
   </div>
 </main>
 
-<button class="fab" id="fabBtn" onclick="onFabClick()">+</button>
+<button class="fab" id="fabBtn">+</button>
 
 <!-- MODAL: VEHÍCULOS PARA PERSONA -->
 <div class="modal-overlay hidden" id="modalVehiculos">
@@ -595,9 +595,8 @@ function updateFab() {
 }
 
 function onFabClick() {
-  alert("FAB tocado! Vista: " + (document.querySelector(".view.active")?.id || "ninguna"));
-  const cur = document.querySelector(".view.active")?.id;
-  if (cur==="view-vehiculos") abrirFormVehiculo(); else abrirFormPersona();
+  const cur = document.querySelector('.view.active')?.id;
+  if (cur==='view-vehiculos') abrirFormVehiculo(); else abrirFormPersona();
 }
 
 // ============================================================
@@ -1195,6 +1194,8 @@ function confirmarEliminar(tipo, id) {
 // INIT
 // ============================================================
 renderPersonas();
+document.getElementById("fabBtn").addEventListener("touchend", function(e){ e.preventDefault(); onFabClick(); });
+document.getElementById("fabBtn").addEventListener("click", function(e){ onFabClick(); });
 </script>
 </body>
 </html>
