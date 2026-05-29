@@ -42,7 +42,7 @@
       z-index: 999;
       display: flex; align-items: center; justify-content: center;
     }
-    .loader-overlay.hidden { display: none; }
+    .loader-overlay.hidden { display: none; pointer-events: none; }
     .spinner {
       width: 40px; height: 40px;
       border: 4px solid rgba(255,255,255,0.4);
@@ -294,7 +294,7 @@
 </head>
 <body>
 
-<div class="loader-overlay hidden" id="loader"><div class="spinner"></div></div>
+<div class="loader-overlay hidden" id="loader" style="display:none;"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
 <header>
@@ -531,8 +531,8 @@ const PAGE_SIZE = 30;
 // ============================================================
 // UI HELPERS
 // ============================================================
-function showLoader() { document.getElementById('loader').classList.remove('hidden'); }
-function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
+function showLoader() { const l=document.getElementById('loader'); l.classList.remove('hidden'); l.style.display='flex'; }
+function hideLoader() { const l=document.getElementById('loader'); l.classList.add('hidden'); l.style.display='none'; }
 
 function showToast(msg, duration=2500) {
   const t = document.getElementById('toast');
