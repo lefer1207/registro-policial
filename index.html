@@ -595,8 +595,9 @@ function updateFab() {
 }
 
 function onFabClick() {
-  const cur = document.querySelector('.view.active')?.id;
-  if (cur==='view-vehiculos') abrirFormVehiculo(); else abrirFormPersona();
+  alert("FAB tocado! Vista: " + (document.querySelector(".view.active")?.id || "ninguna"));
+  const cur = document.querySelector(".view.active")?.id;
+  if (cur==="view-vehiculos") abrirFormVehiculo(); else abrirFormPersona();
 }
 
 // ============================================================
