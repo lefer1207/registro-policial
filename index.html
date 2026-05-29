@@ -590,7 +590,8 @@ function goBack() {
 function updateFab() {
   const fab = document.getElementById('fabBtn');
   const cur = document.querySelector('.view.active')?.id;
-  fab.style.display = ['view-personas','view-vehiculos','view-buscar'].includes(cur) ? 'flex' : 'none';
+  const hidden = ['view-form-persona','view-form-vehiculo','view-detalle-persona','view-detalle-vehiculo'];
+  fab.style.display = hidden.includes(cur) ? 'none' : 'flex';
 }
 
 function onFabClick() {
