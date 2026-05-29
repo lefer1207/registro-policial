@@ -5,53 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Policial</title>
     <style>
-        :root { --primary: #1a3a5c; --bg: #f0f2f5; --text: #2d3748; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--text); }
+        :root { --primary: #1a3a5c; --bg: #f0f2f5; --text: #2d3748; --accent: #d69e2e; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; }
         
-        /* HEADER */
-        header { background: var(--primary); color: white; padding: 1rem; text-align: left; display: flex; align-items: center; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        header { background: var(--primary); color: white; padding: 1rem; text-align: left; font-weight: bold; position: sticky; top: 0; z-index: 100; }
         
         /* VISTAS */
-        .view { display: none; padding-bottom: 80px; }
+        .view { display: none; }
         .view.active { display: block; }
 
-        /* LISTA */
-        .search-container { padding: 1rem; background: var(--bg); position: sticky; top: 60px; z-index: 90; }
-        #searchInput { width: 100%; padding: 12px; border: 2px solid #cbd5e0; border-radius: 25px; font-size: 16px; outline: none; box-sizing: border-box; }
-        .container { padding: 0 1rem; display: grid; gap: 10px; }
-        .card { background: white; border-radius: 12px; padding: 1rem; display: flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
-        .avatar-small { width: 45px; height: 45px; background: #2c5282; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; }
+        /* LISTA PRINCIPAL */
+        .search-container { padding: 1rem; background: var(--bg); position: sticky; top: 55px; z-index: 90; }
+        #searchInput { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box; }
+        .container { padding: 0 1rem; }
+        .card { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
+        .avatar-small { width: 45px; height: 45px; background: #2c5282; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; }
 
-        /* DETALLE (IGUAL A LA FOTO) */
-        .back-link { color: #d69e2e; text-decoration: none; display: block; padding: 1rem; font-weight: bold; cursor: pointer; }
-        .profile-header { padding: 1rem; display: flex; align-items: center; gap: 1rem; }
-        .avatar-large { width: 80px; height: 80px; background: #2c5282; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: bold; }
-        .section-title { background: #edf2f7; padding: 5px 1rem; color: #718096; font-size: 0.8rem; font-weight: bold; letter-spacing: 1px; margin-top: 1rem; border-bottom: 1px solid #e2e8f0; }
+        /* DETALLE (FICHA) */
+        .back-link { color: var(--accent); padding: 1rem; font-weight: bold; cursor: pointer; display: block; text-decoration: none; }
+        .profile-header { padding: 0 1rem 1rem; display: flex; align-items: center; gap: 1rem; }
+        .avatar-large { width: 85px; height: 85px; background: #2c5282; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: bold; }
+        .section-title { background: #edf2f7; padding: 6px 1rem; color: #718096; font-size: 0.8rem; font-weight: bold; margin-top: 10px; border-bottom: 1px solid #e2e8f0; }
         .data-row { padding: 1rem; background: white; display: flex; justify-content: space-between; border-bottom: 1px solid #f0f0f0; }
         .data-label { color: #a0aec0; }
-        .notes-box { background: white; padding: 1rem; margin: 10px; border-radius: 10px; min-height: 50px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+        .notes-box { background: white; padding: 1rem; margin: 10px 1rem; border-radius: 10px; min-height: 40px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.05); }
         .actions { display: flex; gap: 10px; padding: 1rem; }
-        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .btn-edit { background: white; border: 1px solid #cbd5e0; }
-        .btn-delete { background: #e53e3e; color: white; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-primary { background: var(--primary); color: white; border: none; }
 
-        /* BOTÓN + */
-        .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 101; }
+        /* BOTON FLOTANTE */
+        .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 101; cursor: pointer; }
 
         /* NAV INFERIOR */
-        nav { position: fixed; bottom: 0; width: 100%; background: #1a3a5c; display: flex; justify-content: space-around; padding: 0.8rem 0; color: #a0aec0; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; cursor: pointer; }
+        nav { position: fixed; bottom: 0; width: 100%; background: #1a3a5c; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+        .nav-item { color: #a0aec0; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; border: none; background: none; }
         .nav-item.active { color: #63b3ed; }
 
         /* FORMULARIO */
-        .modal { position: fixed; top: 0; background: white; width: 100%; height: 100%; z-index: 200; display: none; flex-direction: column; }
-        .modal-body { padding: 1rem; flex: 1; overflow-y: auto; }
-        .modal input, .modal textarea { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        #modal-form { position: fixed; top: 0; background: white; width: 100%; height: 100%; z-index: 200; display: none; flex-direction: column; }
+        .form-content { padding: 1.5rem; flex: 1; }
+        .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<!-- LISTA PRINCIPAL -->
+<!-- VISTA LISTA -->
 <div id="view-list" class="view active">
     <header>🛡️ Registro Policial</header>
     <div class="search-container">
@@ -61,34 +59,156 @@
     <button class="fab" onclick="showForm()">+</button>
 </div>
 
-<!-- DETALLE (LA FICHA DE LA FOTO) -->
+<!-- VISTA DETALLE -->
 <div id="view-detail" class="view">
     <header>🛡️ Registro Policial</header>
     <div class="back-link" onclick="showView('view-list')">← Volver</div>
     <div id="detail-content"></div>
 </div>
 
-<!-- FORMULARIO AGREGAR/EDITAR -->
-<div id="modal-form" class="modal">
-    <header id="form-title">Nueva Persona</header>
-    <div class="modal-body">
+<!-- VISTA FORMULARIO -->
+<div id="modal-form" class="view">
+    <header>🛡️ Registro Policial</header>
+    <div class="form-content">
+        <h3 id="form-title">Nueva Persona</h3>
         <input type="text" id="f-nombre" placeholder="Nombre completo">
         <input type="number" id="f-ci" placeholder="Cédula de Identidad">
         <input type="text" id="f-tel" placeholder="Teléfono">
         <textarea id="f-notas" placeholder="Notas" rows="4"></textarea>
         <div class="actions">
-            <button class="btn btn-edit" onclick="closeForm()">Cancelar</button>
-            <button class="btn btn-delete" style="background:var(--primary)" onclick="savePerson()">Guardar</button>
+            <button class="btn" onclick="hideForm()">Cancelar</button>
+            <button class="btn btn-primary" onclick="savePerson()">Guardar</button>
         </div>
     </div>
 </div>
 
 <nav>
-    <div class="nav-item active"><span>👤</span>Personas</div>
-    <div class="nav-item"><span>🚗</span>Vehículos</div>
-    <div class="nav-item"><span>🔍</span>Buscar</div>
+    <button class="nav-item active">👤<br>Personas</button>
+    <button class="nav-item">🚗<br>Vehículos</button>
+    <button class="nav-item">🔍<br>Buscar</button>
 </nav>
 
 <script>
-    const SB_URL = '[https://pdoeklmwquxggppvigrf.supabase.co](https://pdoeklmwquxggppvigrf.supabase.co)';
-    const SB_KEY = 'eyJhbGciOiJI
+    const SB_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
+    
+    let allData = [];
+    let currentId = null;
+
+    async function loadData() {
+        try {
+            const res = await fetch(`${SB_URL}/rest/v1/personas?select=*&order=nombre.asc`, {
+                headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+            });
+            allData = await res.json();
+            renderList(allData);
+        } catch (e) { console.error(e); }
+    }
+
+    function renderList(data) {
+        document.getElementById('personList').innerHTML = data.map(p => `
+            <div class="card" onclick="showDetail(${p.id})">
+                <div class="avatar-small">${p.nombre ? p.nombre.substring(0,2).toUpperCase() : '??'}</div>
+                <div>
+                    <div style="font-weight:bold">${p.nombre}</div>
+                    <div style="font-size:0.85rem; color:#718096">CI: ${p.ci || '---'}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function showDetail(id) {
+        const p = allData.find(x => x.id === id);
+        currentId = id;
+        document.getElementById('detail-content').innerHTML = `
+            <div class="profile-header">
+                <div class="avatar-large">${p.nombre.substring(0,2).toUpperCase()}</div>
+                <div>
+                    <div style="font-size:1.3rem; font-weight:500;">${p.nombre}</div>
+                    <div style="color:#718096">CI: ${p.ci || '---'}</div>
+                </div>
+            </div>
+            <div class="section-title">DATOS</div>
+            <div class="data-row">
+                <span class="data-label">Teléfono 1</span>
+                <span style="font-weight:bold">${p.telefono || '---'}</span>
+            </div>
+            <div class="section-title">NOTAS</div>
+            <div class="notes-box">${p.notas || 'Sin notas...'}</div>
+            <div class="actions">
+                <button class="btn" onclick="editPerson()">✏️ Editar</button>
+                <button class="btn" style="background:#c53030; color:white; border:none;" onclick="deletePerson(${p.id})">🗑️ Eliminar</button>
+            </div>
+        `;
+        showView('view-detail');
+    }
+
+    function showView(viewId) {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById(viewId).classList.add('active');
+        document.getElementById('modal-form').style.display = 'none';
+        window.scrollTo(0,0);
+    }
+
+    function showForm(isEdit = false) {
+        document.getElementById('modal-form').style.display = 'flex';
+        if (!isEdit) {
+            currentId = null;
+            document.getElementById('f-nombre').value = '';
+            document.getElementById('f-ci').value = '';
+            document.getElementById('f-tel').value = '';
+            document.getElementById('f-notas').value = '';
+        }
+    }
+
+    function hideForm() { document.getElementById('modal-form').style.display = 'none'; }
+
+    function editPerson() {
+        const p = allData.find(x => x.id === currentId);
+        document.getElementById('f-nombre').value = p.nombre;
+        document.getElementById('f-ci').value = p.ci || '';
+        document.getElementById('f-tel').value = p.telefono || '';
+        document.getElementById('f-notas').value = p.notas || '';
+        showForm(true);
+    }
+
+    async function savePerson() {
+        const payload = {
+            nombre: document.getElementById('f-nombre').value,
+            ci: document.getElementById('f-ci').value,
+            telefono: document.getElementById('f-tel').value,
+            notas: document.getElementById('f-notas').value
+        };
+        if (!payload.nombre) return alert("Nombre obligatorio");
+        
+        const method = currentId ? 'PATCH' : 'POST';
+        const url = currentId ? `\({SB_URL}/rest/v1/personas?id=eq.\){currentId}` : `${SB_URL}/rest/v1/personas`;
+
+        const res = await fetch(url, {
+            method: method,
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) { hideForm(); await loadData(); showView('view-list'); }
+    }
+
+    async function deletePerson(id) {
+        if (!confirm("¿Eliminar registro?")) return;
+        await fetch(`\({SB_URL}/rest/v1/personas?id=eq.\){id}`, {
+            method: 'DELETE',
+            headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+        });
+        await loadData();
+        showView('view-list');
+    }
+
+    function filterData() {
+        const t = document.getElementById('searchInput').value.toLowerCase();
+        renderList(allData.filter(p => p.nombre.toLowerCase().includes(t) || (p.ci && p.ci.toString().includes(t))));
+    }
+
+    window.onload = loadData;
+</script>
+</body>
+</html>
