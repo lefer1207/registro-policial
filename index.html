@@ -141,7 +141,7 @@
       z-index: 99;
       transition: transform 0.2s;
     }
-    .fab:active { transform: scale(0.92); } .fab { touch-action: manipulation; }
+    .fab:active { transform: scale(0.92); } .fab { touch-action: manipulation !important; -webkit-tap-highlight-color: rgba(0,0,0,0.2); } .fab { touch-action: manipulation; }
 
     .card {
       background: var(--card);
@@ -418,7 +418,7 @@
   </div>
 </main>
 
-<button class="fab" id="fabBtn">+</button>
+<button class="fab" id="fabBtn" style="display:flex;">+</button>
 
 <!-- MODAL: VEHÍCULOS PARA PERSONA -->
 <div class="modal-overlay hidden" id="modalVehiculos">
@@ -532,7 +532,7 @@ const PAGE_SIZE = 30;
 // UI HELPERS
 // ============================================================
 function showLoader() { const l=document.getElementById('loader'); l.classList.remove('hidden'); l.style.display='flex'; }
-function hideLoader() { const l=document.getElementById('loader'); l.classList.add('hidden'); l.style.display='none'; }
+function hideLoader() { var l=document.getElementById('loader'); l.classList.add('hidden'); l.style.display='none'; }
 
 function showToast(msg, duration=2500) {
   const t = document.getElementById('toast');
@@ -565,7 +565,10 @@ function showTab(tab) {
   document.getElementById('view-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
   currentTab = tab; viewStack = []; updateFab(); window.scrollTo(0,0);
-  if (tab==='personas') { personasPage=0; renderPersonas(); }
+  if (tab==='personas') { personasPage=0; renderPersonas();
+var fabEl = document.getElementById('fabBtn');
+fabEl.addEventListener('click', function(){ onFabClick(); });
+fabEl.addEventListener('touchend', function(e){ e.preventDefault(); onFabClick(); }); }
   if (tab==='vehiculos') { vehiculosPage=0; renderVehiculos(); }
 }
 
@@ -583,6 +586,9 @@ function goBack() {
     document.getElementById(prev).classList.add('active');
     updateFab();
     if (prev==='view-personas') renderPersonas();
+var fabEl = document.getElementById('fabBtn');
+fabEl.addEventListener('click', function(){ onFabClick(); });
+fabEl.addEventListener('touchend', function(e){ e.preventDefault(); onFabClick(); });
     if (prev==='view-vehiculos') renderVehiculos();
   } else { showTab(currentTab); }
 }
@@ -1194,6 +1200,9 @@ function confirmarEliminar(tipo, id) {
 // INIT
 // ============================================================
 renderPersonas();
+var fabEl = document.getElementById('fabBtn');
+fabEl.addEventListener('click', function(){ onFabClick(); });
+fabEl.addEventListener('touchend', function(e){ e.preventDefault(); onFabClick(); });
 document.getElementById("fabBtn").addEventListener("touchend", function(e){ e.preventDefault(); onFabClick(); });
 document.getElementById("fabBtn").addEventListener("click", function(e){ onFabClick(); });
 </script>
