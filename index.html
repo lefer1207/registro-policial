@@ -29,8 +29,8 @@
         .data-label { color: #a0aec0; font-size: 0.9rem; }
         .data-value { font-weight: 700; text-align: right; color: var(--text); }
         .notes-box { background: white; padding: 20px; line-height: 1.6; font-size: 0.95rem; }
-        .chip { display: inline-flex; align-items: center; background: #ebf8ff; color: #2c5282; border-radius: 20px; padding: 6px 14px; margin: 4px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bee3f8; cursor: pointer; gap: 5px; }
-        .chip-del { color: var(--danger); font-weight: bold; padding: 2px 5px; border-radius: 50%; }
+        .chip { display: inline-flex; align-items: center; background: #ebf8ff; color: #2c5282; border-radius: 20px; padding: 6px 14px; margin: 4px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bee3f8; cursor: pointer; gap: 6px; }
+        .chip-del { color: var(--danger); font-weight: bold; padding: 0 4px; border-radius: 50%; }
         .v-card { background: white; padding: 15px; margin-bottom: 8px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
         .v-plate { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
         .v-owner { font-size: 0.85rem; color: #718096; text-align: right; }
@@ -49,8 +49,8 @@
         .modal-overlay.open { display: flex; }
         .modal { background: white; width: 100%; border-radius: 20px 20px 0 0; max-height: 75vh; display: flex; flex-direction: column; }
         .modal-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; font-weight: bold; display: flex; justify-content: space-between; }
-        .modal-body { overflow-y: auto; }
-        .modal-item { padding: 13px 20px; border-bottom: 1px solid #f0f4f8; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .modal-body { overflow-y: auto; padding-bottom: 20px; }
+        .modal-item { padding: 14px 20px; border-bottom: 1px solid #f0f4f8; cursor: pointer; }
         .form-content { padding: 20px; }
         .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; background: #f7fafc; outline: none; }
         label { display: block; margin-bottom: 4px; color: #718096; font-size: 0.82rem; font-weight: 600; }
@@ -61,8 +61,8 @@
 <div id="view-list" class="view active">
     <header>🛡️ Registro Policial Pro</header>
     <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Nombre, CI, Matrícula..." oninput="filtrar()">
-        <button class="btn-direct" onclick="vehiculoDirecto()">🚗</button>
+        <input type="text" id="searchInput" placeholder="Buscar por nombre, CI o matrícula..." oninput="filtrar()">
+        <button class="btn-direct" onclick="vehiculoDirecto()" title="Agregar Vehículo Rápido">🚗</button>
     </div>
     <div class="list-container" id="listaPersonas"></div>
     <button class="fab" onclick="abrirForm()">+</button>
@@ -78,12 +78,12 @@
 
 <div id="view-detail" class="view">
     <header>🛡️ Detalle de Registro</header>
-    <div class="back-link" onclick="irA('view-list')">← Volver</div>
+    <div class="back-link" onclick="irA('view-list')">← Volver al listado</div>
     <div id="detalleContent"></div>
 </div>
 
 <div id="view-form" class="view">
-    <header>🛡️ Formulario</header>
+    <header>🛡️ Formulario de Registro</header>
     <div class="form-content">
         <h3 id="formTitle" style="margin:0 0 16px;color:var(--primary);">Registro</h3>
         <label>Nombre completo *</label><input type="text" id="f-nombre">
@@ -132,7 +132,7 @@ function cargar() {
 function dibujarPersonas(data) {
     let html = '';
     data.forEach(p => {
-        html += `<div class="card" onclick="verDetalle(${p.id})">
+        html += `<div class="card" onclick="verDetalle('${p.id}')">
             <div class="avatar-s">${(p.nombre||'??').substring(0,2).toUpperCase()}</div>
             <div><div class="card-name">${h(p.nombre)}</div>
             <div class="card-sub">CI: \({h(p.ci)}\){p.vehiculo1 ? ' · 🚗 '+p.vehiculo1 : ''}</div></div></div>`;
@@ -149,13 +149,13 @@ function dibujarVehiculos(data) {
     vehi.sort((a,b) => a.p.localeCompare(b.p));
     let html = '';
     vehi.forEach(v => {
-        html += `<div class="v-card" onclick="verDetalle(\({v.id})"><div class="v-plate">\){v.p.toUpperCase()}</div><div class="v-owner">${h(v.o)}</div></div>`;
+        html += `<div class="v-card" onclick="verDetalle('\({v.id}')"><div class="v-plate">\){v.p.toUpperCase()}</div><div class="v-owner">${h(v.o)}</div></div>`;
     });
     document.getElementById('listaVehiculos').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin vehículos.</p>';
 }
 
 function verDetalle(id) {
-    let p = db.find(x => x.id == id);
+    let p = db.find(x => String(x.id) === String(id));
     if (!p) return;
     currentId = id;
     let vArr = (p.vinculo || '').split('|').filter(x => x);
@@ -180,7 +180,7 @@ function verDetalle(id) {
             <button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>
             <button class="btn btn-accent" onclick="agregarMatricula()">🚗 Matrícula</button>
             <button class="btn btn-primary" onclick="editar()">✏️ Editar</button>
-            <button class="btn btn-danger" onclick="eliminar(${p.id})">🗑️</button>
+            <button class="btn btn-danger" onclick="eliminar('${p.id}')">🗑️</button>
         </div>`;
     document.getElementById('detalleContent').innerHTML = html;
     irA('view-detail');
@@ -193,7 +193,7 @@ function irAVinculo(n) {
 
 function borrarVinculo(n) {
     if (!confirm('¿Quitar este vínculo?')) return;
-    let p = db.find(x => x.id == currentId);
+    let p = db.find(x => String(x.id) === String(currentId));
     let v = (p.vinculo || '').split('|').filter(x => x && x !== n);
     updatePersona({ vinculo: v.join('|') });
 }
@@ -216,7 +216,7 @@ function updatePersona(d) {
 
 function abrirVincular() {
     let html = '';
-    db.filter(x => x.id != currentId).forEach(p => {
+    db.filter(x => String(x.id) !== String(currentId)).forEach(p => {
         html += `<div class="modal-item" onclick="vincular('${p.nombre.replace(/'/g,"\\'")}')">
             <div style="font-weight:600">\({h(p.nombre)}</div><div style="font-size:0.8rem;color:#718096">CI: \){h(p.ci)}</div></div>`;
     });
@@ -225,7 +225,7 @@ function abrirVincular() {
 }
 
 function vincular(n) {
-    let p = db.find(x => x.id == currentId);
+    let p = db.find(x => String(x.id) === String(currentId));
     let v = (p.vinculo || '').split('|').filter(x => x);
     if (v.indexOf(n) < 0) {
         v.push(n);
@@ -235,12 +235,12 @@ function vincular(n) {
 }
 
 function vehiculoDirecto() {
-    let plate = prompt('Matrícula:'); if (!plate) return;
-    let owner = prompt('Dueño:'); if (!owner) return;
+    let plate = prompt('Matrícula del vehículo:'); if (!plate) return;
+    let owner = prompt('Nombre del dueño:'); if (!owner) return;
     fetch(SB + '/rest/v1/personas', {
         method: 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
         body: JSON.stringify({ nombre: owner, vehiculo1: plate.toUpperCase().trim() })
-    }).then(() => { cargar(); alert('Cargado.'); });
+    }).then(() => { cargar(); alert('Vehículo registrado correctamente.'); });
 }
 
 function irA(v) {
@@ -259,7 +259,7 @@ function abrirForm() {
 }
 
 function editar() {
-    let p = db.find(x => x.id == currentId);
+    let p = db.find(x => String(x.id) === String(currentId));
     if (!p) return;
     document.getElementById('formTitle').innerText = 'Editar Registro';
     document.getElementById('f-nombre').value = p.nombre || '';
@@ -282,7 +282,7 @@ function guardar() {
         vehiculo2: document.getElementById('f-veh2').value,
         notas: document.getElementById('f-notas').value
     };
-    if (!d.nombre) return alert('Nombre obligatorio');
+    if (!d.nombre) return alert('El nombre es obligatorio.');
     let url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
     fetch(url, {
         method: currentId ? 'PATCH' : 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
@@ -291,7 +291,7 @@ function guardar() {
 }
 
 function eliminar(id) {
-    if (!confirm('¿Eliminar?')) return;
+    if (!confirm('¿Seguro que querés eliminar este registro?')) return;
     fetch(SB + '/rest/v1/personas?id=eq.' + id, { method: 'DELETE', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
     .then(() => { cargar(); irA('view-list'); });
 }
@@ -313,7 +313,7 @@ function filtrarVehiculos() {
     });
     let html = '';
     vList.forEach(v => {
-        html += `<div class="v-card" onclick="verDetalle(\({v.id})"><div class="v-plate">\){v.p.toUpperCase()}</div><div class="v-owner">${h(v.o)}</div></div>`;
+        html += `<div class="v-card" onclick="verDetalle('\({v.id}')"><div class="v-plate">\){v.p.toUpperCase()}</div><div class="v-owner">${h(v.o)}</div></div>`;
     });
     document.getElementById('listaVehiculos').innerHTML = html;
 }
