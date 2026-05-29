@@ -37,37 +37,48 @@
         .fab { position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 101; cursor: pointer; }
 
         /* NAV INFERIOR */
-        nav { position: fixed; bottom: 0; width: 100%; background: #1a3a5c; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
-        .nav-item { color: #a0aec0; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; border: none; background: none; }
+        nav { position: fixed; bottom: 0; width: 100%; background: #1a3a5c; display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; border-top: 1px solid #2c5282; }
+        .nav-item { color: #a0aec0; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; border: none; background: none; cursor: pointer; outline: none; }
         .nav-item.active { color: #63b3ed; }
 
         /* FORMULARIO */
-        #modal-form { position: fixed; top: 0; background: white; width: 100%; height: 100%; z-index: 200; display: none; flex-direction: column; }
-        .form-content { padding: 1.5rem; flex: 1; }
+        #view-form { position: fixed; top: 0; background: white; width: 100%; height: 100%; z-index: 200; display: none; flex-direction: column; }
+        .form-content { padding: 1.5rem; flex: 1; overflow-y: auto; }
         .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e0; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<!-- VISTA LISTA -->
+<!-- VISTA 1: PERSONAS -->
 <div id="view-list" class="view active">
     <header>🛡️ Registro Policial</header>
     <div class="search-container">
         <input type="text" id="searchInput" placeholder="Buscar por nombre o CI..." oninput="filterData()">
     </div>
-    <div class="container" id="personList"></div>
+    <div class="container" id="personList">
+        <p style="text-align:center; padding:20px;">Cargando...</p>
+    </div>
     <button class="fab" onclick="showForm()">+</button>
 </div>
 
-<!-- VISTA DETALLE -->
+<!-- VISTA 2: DETALLE -->
 <div id="view-detail" class="view">
     <header>🛡️ Registro Policial</header>
     <div class="back-link" onclick="showView('view-list')">← Volver</div>
     <div id="detail-content"></div>
 </div>
 
-<!-- VISTA FORMULARIO -->
-<div id="modal-form" class="view">
+<!-- VISTA 3: VEHÍCULOS (NUEVA) -->
+<div id="view-vehicles" class="view">
+    <header>🛡️ Registro de Vehículos</header>
+    <div style="text-align:center; padding:50px; color:#718096;">
+        <h2>🚗 Vehículos</h2>
+        <p>Esta sección estará disponible próximamente.</p>
+    </div>
+</div>
+
+<!-- VISTA 4: FORMULARIO -->
+<div id="view-form">
     <header>🛡️ Registro Policial</header>
     <div class="form-content">
         <h3 id="form-title">Nueva Persona</h3>
@@ -83,9 +94,9 @@
 </div>
 
 <nav>
-    <button class="nav-item active">👤<br>Personas</button>
-    <button class="nav-item">🚗<br>Vehículos</button>
-    <button class="nav-item">🔍<br>Buscar</button>
+    <button class="nav-item active" onclick="showView('view-list')">👤<br>Personas</button>
+    <button class="nav-item" onclick="showView('view-vehicles')">🚗<br>Vehículos</button>
+    <button class="nav-item" onclick="document.getElementById('searchInput').focus()">🔍<br>Buscar</button>
 </nav>
 
 <script>
@@ -102,11 +113,13 @@
             });
             allData = await res.json();
             renderList(allData);
-        } catch (e) { console.error(e); }
+        } catch (e) { alert("Error de conexión"); }
     }
 
     function renderList(data) {
-        document.getElementById('personList').innerHTML = data.map(p => `
+        const list = document.getElementById('personList');
+        if (data.length === 0) { list.innerHTML = '<p style="text-align:center;">No hay registros</p>'; return; }
+        list.innerHTML = data.map(p => `
             <div class="card" onclick="showDetail(${p.id})">
                 <div class="avatar-small">${p.nombre ? p.nombre.substring(0,2).toUpperCase() : '??'}</div>
                 <div>
@@ -119,6 +132,7 @@
 
     function showDetail(id) {
         const p = allData.find(x => x.id === id);
+        if (!p) return;
         currentId = id;
         document.getElementById('detail-content').innerHTML = `
             <div class="profile-header">
@@ -144,24 +158,36 @@
     }
 
     function showView(viewId) {
+        // Ocultar todas las vistas
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-form').style.display = 'none';
+        
+        // Activar la seleccionada
         document.getElementById(viewId).classList.add('active');
-        document.getElementById('modal-form').style.display = 'none';
+        
+        // Actualizar menú inferior
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        if (viewId === 'view-list') document.querySelector('.nav-item:nth-child(1)').classList.add('active');
+        if (viewId === 'view-vehicles') document.querySelector('.nav-item:nth-child(2)').classList.add('active');
+        
         window.scrollTo(0,0);
     }
 
     function showForm(isEdit = false) {
-        document.getElementById('modal-form').style.display = 'flex';
+        document.getElementById('view-form').style.display = 'flex';
         if (!isEdit) {
             currentId = null;
             document.getElementById('f-nombre').value = '';
             document.getElementById('f-ci').value = '';
             document.getElementById('f-tel').value = '';
             document.getElementById('f-notas').value = '';
+            document.getElementById('form-title').innerText = 'Nueva Persona';
+        } else {
+            document.getElementById('form-title').innerText = 'Editar Persona';
         }
     }
 
-    function hideForm() { document.getElementById('modal-form').style.display = 'none'; }
+    function hideForm() { document.getElementById('view-form').style.display = 'none'; }
 
     function editPerson() {
         const p = allData.find(x => x.id === currentId);
