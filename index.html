@@ -6,110 +6,89 @@
     <title>Registro Policial</title>
     <style>
         :root { --primary: #1a3a5c; --secondary: #2c5282; --bg: #f0f2f5; --text: #2d3748; --accent: #d69e2e; --danger: #c53030; }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 90px; overflow-x: hidden; }
+        body { font-family: -apple-system, sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
 
         header { background: var(--primary); color: white; padding: 15px; font-weight: bold; font-size: 1.1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .view { display: none; }
+        .view.active { display: block; }
 
-        .view { display: none; min-height: 100vh; }
-        .view.active { display: block; animation: fadeIn 0.2s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .search-box { padding: 15px; position: sticky; top: 52px; background: var(--bg); z-index: 90; }
-        #searchInput { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e0; border-radius: 10px; font-size: 16px; outline: none; }
+        /* LISTA */
+        .search-container { padding: 15px; background: var(--bg); position: sticky; top: 51px; z-index: 90; }
+        #searchInput { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 10px; font-size: 16px; outline: none; }
         .list-container { padding: 0 15px; }
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
-        .avatar-s { width: 45px; height: 45px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; font-size: 1.1rem; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .avatar-s { width: 45px; height: 45px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 15px; flex-shrink: 0; }
 
-        .btn-back { color: var(--accent); padding: 15px; font-weight: 600; cursor: pointer; display: inline-block; }
+        /* FICHA DE DETALLE COMPLETA */
+        .back-link { color: var(--accent); padding: 15px; font-weight: bold; cursor: pointer; display: inline-block; }
         .profile-hero { padding: 0 20px 20px; display: flex; align-items: center; gap: 20px; }
         .avatar-l { width: 85px; height: 85px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: bold; }
-        .label-section { background: #edf2f7; padding: 8px 20px; color: #718096; font-size: 0.75rem; font-weight: 700; letter-spacing: 1px; margin-top: 15px; border-bottom: 1px solid #e2e8f0; }
-        .data-item { background: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0f4f8; }
-        .item-key { color: #a0aec0; font-size: 0.9rem; }
-        .item-val { font-weight: 600; }
-        .notes-area { background: white; padding: 20px; margin: 10px 20px; border-radius: 12px; min-height: 60px; line-height: 1.5; color: #4a5568; }
+        .section-title { background: #edf2f7; padding: 8px 20px; color: #718096; font-size: 0.75rem; font-weight: bold; margin-top: 10px; border-bottom: 1px solid #e2e8f0; }
+        .data-row { background: white; padding: 12px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #f0f4f8; font-size: 0.95rem; }
+        .data-label { color: #a0aec0; }
+        .data-value { font-weight: bold; text-align: right; }
+        .notes-box { background: white; padding: 20px; margin: 10px 15px; border-radius: 12px; line-height: 1.5; }
 
-        .action-bar { display: flex; gap: 12px; padding: 20px; }
-        .btn { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e0; font-weight: 700; cursor: pointer; font-size: 0.95rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-del { background: var(--danger); color: white; border: none; }
-        .btn-save { background: var(--primary); color: white; border: none; width: 100%; margin-top: 10px; }
+        /* ACCIONES */
+        .actions { display: flex; gap: 10px; padding: 20px; }
+        .btn { flex: 1; padding: 14px; border-radius: 10px; border: 1px solid #cbd5e0; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .btn-primary { background: var(--primary); color: white; border: none; }
+        .btn-danger { background: var(--danger); color: white; border: none; }
 
-        .form-view { background: white; padding: 20px; }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; color: #718096; font-size: 0.85rem; font-weight: 600; }
-        input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; font-family: inherit; }
+        .fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 101; }
 
-        .fab { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 101; cursor: pointer; }
+        /* NAV */
+        nav { position: fixed; bottom: 0; width: 100%; background: var(--primary); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+        .nav-item { color: #a0aec0; background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; }
+        .nav-item.active { color: #63b3ed; }
 
-        nav { position: fixed; bottom: 0; width: 100%; background: var(--primary); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; border-top: 1px solid rgba(255,255,255,0.1); }
-        .nav-btn { background: none; border: none; color: #a0aec0; display: flex; flex-direction: column; align-items: center; font-size: 0.7rem; cursor: pointer; }
-        .nav-btn.active { color: #63b3ed; }
-        .nav-icon { font-size: 1.4rem; margin-bottom: 3px; }
+        /* FORMULARIO */
+        .form-content { padding: 20px; background: white; }
+        .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 16px; }
     </style>
 </head>
 <body>
 
-<div id="view-personas" class="view active">
+<div id="view-list" class="view active">
     <header>🛡️ Registro Policial</header>
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="Buscar por nombre o CI..." oninput="filtrar()">
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Buscar por nombre, CI o Matrícula..." oninput="filtrar()">
     </div>
-    <div id="listaPersonas" class="list-container">
-        <p style="text-align:center; margin-top:40px; color:#a0aec0;">Cargando base de datos...</p>
-    </div>
-    <button class="fab" onclick="abrirFormulario()">+</button>
+    <div class="list-container" id="listaPersonas"></div>
+    <button class="fab" onclick="abrirForm()">+</button>
 </div>
 
-<div id="view-detalle" class="view">
+<div id="view-detail" class="view">
     <header>🛡️ Registro Policial</header>
-    <div class="btn-back" onclick="cambiarVista('view-personas')">← Volver</div>
+    <div class="back-link" onclick="irA('view-list')">← Volver</div>
     <div id="detalleContent"></div>
 </div>
 
-<div id="view-vehiculos" class="view">
+<div id="view-form" class="view">
     <header>🛡️ Registro Policial</header>
-    <div style="text-align:center; padding:60px 20px; color:#718096;">
-        <div style="font-size:3rem; margin-bottom:15px;">🚗</div>
-        <h3>Sección Vehículos</h3>
-        <p>Módulo en desarrollo para la próxima actualización.</p>
-    </div>
-</div>
-
-<div id="view-formulario" class="view">
-    <header id="formTitle">Nueva Persona</header>
-    <div class="form-view">
-        <div class="input-group">
-            <label>Nombre Completo</label>
-            <input type="text" id="in-nombre" placeholder="Ej: Juan Pérez">
-        </div>
-        <div class="input-group">
-            <label>Cédula de Identidad</label>
-            <input type="number" id="in-ci" placeholder="Sin puntos ni guiones">
-        </div>
-        <div class="input-group">
-            <label>Teléfono 1</label>
-            <input type="text" id="in-tel" placeholder="09x xxx xxx">
-        </div>
-        <div class="input-group">
-            <label>Notas / Antecedentes</label>
-            <textarea id="in-notas" rows="5" placeholder="Detalles relevantes..."></textarea>
-        </div>
-        <div style="display:flex; gap:10px;">
-            <button class="btn" onclick="cambiarVista('view-personas')">Cancelar</button>
-            <button class="btn btn-save" onclick="guardar()">Guardar Registro</button>
+    <div class="form-content">
+        <h3 id="formTitle">Nueva Persona</h3>
+        <input type="text" id="f-nombre" placeholder="Nombre completo">
+        <input type="text" id="f-ci" placeholder="Cédula de Identidad">
+        <input type="date" id="f-fecha_nac" placeholder="Fecha de Nacimiento">
+        <input type="text" id="f-domicilio" placeholder="Domicilio">
+        <input type="text" id="f-tel" placeholder="Teléfono 1">
+        <input type="text" id="f-tel2" placeholder="Teléfono 2">
+        <input type="text" id="f-veh1" placeholder="Vehículo 1 (Matrícula)">
+        <input type="text" id="f-veh2" placeholder="Vehículo 2 (Matrícula)">
+        <input type="text" id="f-vinculo" placeholder="Vínculos">
+        <textarea id="f-notas" placeholder="Notas / Antecedentes" rows="4"></textarea>
+        <div class="actions">
+            <button class="btn" onclick="irA('view-list')">Cancelar</button>
+            <button class="btn btn-primary" onclick="guardar()">Guardar</button>
         </div>
     </div>
 </div>
 
 <nav>
-    <button class="nav-btn active" id="nav-per" onclick="cambiarVista('view-personas')">
-        <span class="nav-icon">👤</span>Personas
-    </button>
-    <button class="nav-btn" id="nav-veh" onclick="cambiarVista('view-vehiculos')">
-        <span class="nav-icon">🚗</span>Vehículos
-    </button>
+    <button class="nav-item active" onclick="irA('view-list')"><span>👤</span>Personas</button>
+    <button class="nav-item" onclick="document.getElementById('searchInput').focus(); irA('view-list')"><span>🚗</span>Vehículos</button>
 </nav>
 
 <script>
@@ -117,7 +96,7 @@
     const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
     
     let db = [];
-    let idEditando = null;
+    let currentId = null;
 
     async function cargar() {
         try {
@@ -126,18 +105,16 @@
             });
             db = await res.json();
             dibujarLista(db);
-        } catch (e) { alert("Error de conexión"); }
+        } catch (e) { console.error(e); }
     }
 
     function dibujarLista(data) {
-        const contenedor = document.getElementById('listaPersonas');
-        if (data.length === 0) { contenedor.innerHTML = '<p style="text-align:center;">No hay registros.</p>'; return; }
-        contenedor.innerHTML = data.map(p => `
-            <div class="card" onclick="verDetalle(${p.id})">
-                <div class="avatar-s">${p.nombre.substring(0,2).toUpperCase()}</div>
+        document.getElementById('listaPersonas').innerHTML = data.map(p => `
+            <div class="card" onclick="verDetalle('${p.id}')">
+                <div class="avatar-s">${p.nombre ? p.nombre.substring(0,2).toUpperCase() : '??'}</div>
                 <div>
-                    <div style="font-weight:700;">${p.nombre}</div>
-                    <div style="font-size:0.85rem; color:#718096;">CI: ${p.ci || '---'}</div>
+                    <div style="font-weight:bold">${p.nombre}</div>
+                    <div style="font-size:0.85rem; color:#718096">CI: \({p.ci || '---'} | \){p.vehiculo1 || ''}</div>
                 </div>
             </div>
         `).join('');
@@ -145,89 +122,110 @@
 
     function verDetalle(id) {
         const p = db.find(x => x.id === id);
-        idEditando = id;
+        if (!p) return;
+        currentId = id;
         document.getElementById('detalleContent').innerHTML = `
             <div class="profile-hero">
                 <div class="avatar-l">${p.nombre.substring(0,2).toUpperCase()}</div>
                 <div>
-                    <div style="font-size:1.4rem; font-weight:700;">${p.nombre}</div>
+                    <div style="font-size:1.4rem; font-weight:bold;">${p.nombre}</div>
                     <div style="color:#718096">CI: ${p.ci || '---'}</div>
                 </div>
             </div>
-            <div class="label-section">DATOS</div>
-            <div class="data-item">
-                <span class="item-key">Teléfono 1</span>
-                <span class="item-val">${p.telefono || '---'}</span>
-            </div>
-            <div class="label-section">NOTAS</div>
-            <div class="notes-area">${p.notas || 'Sin información adicional.'}</div>
-            <div class="action-bar">
+            <div class="section-title">DATOS PERSONALES</div>
+            <div class="data-row"><span class="data-label">Nacimiento</span><span class="data-value">${p.fecha_nac || '---'}</span></div>
+            <div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">${p.domicilio || '---'}</span></div>
+            <div class="section-title">CONTACTO</div>
+            <div class="data-row"><span class="data-label">Teléfono 1</span><span class="data-value">${p.telefono || '---'}</span></div>
+            <div class="data-row"><span class="data-label">Teléfono 2</span><span class="data-value">${p.telefono2 || '---'}</span></div>
+            <div class="section-title">VEHÍCULOS</div>
+            <div class="data-row"><span class="data-label">Vehículo 1</span><span class="data-value">${p.vehiculo1 || '---'}</span></div>
+            <div class="data-row"><span class="data-label">Vehículo 2</span><span class="data-value">${p.vehiculo2 || '---'}</span></div>
+            <div class="section-title">VÍNCULOS</div>
+            <div class="data-row"><span class="data-label">Relacionado con</span><span class="data-value">${p.vinculo || '---'}</span></div>
+            <div class="section-title">NOTAS / ANTECEDENTES</div>
+            <div class="notes-box">${p.notes || p.notas || 'Sin registros.'}</div>
+            <div class="actions">
                 <button class="btn" onclick="editar()">✏️ Editar</button>
-                <button class="btn btn-del" onclick="eliminar(${p.id})">🗑️ Eliminar</button>
+                <button class="btn btn-danger" onclick="eliminar('${p.id}')">🗑️ Eliminar</button>
             </div>
         `;
-        cambiarVista('view-detalle');
+        irA('view-detail');
     }
 
-    function cambiarVista(id) {
+    function irA(viewId) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        document.getElementById('nav-per').classList.toggle('active', id === 'view-personas');
-        document.getElementById('nav-veh').classList.toggle('active', id === 'view-vehiculos');
+        document.getElementById(viewId).classList.add('active');
         window.scrollTo(0,0);
     }
 
-    function abrirFormulario() {
-        idEditando = null;
+    function abrirForm() {
+        currentId = null;
         document.getElementById('formTitle').innerText = 'Nueva Persona';
-        document.getElementById('in-nombre').value = '';
-        document.getElementById('in-ci').value = '';
-        document.getElementById('in-tel').value = '';
-        document.getElementById('in-notas').value = '';
-        cambiarVista('view-formulario');
+        ['nombre','ci','fecha_nac','domicilio','tel','tel2','veh1','veh2','vinculo','notas'].forEach(f => {
+            const el = document.getElementById('f-'+f);
+            if(el) el.value = '';
+        });
+        irA('view-form');
     }
 
     function editar() {
-        const p = db.find(x => x.id === idEditando);
+        const p = db.find(x => x.id === currentId);
+        if (!p) return;
         document.getElementById('formTitle').innerText = 'Editar Registro';
-        document.getElementById('in-nombre').value = p.nombre;
-        document.getElementById('in-ci').value = p.ci || '';
-        document.getElementById('in-tel').value = p.telefono || '';
-        document.getElementById('in-notas').value = p.notas || '';
-        cambiarVista('view-formulario');
+        document.getElementById('f-nombre').value = p.nombre || '';
+        document.getElementById('f-ci').value = p.ci || '';
+        document.getElementById('f-fecha_nac').value = p.fecha_nac || '';
+        document.getElementById('f-domicilio').value = p.domicilio || '';
+        document.getElementById('f-tel').value = p.telefono || '';
+        document.getElementById('f-tel2').value = p.telefono2 || '';
+        document.getElementById('f-veh1').value = p.vehiculo1 || '';
+        document.getElementById('f-veh2').value = p.vehiculo2 || '';
+        document.getElementById('f-vinculo').value = p.vinculo || '';
+        document.getElementById('f-notas').value = p.notas || '';
+        irA('view-form');
     }
 
     async function guardar() {
-        const payload = {
-            nombre: document.getElementById('in-nombre').value,
-            ci: document.getElementById('in-ci').value,
-            telefono: document.getElementById('in-tel').value,
-            notas: document.getElementById('in-notas').value
+        const p = {
+            nombre: document.getElementById('f-nombre').value,
+            ci: document.getElementById('f-ci').value,
+            fecha_nac: document.getElementById('f-fecha_nac').value || null,
+            domicilio: document.getElementById('f-domicilio').value,
+            telefono: document.getElementById('f-tel').value,
+            telefono2: document.getElementById('f-tel2').value,
+            vehiculo1: document.getElementById('f-veh1').value,
+            vehiculo2: document.getElementById('f-veh2').value,
+            vinculo: document.getElementById('f-vinculo').value,
+            notas: document.getElementById('f-notas').value
         };
-        if (!payload.nombre) { alert("El nombre es obligatorio"); return; }
-        const endpoint = idEditando ? `\({URL}/rest/v1/personas?id=eq.\){idEditando}` : `${URL}/rest/v1/personas`;
-        const metodo = idEditando ? 'PATCH' : 'POST';
-        const res = await fetch(endpoint, {
-            method: metodo,
+        const endpoint = currentId ? `\({URL}/rest/v1/personas?id=eq.\){currentId}` : `${URL}/rest/v1/personas`;
+        const method = currentId ? 'PATCH' : 'POST';
+        await fetch(endpoint, {
+            method: method,
             headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify(p)
         });
-        if (res.ok) { await cargar(); cambiarVista('view-personas'); }
-        else { alert("Error al guardar"); }
+        await cargar(); irA('view-list');
     }
 
     async function eliminar(id) {
-        if (!confirm("¿Seguro que desea eliminar este registro?")) return;
-        const res = await fetch(`\({URL}/rest/v1/personas?id=eq.\){id}`, {
-            method: 'DELETE',
-            headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
+        if (!confirm("¿Eliminar registro?")) return;
+        await fetch(`\({URL}/rest/v1/personas?id=eq.\){id}`, { 
+            method: 'DELETE', 
+            headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY } 
         });
-        if (res.ok) { await cargar(); cambiarVista('view-personas'); }
+        await cargar(); irA('view-list');
     }
 
     function filtrar() {
         const t = document.getElementById('searchInput').value.toLowerCase();
-        dibujarLista(db.filter(p => p.nombre.toLowerCase().includes(t) || (p.ci && p.ci.toString().includes(t))));
+        dibujarLista(db.filter(p => 
+            (p.nombre && p.nombre.toLowerCase().includes(t)) || 
+            (p.ci && p.ci.toString().includes(t)) ||
+            (p.vehiculo1 && p.vehiculo1.toLowerCase().includes(t)) ||
+            (p.vehiculo2 && p.vehiculo2.toLowerCase().includes(t))
+        ));
     }
 
     window.onload = cargar;
