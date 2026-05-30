@@ -289,6 +289,20 @@ function verDetalle(id) {
     var p = db.find(function(x){ return String(x.id) === String(id); });
     if (!p) return;
     currentId = p.id;
+
+    // Extraer Alias y Antecedentes de notas si no existen como columnas
+    var al = p.alias || '';
+    var ant = p.antecedentes || '';
+    var nt = p.notas || '';
+    if (!al && nt.includes('Alias: ')) {
+        var match = nt.match(/Alias: ([^\n]+)/);
+        if (match) al = match[1];
+    }
+    if (!ant && nt.includes('Antecedentes: ')) {
+        var match = nt.match(/Antecedentes: ([^\n]+)/);
+        if (match) ant = match[1];
+    }
+
     var vNames = (p.vinculo || '').split('|').filter(function(x){ return x; });
     var vHtml = '';
     vNames.forEach(function(vName){
@@ -297,7 +311,7 @@ function verDetalle(id) {
     });
     var avatarL = p.foto ? '<img src="'+p.foto+'">' : (p.nombre||'??').substring(0,2).toUpperCase();
     var html = '<div class="profile-hero"><div class="avatar-l">'+avatarL+'</div>';
-    html += '<div><div class="h-name">'+h(p.nombre)+'</div><div class="h-ci">Alias: '+h(p.alias)+' | CI: '+h(p.ci)+'</div></div></div>';
+    html += '<div><div class="h-name">'+h(p.nombre)+'</div><div class="h-ci">Alias: '+h(al)+' | CI: '+h(p.ci)+'</div></div></div>';
     
     html += '<div class="section-title">DATOS</div>';
     html += '<div class="data-row"><span class="data-label">Cédula</span><span class="data-value">'+h(p.ci)+'</span></div>';
@@ -305,7 +319,7 @@ function verDetalle(id) {
     html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">'+h(p.domicilio)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Teléfono 1</span><span class="data-value">'+h(p.telefono)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Teléfono 2</span><span class="data-value">'+h(p.telefono2)+'</span></div>';
-    html += '<div class="data-row"><span class="data-label">Alias</span><span class="data-value">'+h(p.alias)+'</span></div>';
+    html += '<div class="data-row"><span class="data-label">Alias</span><span class="data-value">'+h(al)+'</span></div>';
     
     html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
     html += '<div class="data-row"><span class="data-label">Vehículo 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
@@ -314,8 +328,8 @@ function verDetalle(id) {
     html += '<div class="section-title">VÍNCULOS</div>';
     html += '<div style="padding:10px 15px;">'+(vHtml || '<span style="color:#a0aec0">Sin vínculos.</span>')+'</div>';
     
-    html += '<div class="section-title">ANTECEDENTES</div><div class="notes-box" style="border-left-color:#e53e3e;background:#fff5f5;margin-bottom:15px;">'+h(p.antecedentes)+'</div>';
-    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notas)+'</div>';
+    html += '<div class="section-title">ANTECEDENTES</div><div class="notes-box" style="border-left-color:#e53e3e;background:#fff5f5;margin-bottom:15px;">'+h(ant)+'</div>';
+    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(nt)+'</div>';
     
     html += '<div class="actions" style="margin-top:25px;">';
     html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
@@ -454,16 +468,31 @@ function editar() {
     if (!p) return;
     document.getElementById('formTitle').innerText = 'Editar Registro';
     document.getElementById('f-nombre').value = p.nombre || '';
-    document.getElementById('f-alias').value = p.alias || '';
+    
+    // Intentamos extraer Alias y Antecedentes de notas si no existen como columnas
+    var al = p.alias || '';
+    var ant = p.antecedentes || '';
+    var nt = p.notas || '';
+    
+    if (!al && nt.includes('Alias: ')) {
+        var match = nt.match(/Alias: ([^\n]+)/);
+        if (match) al = match[1];
+    }
+    if (!ant && nt.includes('Antecedentes: ')) {
+        var match = nt.match(/Antecedentes: ([^\n]+)/);
+        if (match) ant = match[1];
+    }
+
+    document.getElementById('f-alias').value = al;
+    document.getElementById('f-antecedentes').value = ant;
     document.getElementById('f-fecha_nac').value = p.fecha_nac || '';
-    document.getElementById('f-antecedentes').value = p.antecedentes || '';
     document.getElementById('f-ci').value = p.ci || '';
     document.getElementById('f-domicilio').value = p.domicilio || '';
     document.getElementById('f-tel').value = p.telefono || '';
     document.getElementById('f-tel2').value = p.telefono2 || '';
     document.getElementById('f-veh1').value = p.vehiculo1 || '';
     document.getElementById('f-veh2').value = p.vehiculo2 || '';
-    document.getElementById('f-notas').value = p.notas || '';
+    document.getElementById('f-notas').value = nt;
     currentFoto = p.foto;
     if (currentFoto) {
         document.getElementById('f-preview').src = currentFoto;
@@ -478,41 +507,54 @@ function editar() {
 
 function guardar() {
     var pOld = currentId ? db.find(function(x){ return String(x.id) === String(currentId); }) : null;
+    
+    var n = document.getElementById('f-nombre').value;
+    var al = document.getElementById('f-alias').value;
+    var ant = document.getElementById('f-antecedentes').value;
+    var nt = document.getElementById('f-notas').value;
+    
+    // Si no existen las columnas alias/antecedentes, los guardamos en Notas para no perder info
+    var notasFinales = nt;
+    if (al && !nt.includes('Alias: ' + al)) notasFinales += '\nAlias: ' + al;
+    if (ant && !nt.includes('Antecedentes: ' + ant)) notasFinales += '\nAntecedentes: ' + ant;
+
     var d = {
-        nombre: document.getElementById('f-nombre').value,
-        alias: document.getElementById('f-alias').value,
+        nombre: n,
         fecha_nac: document.getElementById('f-fecha_nac').value,
-        antecedentes: document.getElementById('f-antecedentes').value,
         ci: document.getElementById('f-ci').value,
         domicilio: document.getElementById('f-domicilio').value,
         telefono: document.getElementById('f-tel').value,
         telefono2: document.getElementById('f-tel2').value,
         vehiculo1: document.getElementById('f-veh1').value,
         vehiculo2: document.getElementById('f-veh2').value,
-        notas: document.getElementById('f-notas').value,
+        notas: notasFinales.trim(),
         foto: currentFoto,
         vinculo: pOld ? pOld.vinculo : ''
     };
+
     if (!d.nombre) return alert('Nombre obligatorio.');
+    
     var url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
     var method = currentId ? 'PATCH' : 'POST';
+    
     fetch(url, {
         method: method,
-        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+        headers: { 
+            'apikey': KEY, 
+            'Authorization': 'Bearer ' + KEY, 
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal' 
+        },
         body: JSON.stringify(d)
-    }).then(function(r){ return r.text().then(function(t){ return { ok: r.ok, status: r.status, text: t }; }); })
-    .then(function(resp){
-        if (!resp.ok) {
-            console.error('Error guardando:', resp.status, resp.text);
-            alert('No se pudo guardar. Revisá la consola.');
-            return;
+    }).then(function(r) {
+        if (!r.ok) {
+            return r.json().then(function(err){ throw err; });
         }
         cargar();
         irA('view-list');
-    })
-    .catch(function(err){
-        console.error('Fetch error:', err);
-        alert('No se pudo guardar.');
+    }).catch(function(err) {
+        console.error('Error:', err);
+        alert('Error al guardar: ' + (err.message || 'Verifique la conexión o campos'));
     });
 }
 
