@@ -183,8 +183,8 @@
         <label>Teléfono 1</label><input type="text" id="f-tel">
         <label>Teléfono 2</label><input type="text" id="f-tel2">
         <label>Alias</label><input type="text" id="f-alias">
-        <label>Matrícula 1</label><input type="text" id="f-veh1">
-        <label>Matrícula 2</label><input type="text" id="f-veh2">
+        <label>Vehículo 1</label><input type="text" id="f-veh1">
+        <label>Vehículo 2</label><input type="text" id="f-veh2">
         <label>Antecedentes</label><textarea id="f-antecedentes" rows="3"></textarea>
         <label>Notas</label><textarea id="f-notas" rows="4"></textarea>
 
@@ -207,7 +207,7 @@
 <!-- Modal Nueva Matrícula -->
 <div class="modal-overlay" id="modalVeh" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="modal">
-        <div class="modal-header"><span>🚗 Agregar Matrícula</span><span onclick="document.getElementById('modalVeh').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
+        <div class="modal-header"><span>🚗 Agregar Vehículo</span><span onclick="document.getElementById('modalVeh').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
         <div class="modal-body" style="padding:20px;">
             <label>Posición</label>
             <select id="v-pos">
@@ -216,7 +216,7 @@
             </select>
             <label>Matrícula</label>
             <input type="text" id="v-plate" placeholder="Ej: ABC1234">
-            <button class="btn btn-accent" style="width:100%" onclick="guardarVehiculo()">💾 Guardar Matrícula</button>
+            <button class="btn btn-accent" style="width:100%" onclick="guardarVehiculo()">💾 Guardar Vehículo</button>
         </div>
     </div>
 </div>
@@ -308,8 +308,8 @@ function verDetalle(id) {
     html += '<div class="data-row"><span class="data-label">Alias</span><span class="data-value">'+h(p.alias)+'</span></div>';
     
     html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
-    html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
-    html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">'+h(p.vehiculo2)+'</span></div>';
+    html += '<div class="data-row"><span class="data-label">Vehículo 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
+    html += '<div class="data-row"><span class="data-label">Vehículo 2</span><span class="data-value">'+h(p.vehiculo2)+'</span></div>';
     
     html += '<div class="section-title">VÍNCULOS</div>';
     html += '<div style="padding:10px 15px;">'+(vHtml || '<span style="color:#a0aec0">Sin vínculos.</span>')+'</div>';
