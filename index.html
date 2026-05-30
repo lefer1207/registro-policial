@@ -107,6 +107,7 @@
         <label>Nombre completo *</label><input type="text" id="f-nombre">
         <label>Alias</label><input type="text" id="f-alias">
         <label>Fecha de Nacimiento (Día/Mes/Año)</label><input type="text" id="f-fecha_nac">
+        <label>Antecedentes</label><textarea id="f-antecedentes" rows="3"></textarea>
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
         <label>Domicilio</label><input type="text" id="f-domicilio">
         <label>Teléfono</label><input type="text" id="f-tel">
@@ -226,6 +227,7 @@ function verDetalle(id) {
     html += '<div><div class="h-name">'+h(p.nombre)+'</div><div class="h-ci">Alias: '+h(p.alias)+' | CI: '+h(p.ci)+'</div></div></div>';
     html += '<div class="section-title">DATOS</div>';
     html += '<div class="data-row"><span class="data-label">F. Nacimiento</span><span class="data-value">'+h(p.fecha_nac)+'</span></div>';
+    html += '<div class="section-title">ANTECEDENTES</div><div class="notes-box" style="border-left-color:#e53e3e;background:#fff5f5;">'+h(p.antecedentes)+'</div>';
     html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">'+h(p.domicilio)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">'+h(p.telefono)+'</span></div>';
     html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
@@ -365,7 +367,7 @@ function abrirForm() {
     document.getElementById('formTitle').innerText = 'Nuevo Registro';
     document.getElementById('f-preview').style.display = 'none';
     document.getElementById('label-text').innerText = '📷 Subir Foto';
-    ['nombre','alias','fecha_nac','ci','domicilio','tel','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
+    ['nombre','alias','fecha_nac','antecedentes','ci','domicilio','tel','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
     irA('view-form');
 }
 
@@ -385,6 +387,7 @@ function editar() {
     document.getElementById('f-nombre').value = p.nombre || '';
     document.getElementById('f-alias').value = p.alias || '';
     document.getElementById('f-fecha_nac').value = p.fecha_nac || '';
+    document.getElementById('f-antecedentes').value = p.antecedentes || '';
     document.getElementById('f-ci').value = p.ci || '';
     document.getElementById('f-domicilio').value = p.domicilio || '';
     document.getElementById('f-tel').value = p.telefono || '';
@@ -399,6 +402,7 @@ function guardar() {
         nombre: document.getElementById('f-nombre').value,
         alias: document.getElementById('f-alias').value,
         fecha_nac: document.getElementById('f-fecha_nac').value,
+        antecedentes: document.getElementById('f-antecedentes').value,
         ci: document.getElementById('f-ci').value,
         domicilio: document.getElementById('f-domicilio').value,
         telefono: document.getElementById('f-tel').value,
