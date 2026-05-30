@@ -233,7 +233,6 @@ function verDetalle(id) {
     html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notes)+'</div>';
     html += '<div class="actions">';
     html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
-    html += '<button class="btn btn-accent" onclick="abrirVehiculo()">🚗 Matrícula</button>';
     html += '<button class="btn btn-primary" onclick="editar()">✏️ Editar</button>';
     html += '<button class="btn btn-danger" onclick="eliminar(\''+p.id+'\')">🗑️</button></div>';
     document.getElementById('detalleContent').innerHTML = html;
