@@ -253,7 +253,7 @@ function cargar() {
     fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
     .then(function(r){ return r.json(); }).then(function(data){
         db = Array.isArray(data) ? data : [];
-        dibujarPersonas(db);
+        filtrar();
         dibujarVehiculos(db);
     });
 }
