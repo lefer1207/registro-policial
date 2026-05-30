@@ -542,19 +542,18 @@ function guardar() {
         headers: { 
             'apikey': KEY, 
             'Authorization': 'Bearer ' + KEY, 
-            'Content-Type': 'application/json',
-            'Prefer': 'return=minimal' 
+            'Content-Type': 'application/json'
         },
         body: JSON.stringify(d)
     }).then(function(r) {
         if (!r.ok) {
-            return r.json().then(function(err){ throw err; });
+            return r.text().then(function(t){ throw new Error(t); });
         }
         cargar();
         irA('view-list');
     }).catch(function(err) {
         console.error('Error:', err);
-        alert('Error al guardar: ' + (err.message || 'Verifique la conexión o campos'));
+        alert('Error al guardar: ' + err.message);
     });
 }
 
