@@ -445,6 +445,7 @@ function abrirForm() {
     document.getElementById('f-preview').style.display = 'none';
     document.getElementById('label-text').innerText = '📷 Subir Foto';
     ['nombre','alias','fecha_nac','antecedentes','ci', 'domicilio','tel','tel2','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
+    currentFoto = null;
     irA('view-form');
 }
 
@@ -476,6 +477,7 @@ function editar() {
 }
 
 function guardar() {
+    var pOld = currentId ? db.find(function(x){ return String(x.id) === String(currentId); }) : null;
     var d = {
         nombre: document.getElementById('f-nombre').value,
         alias: document.getElementById('f-alias').value,
@@ -488,14 +490,30 @@ function guardar() {
         vehiculo1: document.getElementById('f-veh1').value,
         vehiculo2: document.getElementById('f-veh2').value,
         notas: document.getElementById('f-notas').value,
-        foto: currentFoto
+        foto: currentFoto,
+        vinculo: pOld ? pOld.vinculo : ''
     };
     if (!d.nombre) return alert('Nombre obligatorio.');
     var url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
+    var method = currentId ? 'PATCH' : 'POST';
     fetch(url, {
-        method: currentId ? 'PATCH' : 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+        method: method,
+        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
         body: JSON.stringify(d)
-    }).then(function(){ cargar(); irA('view-list'); });
+    }).then(function(r){ return r.text().then(function(t){ return { ok: r.ok, status: r.status, text: t }; }); })
+    .then(function(resp){
+        if (!resp.ok) {
+            console.error('Error guardando:', resp.status, resp.text);
+            alert('No se pudo guardar. Revisá la consola.');
+            return;
+        }
+        cargar();
+        irA('view-list');
+    })
+    .catch(function(err){
+        console.error('Fetch error:', err);
+        alert('No se pudo guardar.');
+    });
 }
 
 function eliminar(id) {
