@@ -230,7 +230,7 @@ function verDetalle(id) {
     html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">'+h(p.vehiculo2)+'</span></div>';
     html += '<div class="section-title">VÍNCULOS</div>';
     html += '<div style="padding:10px 15px;">'+(vHtml || '<span style="color:#a0aec0">Sin vínculos.</span>')+'</div>';
-    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notes)+'</div>';
+    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notas)+'</div>';
     html += '<div class="actions">';
     html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
     html += '<button class="btn btn-primary" onclick="editar()">✏️ Editar</button>';
@@ -246,9 +246,28 @@ function irAVinculo(n) {
 
 function borrarVinculo(n) {
     if (!confirm('¿Quitar vínculo?')) return;
-    var p = db.find(function(x){ return String(x.id) === String(currentId); });
-    var v = (p.vinculo || '').split('|').filter(function(x){ return x && x !== n; });
-    updatePersona({ vinculo: v.join('|') });
+    var personA = db.find(function(x){ return String(x.id) === String(currentId); });
+    var personB = db.find(function(x){ return x.nombre && x.nombre.toLowerCase() === n.toLowerCase(); });
+    if (!personA) return;
+
+    var vA = (personA.vinculo || '').split('|').filter(function(x){ return x && x !== n; });
+    var promises = [
+        fetch(SB + '/rest/v1/personas?id=eq.' + personA.id, {
+            method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vinculo: vA.join('|') })
+        })
+    ];
+
+    if (personB) {
+        var vB = (personB.vinculo || '').split('|').filter(function(x){ return x && x !== personA.nombre; });
+        promises.push(
+            fetch(SB + '/rest/v1/personas?id=eq.' + personB.id, {
+                method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ vinculo: vB.join('|') })
+            })
+        );
+    }
+    Promise.all(promises).then(function(){ cargar(); setTimeout(function(){ verDetalle(currentId); }, 500); });
 }
 
 function abrirVehiculo() {
@@ -297,12 +316,27 @@ function dibujarListaVincular(lista) {
 }
 
 function vincular(n) {
-    var p = db.find(function(x){ return String(x.id) === String(currentId); });
-    var v = (p.vinculo || '').split('|').filter(function(x){ return x; });
-    if (v.indexOf(n) < 0) {
-        v.push(n);
-        updatePersona({ vinculo: v.join('|') });
-    }
+    var personA = db.find(function(x){ return String(x.id) === String(currentId); });
+    var personB = db.find(function(x){ return x.nombre && x.nombre.toLowerCase() === n.toLowerCase(); });
+    if (!personA || !personB) return;
+
+    var vA = (personA.vinculo || '').split('|').filter(function(x){ return x; });
+    if (vA.indexOf(personB.nombre) < 0) vA.push(personB.nombre);
+    
+    var vB = (personB.vinculo || '').split('|').filter(function(x){ return x; });
+    if (vB.indexOf(personA.nombre) < 0) vB.push(personA.nombre);
+
+    Promise.all([
+        fetch(SB + '/rest/v1/personas?id=eq.' + personA.id, {
+            method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vinculo: vA.join('|') })
+        }),
+        fetch(SB + '/rest/v1/personas?id=eq.' + personB.id, {
+            method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vinculo: vB.join('|') })
+        })
+    ]).then(function(){ cargar(); setTimeout(function(){ verDetalle(currentId); }, 500); });
+
     document.getElementById('modalVinc').classList.remove('open');
 }
 
