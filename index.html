@@ -588,7 +588,9 @@ function eliminar(id) {
 }
 
 function filtrar() {
-    var t = document.getElementById('searchInput').value.toLowerCase();
+    var t = document.getElementById('searchInput').value.toLowerCase().trim();
+    var terms = t.split(/\s+/); // Divide la búsqueda por espacios (ej: "Julio Romero" -> ["julio", "romero"])
+    
     dibujarPersonas(db.filter(function(p){
         var al = p.alias || '';
         var nt = p.notas || '';
@@ -596,11 +598,20 @@ function filtrar() {
             var match = nt.match(/Alias: ([^\n]+)/);
             if (match) al = match[1];
         }
-        return (p.nombre||'').toLowerCase().includes(t) || 
-               (p.ci||'').includes(t) || 
-               al.toLowerCase().includes(t) ||
-               (p.vehiculo1||'').toLowerCase().includes(t) || 
-               (p.vehiculo2||'').toLowerCase().includes(t);
+
+        // Creamos un string gigante con toda la info de la persona para buscar ahí
+        var searchString = (
+            (p.nombre || '') + ' ' + 
+            (p.ci || '') + ' ' + 
+            al + ' ' + 
+            (p.vehiculo1 || '') + ' ' + 
+            (p.vehiculo2 || '')
+        ).toLowerCase();
+
+        // Verificamos que CADA palabra buscada esté en algún lugar del registro
+        return terms.every(function(term) {
+            return searchString.includes(term);
+        });
     }));
 }
 
