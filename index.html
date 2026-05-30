@@ -370,7 +370,7 @@
       <h3>Datos Personales</h3>
       <div class="form-group"><label>Nombre completo *</label><input type="text" id="fpNombre" placeholder="Ej: Juan Pérez García"></div>
       <div class="form-group"><label>Cédula de Identidad</label><input type="text" id="fpCI" placeholder="Ej: 1.234.567-8"></div>
-      <div class="form-group"><label>Fecha de nacimiento</label><input type="date" id="fpFechaNac"></div>
+      <div class="form-group"><label>Fecha de nacimiento</label><input type="text" id="fpFechaNac" placeholder="DD/MM/AAAA" inputmode="numeric"></div>
       <div class="form-group"><label>Domicilio</label><input type="text" id="fpDomicilio" placeholder="Ej: Av. 18 de Julio 1234, Montevideo"></div>
       <div class="form-group"><label>Teléfono</label><input type="tel" id="fpTelefono" placeholder="Ej: 099 123 456"></div>
     </div>
@@ -398,6 +398,7 @@
   <!-- FORM VEHÍCULO -->
   <div class="view" id="view-form-vehiculo">
     <button class="back-btn" onclick="goBack()">← Cancelar</button>
+    <div class="section-title" id="formVehiculoTitulo">Nuevo Vehículo</div>
     <div class="form-section">
       <h3>Datos del Vehículo</h3>
       <div class="form-group"><label>Matrícula *</label><input type="text" id="fvMatricula" placeholder="Ej: ABC 1234" style="text-transform:uppercase;font-weight:700;letter-spacing:2px;"></div>
@@ -484,7 +485,7 @@ const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
 const api = async (method, table, body, params) => {
-  let url = `\({SUPABASE_URL}/rest/v1/\){table}`;
+  let url = `${SUPABASE_URL}/rest/v1/${table}`;
   if (params) url += '?' + params;
   const opts = {
     method,
@@ -546,7 +547,7 @@ function iniciales(nombre) {
 function formatFecha(iso) {
   if (!iso) return '';
   const [y,m,d] = iso.split('-');
-  return `\({d}/\){m}/${y}`;
+  return `${d}/${m}/${y}`;
 }
 function calcEdad(iso) {
   const hoy = new Date(), nac = new Date(iso);
@@ -606,8 +607,8 @@ async function renderPersonas(q='') {
   try {
     const from = personasPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-    let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=\({PAGE_SIZE}&offset=\){from}`;
-    if (q) params += `&or=(nombre.ilike.*\({encodeURIComponent(q)}*,ci.ilike.*\){encodeURIComponent(q)}*,notas.ilike.*\({encodeURIComponent(q)}*,domicilio.ilike.*\){encodeURIComponent(q)}*)`;
+    let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=${PAGE_SIZE}&offset=${from}`;
+    if (q) params += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*,domicilio.ilike.*${encodeURIComponent(q)}*)`;
     const personas = await sb.get('personas', params);
     const lista = document.getElementById('listaPersonas');
 
@@ -619,10 +620,10 @@ async function renderPersonas(q='') {
 
     lista.innerHTML = personas.map(p=>`
       <div class="card" onclick="verPersona('${p.id}')">
-        <div class="avatar">\({p.foto?`<img src="\){p.foto}" alt="">`:iniciales(p.nombre)}</div>
+        <div class="avatar">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
         <div class="card-info">
           <div class="card-name">${p.nombre}</div>
-          <div class="card-sub">\({p.ci?'CI: '+p.ci:''} \){p.domicilio?'• '+p.domicilio:''}</div>
+          <div class="card-sub">${p.ci?'CI: '+p.ci:''} ${p.domicilio?'• '+p.domicilio:''}</div>
         </div>
         <div class="card-arrow">›</div>
       </div>`).join('');
@@ -657,8 +658,8 @@ async function renderVehiculos(q='') {
   showLoader();
   try {
     const from = vehiculosPage * PAGE_SIZE;
-    let params = `select=id,matricula,marca&order=matricula.asc&limit=\({PAGE_SIZE}&offset=\){from}`;
-    if (q) params += `&or=(matricula.ilike.*\({encodeURIComponent(q)}*,marca.ilike.*\){encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*)`;
+    let params = `select=id,matricula,marca&order=matricula.asc&limit=${PAGE_SIZE}&offset=${from}`;
+    if (q) params += `&or=(matricula.ilike.*${encodeURIComponent(q)}*,marca.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*)`;
     const vehiculos = await sb.get('vehiculos', params);
     const lista = document.getElementById('listaVehiculos');
 
@@ -679,7 +680,7 @@ async function renderVehiculos(q='') {
         <div class="avatar" style="background:var(--primary);font-size:1.4rem;">🚗</div>
         <div class="card-info">
           <div class="vehicle-plate">${v.matricula}</div>
-          <div class="card-sub">\({v.marca||''} \){ps.length?'• '+ps.join(', '):''}</div>
+          <div class="card-sub">${v.marca||''} ${ps.length?'• '+ps.join(', '):''}</div>
         </div>
         <div class="card-arrow">›</div>
       </div>`;
@@ -720,25 +721,25 @@ async function buscarGlobal() {
     showLoader();
     try {
       const [personas, vehiculos] = await Promise.all([
-        sb.get('personas', `select=id,nombre,ci,foto&or=(nombre.ilike.*\({encodeURIComponent(q)}*,ci.ilike.*\){encodeURIComponent(q)}*,domicilio.ilike.*\({encodeURIComponent(q)}*,notas.ilike.*\){encodeURIComponent(q)}*)&limit=20`),
-        sb.get('vehiculos', `select=id,matricula,marca&or=(matricula.ilike.*\({encodeURIComponent(q)}*,marca.ilike.*\){encodeURIComponent(q)}*)&limit=20`)
+        sb.get('personas', `select=id,nombre,ci,foto&or=(nombre.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*,domicilio.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*)&limit=20`),
+        sb.get('vehiculos', `select=id,matricula,marca&or=(matricula.ilike.*${encodeURIComponent(q)}*,marca.ilike.*${encodeURIComponent(q)}*)&limit=20`)
       ]);
       let html = '';
       if (personas.length) {
         html += `<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:8px 0 6px;">Personas</div>`;
         html += personas.map(p=>`<div class="card" onclick="verPersona('${p.id}')">
-          <div class="avatar">\({p.foto?`<img src="\){p.foto}" alt="">`:iniciales(p.nombre)}</div>
-          <div class="card-info"><div class="card-name">\({p.nombre}</div><div class="card-sub">\){p.ci?'CI: '+p.ci:''}</div></div>
+          <div class="avatar">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
+          <div class="card-info"><div class="card-name">${p.nombre}</div><div class="card-sub">${p.ci?'CI: '+p.ci:''}</div></div>
           <div class="card-arrow">›</div></div>`).join('');
       }
       if (vehiculos.length) {
         html += `<div style="font-size:.78rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px;">Vehículos</div>`;
         html += vehiculos.map(v=>`<div class="card vehicle-card" onclick="verVehiculo('${v.id}')">
           <div class="avatar" style="background:var(--primary);font-size:1.4rem;">🚗</div>
-          <div class="card-info"><div class="vehicle-plate">\({v.matricula}</div><div class="card-sub">\){v.marca||''}</div></div>
+          <div class="card-info"><div class="vehicle-plate">${v.matricula}</div><div class="card-sub">${v.marca||''}</div></div>
           <div class="card-arrow">›</div></div>`).join('');
       }
-      if (!html) html = `<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados for "${q}"</p></div>`;
+      if (!html) html = `<div class="empty-state"><div class="icon">🔍</div><p>Sin resultados para "${q}"</p></div>`;
       res.innerHTML = html;
     } catch(e){ showToast('Error en búsqueda'); }
     finally { hideLoader(); }
@@ -764,30 +765,30 @@ async function verPersona(id) {
     showView('view-detalle-persona', cur);
     document.getElementById('detallePersonaContent').innerHTML = `
       <div class="detail-header">
-        <div class="detail-avatar">\({p.foto?`<img src="\){p.foto}" alt="">`:iniciales(p.nombre)}</div>
+        <div class="detail-avatar">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
         <div>
           <div class="detail-name">${p.nombre}</div>
-          \({p.ci?`<div class="detail-ci">CI: \){p.ci}</div>`:''}
+          ${p.ci?`<div class="detail-ci">CI: ${p.ci}</div>`:''}
         </div>
       </div>
       <div class="detail-section">
         <h3>Datos Personales</h3>
-        \({p.fecha_nac?`<div class="detail-row"><span class="detail-label">Nacimiento</span><span class="detail-value">\){formatFecha(p.fecha_nac)}${edad?' ('+edad+' años)':''}</span></div>`:''}
-        \({p.domicilio?`<div class="detail-row"><span class="detail-label">Domicilio</span><span class="detail-value">\){p.domicilio}</span></div>`:''}
-        \({p.telefono?`<div class="detail-row"><span class="detail-label">Teléfono</span><span class="detail-value">\){p.telefono}</span></div>`:''}
+        ${p.fecha_nac?`<div class="detail-row"><span class="detail-label">Nacimiento</span><span class="detail-value">${formatFecha(p.fecha_nac)}${edad?' ('+edad+' años)':''}</span></div>`:''}
+        ${p.domicilio?`<div class="detail-row"><span class="detail-label">Domicilio</span><span class="detail-value">${p.domicilio}</span></div>`:''}
+        ${p.telefono?`<div class="detail-row"><span class="detail-label">Teléfono</span><span class="detail-value">${p.telefono}</span></div>`:''}
       </div>
-      \({vehiculos.length?`<div class="detail-section"><h3>Vehículos</h3>\){vehiculos.map(v=>`
+      ${vehiculos.length?`<div class="detail-section"><h3>Vehículos</h3>${vehiculos.map(v=>`
         <div class="card vehicle-card" onclick="verVehiculo('${v.id}')" style="margin-bottom:8px;">
           <div class="avatar" style="background:var(--primary);font-size:1.2rem;width:38px;height:38px;">🚗</div>
-          <div class="card-info"><div class="vehicle-plate" style="font-size:.95rem;">\({v.matricula}</div><div class="card-sub">\){v.marca||''}</div></div>
+          <div class="card-info"><div class="vehicle-plate" style="font-size:.95rem;">${v.matricula}</div><div class="card-sub">${v.marca||''}</div></div>
           <div class="card-arrow">›</div></div>`).join('')}</div>`:''}
-      \({vinculos.length?`<div class="detail-section"><h3>Vínculos</h3>\){vinculos.map(v=>`
+      ${vinculos.length?`<div class="detail-section"><h3>Vínculos</h3>${vinculos.map(v=>`
         <div class="relation-item">
           <div class="avatar" style="width:36px;height:36px;font-size:.9rem;">${iniciales(v.personas?.nombre||'?')}</div>
-          <div style="flex:1;"><div class="rel-name">\({v.personas?.nombre||''}</div><div class="rel-type">\){v.tipo}</div></div>
+          <div style="flex:1;"><div class="rel-name">${v.personas?.nombre||''}</div><div class="rel-type">${v.tipo}</div></div>
           <button class="rel-go" onclick="verPersona('${v.persona_vinculada_id}')">Ver →</button>
         </div>`).join('')}</div>`:''}
-      \({p.notas?`<div class="detail-section"><h3>Notas / Antecedentes</h3><div class="detail-notes">\){p.notas}</div></div>`:''}
+      ${p.notas?`<div class="detail-section"><h3>Notas / Antecedentes</h3><div class="detail-notes">${p.notas}</div></div>`:''}
       <div class="form-actions" style="margin-top:24px;">
         <button class="btn btn-ghost" onclick="editarPersona('${p.id}')">✏️ Editar</button>
         <button class="btn btn-danger" onclick="confirmarEliminar('persona','${p.id}')">🗑️ Eliminar</button>
@@ -816,14 +817,14 @@ async function verVehiculo(id) {
         <div class="detail-avatar" style="background:var(--primary);font-size:2rem;">🚗</div>
         <div>
           <div class="detail-name" style="letter-spacing:2px;">${v.matricula}</div>
-          \({v.marca?`<div class="detail-ci">\){v.marca}</div>`:''}
+          ${v.marca?`<div class="detail-ci">${v.marca}</div>`:''}
         </div>
       </div>
-      \({v.notas?`<div class="detail-section"><h3>Notas</h3><div class="detail-notes">\){v.notas}</div></div>`:''}
-      \({personas.length?`<div class="detail-section"><h3>Personas asociadas</h3>\){personas.map(p=>`
+      ${v.notas?`<div class="detail-section"><h3>Notas</h3><div class="detail-notes">${v.notas}</div></div>`:''}
+      ${personas.length?`<div class="detail-section"><h3>Personas asociadas</h3>${personas.map(p=>`
         <div class="card" onclick="verPersona('${p.id}')" style="margin-bottom:8px;">
-          <div class="avatar" style="width:38px;height:38px;font-size:.9rem;">\({p.foto?`<img src="\){p.foto}" alt="">`:iniciales(p.nombre)}</div>
-          <div class="card-info"><div class="card-name">\({p.nombre}</div><div class="card-sub">\){p.ci?'CI: '+p.ci:''}</div></div>
+          <div class="avatar" style="width:38px;height:38px;font-size:.9rem;">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
+          <div class="card-info"><div class="card-name">${p.nombre}</div><div class="card-sub">${p.ci?'CI: '+p.ci:''}</div></div>
           <div class="card-arrow">›</div></div>`).join('')}</div>`:''}
       <div class="form-actions" style="margin-top:24px;">
         <button class="btn btn-ghost" onclick="editarVehiculo('${v.id}')">✏️ Editar</button>
@@ -855,7 +856,7 @@ async function abrirFormPersona(id) {
       document.getElementById('fpId').value = p.id;
       document.getElementById('fpNombre').value = p.nombre;
       document.getElementById('fpCI').value = p.ci||'';
-      document.getElementById('fpFechaNac').value = p.fecha_nac||'';
+      document.getElementById('fpFechaNac').value = p.fecha_nac ? formatFecha(p.fecha_nac) : '';
       document.getElementById('fpDomicilio').value = p.domicilio||'';
       document.getElementById('fpTelefono').value = p.telefono||'';
       document.getElementById('fpNotas').value = p.notas||'';
@@ -913,7 +914,7 @@ function renderPhotoPreview() {
 
 function renderFpVehiculos() {
   document.getElementById('fpVehiculosSeleccionados').innerHTML =
-    editingPersonaVehiculos.map(v=>`<span class="chip">\({v.matricula}\){v.marca?' '+v.marca:''}<span onclick="removeVehiculoFromPersona('${v.id}')"> ✕</span></span>`).join('');
+    editingPersonaVehiculos.map(v=>`<span class="chip">${v.matricula}${v.marca?' '+v.marca:''}<span onclick="removeVehiculoFromPersona('${v.id}')"> ✕</span></span>`).join('');
 }
 function removeVehiculoFromPersona(id) {
   editingPersonaVehiculos = editingPersonaVehiculos.filter(v=>v.id!==id);
@@ -922,7 +923,7 @@ function removeVehiculoFromPersona(id) {
 
 function renderFpVinculos() {
   document.getElementById('fpVinculosSeleccionados').innerHTML =
-    editingPersonaVinculos.map((v,i)=>`<span class="chip">\({v.nombre} (\){v.tipo})<span onclick="removeVinculo(${i})"> ✕</span></span>`).join('');
+    editingPersonaVinculos.map((v,i)=>`<span class="chip">${v.nombre} (${v.tipo})<span onclick="removeVinculo(${i})"> ✕</span></span>`).join('');
 }
 function removeVinculo(i) {
   editingPersonaVinculos.splice(i,1);
@@ -934,30 +935,23 @@ async function guardarPersona() {
   if (!nombre) { showToast('El nombre es obligatorio'); return; }
   showLoader();
   try {
-    const rawFecha = document.getElementById('fpFechaNac').value;
-    let fechaNac = rawFecha;
-    if (rawFecha && rawFecha.includes('/')) {
-      const pts = rawFecha.split('/');
-      if (pts.length === 3) {
-        if (pts[2].length === 4) { // DD/MM/YYYY
-           fechaNac = `\({pts[2]}-\){pts[1]}-${pts[0]}`;
-        }
+    const rawFecha = document.getElementById('fpFechaNac').value.trim();
+    let fechaNac = null;
+    if (rawFecha) {
+      const parts = rawFecha.split('/');
+      if (parts.length !== 3) {
+        showToast('Usá DD/MM/AAAA');
+        hideLoader();
+        return;
       }
-    }
-
-    if (fechaNac) {
-      const parts = fechaNac.split('-');
-      if (parts.length === 3) {
-        const y = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10) - 1;
-        const d = parseInt(parts[2], 10);
-        const testDate = new Date(y, m, d);
-        if (testDate.getFullYear() !== y || testDate.getMonth() !== m || testDate.getDate() !== d) {
-          showToast('Fecha de nacimiento inválida');
-          hideLoader();
-          return;
-        }
+      const [d, m, y] = parts.map(n => parseInt(n, 10));
+      const testDate = new Date(y, m - 1, d);
+      if (testDate.getFullYear() !== y || testDate.getMonth() !== (m - 1) || testDate.getDate() !== d) {
+        showToast('Fecha de nacimiento inválida');
+        hideLoader();
+        return;
       }
+      fechaNac = `${y}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     }
     const id = document.getElementById('fpId').value;
     const data = {
@@ -1034,7 +1028,7 @@ function editarVehiculo(id) { abrirFormVehiculo(id); }
 
 function renderFvPersonas() {
   document.getElementById('fvPersonasSeleccionadas').innerHTML =
-    editingVehiculoPersonas.map(p=>`<span class="chip">\({p.nombre}<span onclick="removePersonaFromVehiculo('\){p.id}')"> ✕</span></span>`).join('');
+    editingVehiculoPersonas.map(p=>`<span class="chip">${p.nombre}<span onclick="removePersonaFromVehiculo('${p.id}')"> ✕</span></span>`).join('');
 }
 function removePersonaFromVehiculo(id) {
   editingVehiculoPersonas = editingVehiculoPersonas.filter(p=>p.id!==id);
@@ -1092,9 +1086,9 @@ function filtrarModalVehiculos(q) {
 function renderModalVehiculos(vehiculos) {
   const ya = editingPersonaVehiculos.map(v=>v.id);
   document.getElementById('modalVehiculosLista').innerHTML = vehiculos.map(v=>`
-    <div class="relation-item" onclick="toggleVehiculoEnPersona('\({v.id}','\){v.matricula}','${v.marca||''}')">
+    <div class="relation-item" onclick="toggleVehiculoEnPersona('${v.id}','${v.matricula}','${v.marca||''}')">
       <div style="font-size:1.2rem;">🚗</div>
-      <div style="flex:1;"><div class="vehicle-plate" style="font-size:.9rem;">\({v.matricula}</div><div style="font-size:.78rem;color:var(--muted)">\){v.marca||''}</div></div>
+      <div style="flex:1;"><div class="vehicle-plate" style="font-size:.9rem;">${v.matricula}</div><div style="font-size:.78rem;color:var(--muted)">${v.marca||''}</div></div>
       <div style="font-size:1.2rem;">${ya.includes(v.id)?'✅':'⬜'}</div>
     </div>`).join('') || '<p style="color:var(--muted);font-size:.9rem;">No hay vehículos.</p>';
 }
@@ -1126,8 +1120,8 @@ function filtrarModalVinculos(q) {
 
 function renderModalVinculos(personas) {
   document.getElementById('modalVinculosLista').innerHTML = personas.map(p=>`
-    <div class="relation-item" onclick="seleccionarPersonaVinculo('\({p.id}','\){p.nombre.replace(/'/g,'\\'')}')">
-      <div style="flex:1;"><div class="rel-name">\({p.nombre}</div><div class="rel-type">\){p.ci?'CI: '+p.ci:''}</div></div>
+    <div class="relation-item" onclick="seleccionarPersonaVinculo('${p.id}','${p.nombre.replace(/'/g,'\\'')}')">
+      <div style="flex:1;"><div class="rel-name">${p.nombre}</div><div class="rel-type">${p.ci?'CI: '+p.ci:''}</div></div>
     </div>`).join('') || '<p style="color:var(--muted);font-size:.9rem;">Sin resultados.</p>';
 }
 
@@ -1169,9 +1163,9 @@ function filtrarModalPersonasVehiculo(q) {
 function renderModalPersonasVehiculo(personas) {
   const ya = editingVehiculoPersonas.map(p=>p.id);
   document.getElementById('modalPersonasVehiculoLista').innerHTML = personas.map(p=>`
-    <div class="relation-item" onclick="togglePersonaEnVehiculo('\({p.id}','\){p.nombre.replace(/'/g,'\\'')}')">
-      <div class="avatar" style="width:36px;height:36px;font-size:.85rem;">\({p.foto?`<img src="\){p.foto}" alt="">`:iniciales(p.nombre)}</div>
-      <div style="flex:1;"><div class="rel-name">\({p.nombre}</div><div class="rel-type">\){p.ci?'CI: '+p.ci:''}</div></div>
+    <div class="relation-item" onclick="togglePersonaEnVehiculo('${p.id}','${p.nombre.replace(/'/g,'\\'')}')">
+      <div class="avatar" style="width:36px;height:36px;font-size:.85rem;">${p.foto?`<img src="${p.foto}" alt="">`:iniciales(p.nombre)}</div>
+      <div style="flex:1;"><div class="rel-name">${p.nombre}</div><div class="rel-type">${p.ci?'CI: '+p.ci:''}</div></div>
       <div style="font-size:1.2rem;">${ya.includes(p.id)?'✅':'⬜'}</div>
     </div>`).join('') || '<p style="color:var(--muted);font-size:.9rem;">No hay personas.</p>';
 }
