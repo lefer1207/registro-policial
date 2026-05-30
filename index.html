@@ -2,364 +2,321 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registro Policial Pro v1.3</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #1a3a5c; --secondary: #2c5282; --bg: #f0f2f5; --text: #2d3748; --accent: #d69e2e; --danger: #c53030; --green: #276749; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; margin: 0; background: var(--bg); color: var(--text); padding-bottom: 80px; }
-        header { background: var(--primary); color: white; padding: 16px 20px; font-weight: bold; font-size: 1.1rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-        .view { display: none; }
-        .view.active { display: block; }
-        .search-container { padding: 12px 15px; background: white; border-bottom: 1px solid #e2e8f0; position: sticky; top: 55px; z-index: 90; display: flex; gap: 8px; }
-        .search-container input { flex: 1; padding: 10px 16px; border: 1px solid #cbd5e0; border-radius: 25px; font-size: 15px; outline: none; background: #f7fafc; }
-        .btn-direct { background: var(--accent); color: white; border: none; border-radius: 50%; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; flex-shrink: 0; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .list-container { padding: 10px 12px; }
-        .card { background: white; border-radius: 12px; padding: 14px; margin-bottom: 8px; display: flex; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
-        .avatar-s { width: 45px; height: 45px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 14px; flex-shrink: 0; }
-        .card-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 2px; }
-        .card-sub { font-size: 0.8rem; color: #718096; }
-        .back-link { color: var(--accent); padding: 15px 20px; font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        .profile-hero { background: white; padding: 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #e2e8f0; }
-        .avatar-l { width: 85px; height: 85px; background: var(--secondary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: bold; border: 4px solid #edf2f7; }
-        .h-name { font-size: 1.4rem; font-weight: bold; color: var(--primary); }
-        .h-ci { color: #718096; font-size: 0.9rem; margin-top: 4px; }
-        .section-title { background: #edf2f7; padding: 8px 20px; color: #718096; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .section-title .plus-btn { background: var(--accent); color: white; border-radius: 4px; padding: 2px 10px; font-size: 0.9rem; cursor: pointer; border: none; font-weight: bold; }
-        .data-row { background: white; padding: 14px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #f0f4f8; }
-        .data-label { color: #a0aec0; font-size: 0.9rem; }
-        .data-value { font-weight: 700; text-align: right; color: var(--text); }
-        .notes-box { background: white; padding: 20px; line-height: 1.6; font-size: 0.95rem; }
-        .chip { display: inline-flex; align-items: center; background: #ebf8ff; color: #2c5282; border-radius: 20px; padding: 6px 14px; margin: 4px; font-size: 0.85rem; font-weight: 600; border: 1px solid #bee3f8; cursor: pointer; gap: 6px; }
-        .chip-del { color: var(--danger); font-weight: bold; padding: 0 4px; border-radius: 50%; }
-        .v-card { background: white; padding: 15px; margin-bottom: 8px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--accent); box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
-        .v-plate { font-family: monospace; font-size: 1.2rem; font-weight: bold; color: var(--primary); }
-        .v-owner { font-size: 0.85rem; color: #718096; text-align: right; }
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 15px; }
-        .btn { padding: 12px; border-radius: 10px; border: 1px solid #cbd5e0; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.85rem; }
-        .btn-primary { background: var(--primary); color: white; border: none; }
-        .btn-green { background: var(--green); color: white; border: none; }
-        .btn-accent { background: var(--accent); color: white; border: none; }
-        .btn-danger { background: white; color: var(--danger); border: 1px solid var(--danger); }
-        .fab { position: fixed; bottom: 90px; right: 20px; width: 60px; height: 60px; background: var(--accent); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; border: none; box-shadow: 0 4px 12px rgba(214,158,46,0.4); z-index: 101; cursor: pointer; }
-        nav { position: fixed; bottom: 0; width: 100%; background: var(--primary); display: flex; justify-content: space-around; padding: 10px 0 15px; z-index: 100; }
-        .nav-item { color: rgba(255,255,255,0.5); background: none; border: none; display: flex; flex-direction: column; align-items: center; font-size: 0.75rem; cursor: pointer; }
-        .nav-item.active { color: #90cdf4; }
-        .nav-item span { font-size: 1.4rem; margin-bottom: 2px; }
-        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: flex-end; }
-        .modal-overlay.open { display: flex; }
-        .modal { background: white; width: 100%; border-radius: 20px 20px 0 0; max-height: 85vh; display: flex; flex-direction: column; }
-        .modal-header { padding: 16px 20px; border-bottom: 1px solid #e2e8f0; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .modal-body { overflow-y: auto; padding-bottom: 20px; }
-        .modal-search { padding: 10px 20px; background: #f7fafc; border-bottom: 1px solid #e2e8f0; }
-        .modal-search input, .modal-body input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; outline: none; margin-bottom: 10px; }
-        .modal-item { padding: 14px 20px; border-bottom: 1px solid #f0f4f8; cursor: pointer; }
-        .form-content { padding: 20px; }
-        .form-content input, .form-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 15px; background: #f7fafc; outline: none; }
-        label { display: block; margin-bottom: 4px; color: #718096; font-size: 0.82rem; font-weight: 600; }
-        select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e0; margin-bottom: 15px; background: #f7fafc; }
+        :root {
+            --primary: #1a237e;
+            --secondary: #0d47a1;
+            --accent: #2979ff;
+            --bg: #f5f7fa;
+            --card-bg: #ffffff;
+            --text: #333;
+            --danger: #d32f2f;
+            --success: #388e3c;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding-bottom: 70px; }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white; padding: 20px; text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 100;
+        }
+
+        .container { max-width: 800px; margin: 20px auto; padding: 0 15px; }
+
+        .search-box {
+            background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline: none;
+        }
+
+        .card {
+            background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); border-left: 4px solid var(--accent);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .tag { background: #e3f2fd; color: var(--accent); padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: 600; }
+        
+        .card-body p { margin: 5px 0; color: #666; display: flex; align-items: center; gap: 10px; }
+        .card-body i { color: var(--accent); width: 16px; }
+
+        .btn-add {
+            position: fixed; bottom: 85px; right: 20px; width: 60px; height: 60px;
+            background: var(--accent); color: white; border: none; border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(41,121,255,0.4); cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 24px;
+            z-index: 90;
+        }
+
+        .nav-tabs {
+            position: fixed; bottom: 0; left: 0; right: 0; background: white;
+            display: flex; justify-content: space-around; padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
+        }
+
+        .nav-item {
+            display: flex; flex-direction: column; align-items: center;
+            color: #999; text-decoration: none; font-size: 0.75em; gap: 4px; cursor: pointer;
+        }
+
+        .nav-item.active { color: var(--accent); }
+
+        /* Modal Styles */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white; border-radius: 16px; width: 100%; max-width: 500px;
+            padding: 20px; position: relative;
+        }
+
+        .modal-header { margin-bottom: 20px; }
+        .modal-header h2 { font-size: 1.2em; color: var(--primary); }
+
+        form input, form select, form textarea {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd;
+            border-radius: 8px; outline: none;
+        }
+
+        .btn-group { display: flex; gap: 10px; }
+        .btn-save { flex: 1; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 600; }
+        .btn-cancel { flex: 1; background: #eee; color: #666; border: none; padding: 12px; border-radius: 8px; }
+
+        #searchResults { margin-top: 10px; }
+        .no-results { text-align: center; color: #999; margin-top: 40px; }
     </style>
 </head>
 <body>
 
-<div id="view-list" class="view active">
-    <header>🛡️ Registro Policial Pro v1.3</header>
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Nombre, CI o matrícula..." oninput="filtrar()">
-        <button class="btn-direct" onclick="vehiculoDirecto()">🚗</button>
+<header>
+    <h1 id="viewTitle">Vínculos</h1>
+    <p style="font-size: 0.8em; opacity: 0.8;">Registro Policial Pro v1.3</p>
+</header>
+
+<div class="container">
+    <div class="search-box">
+        <i class="fas fa-search" style="margin-top: 12px; color: #999;"></i>
+        <input type="text" id="searchInput" placeholder="Buscar por nombre, placa, cédula..." onkeyup="handleSearch()">
     </div>
-    <div class="list-container" id="listaPersonas"></div>
-    <button class="fab" onclick="abrirForm()">+</button>
-</div>
 
-<div id="view-vehicles" class="view">
-    <header>🛡️ Índice de Vehículos</header>
-    <div class="search-container">
-        <input type="text" id="searchVeh" placeholder="Buscar matrícula..." oninput="filtrarVehiculos()">
-    </div>
-    <div class="list-container" id="listaVehiculos"></div>
-</div>
-
-<div id="view-detail" class="view">
-    <header>🛡️ Detalle de Registro</header>
-    <div class="back-link" onclick="irA('view-list')">← Volver</div>
-    <div id="detalleContent"></div>
-</div>
-
-<div id="view-form" class="view">
-    <header>🛡️ Formulario</header>
-    <div class="form-content">
-        <h3 id="formTitle" style="margin:0 0 16px;color:var(--primary);">Registro</h3>
-        <label>Nombre completo *</label><input type="text" id="f-nombre">
-        <label>Cédula de Identidad</label><input type="text" id="f-ci">
-        <label>Domicilio</label><input type="text" id="f-domicilio">
-        <label>Teléfono</label><input type="text" id="f-tel">
-        <label>Matrícula 1</label><input type="text" id="f-veh1">
-        <label>Matrícula 2</label><input type="text" id="f-veh2">
-        <label>Notas</label><textarea id="f-notas" rows="4"></textarea>
-        <div class="actions">
-            <button class="btn" onclick="irA('view-list')">Cancelar</button>
-            <button class="btn btn-primary" onclick="guardar()">💾 Guardar</button>
-        </div>
+    <div id="searchResults">
+        <!-- Los datos se cargarán aquí -->
     </div>
 </div>
 
-<!-- Modal Vincular -->
-<div class="modal-overlay" id="modalVinc" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal">
-        <div class="modal-header"><span>🔗 Vincular persona</span><span onclick="document.getElementById('modalVinc').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
-        <div class="modal-search"><input type="text" id="searchVinc" placeholder="Buscar persona..." oninput="filtrarVincular()"></div>
-        <div class="modal-body" id="modalList"></div>
-    </div>
-</div>
+<button class="btn-add" onclick="openModal()">
+    <i class="fas fa-plus"></i>
+</button>
 
-<!-- Modal Nueva Matrícula -->
-<div class="modal-overlay" id="modalVeh" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal">
-        <div class="modal-header"><span>🚗 Agregar Matrícula</span><span onclick="document.getElementById('modalVeh').classList.remove('open')" style="cursor:pointer;padding:5px;">✕</span></div>
-        <div class="modal-body" style="padding:20px;">
-            <label>Posición</label>
-            <select id="v-pos">
-                <option value="1">Vehículo 1</option>
-                <option value="2">Vehículo 2</option>
-            </select>
-            <label>Matrícula</label>
-            <input type="text" id="v-plate" placeholder="Ej: ABC1234">
-            <button class="btn btn-accent" style="width:100%" onclick="guardarVehiculo()">💾 Guardar Matrícula</button>
-        </div>
+<nav class="nav-tabs">
+    <div class="nav-item active" onclick="switchTab('vinculos')">
+        <i class="fas fa-users"></i>
+        <span>Vínculos</span>
     </div>
-</div>
-
-<nav>
-    <button class="nav-item active" id="nav-p" onclick="irA('view-list')"><span>👤</span>Personas</button>
-    <button class="nav-item" id="nav-v" onclick="irA('view-vehicles')"><span>🚗</span>Vehículos</button>
+    <div class="nav-item" onclick="switchTab('vehiculos')">
+        <i class="fas fa-car"></i>
+        <span>Vehículos</span>
+    </div>
+    <div class="nav-item" onclick="switchTab('ajustes')">
+        <i class="fas fa-cog"></i>
+        <span>Ajustes</span>
+    </div>
 </nav>
 
+<!-- Modal Vínculo -->
+<div id="modalVinculo" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Nuevo Vínculo</h2>
+        </div>
+        <form id="formVinculo">
+            <input type="text" placeholder="Nombre completo" required id="vNombre">
+            <input type="text" placeholder="Cédula de Identidad" required id="vCedula">
+            <input type="text" placeholder="Apodo / Alias" id="vApodo">
+            <select id="vTipo">
+                <option value="Sujeto">Sujeto</option>
+                <option value="Víctima">Víctima</option>
+                <option value="Testigo">Testigo</option>
+            </select>
+            <textarea placeholder="Observaciones adicionales..." rows="3" id="vObs"></textarea>
+            <div class="btn-group">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn-save">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Vehículo -->
+<div id="modalVehiculo" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Registrar Vehículo</h2>
+        </div>
+        <form id="formVehiculo">
+            <input type="text" placeholder="Matrícula / Placa" required id="vehPlaca">
+            <input type="text" placeholder="Marca y Modelo" required id="vehModelo">
+            <input type="text" placeholder="Color" id="vehColor">
+            <textarea placeholder="Observaciones del vehículo..." rows="3" id="vehObs"></textarea>
+            <div class="btn-group">
+                <button type="button" class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button type="submit" class="btn-save">Guardar Vehículo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-var SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
-var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
-var db = [];
-var currentId = null;
-
-function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
-
-function cargar() {
-    fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
-    .then(function(r){ return r.json(); }).then(function(data){
-        db = Array.isArray(data) ? data : [];
-        dibujarPersonas(db);
-        dibujarVehiculos(db);
-    });
-}
-
-function dibujarPersonas(data) {
-    var html = '';
-    for (var i = 0; i < data.length; i++) {
-        var p = data[i];
-        html += '<div class="card" onclick="verDetalle(\''+p.id+'\')">';
-        html += '<div class="avatar-s">'+(p.nombre||'??').substring(0,2).toUpperCase()+'</div>';
-        html += '<div><div class="card-name">'+h(p.nombre)+'</div>';
-        html += '<div class="card-sub">CI: '+h(p.ci)+(p.vehiculo1 ? ' · 🚗 '+p.vehiculo1 : '')+'</div></div></div>';
-    }
-    document.getElementById('listaPersonas').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin registros.</p>';
-}
-
-function dibujarVehiculos(data) {
-    var vehi = [];
-    for (var i = 0; i < data.length; i++) {
-        if (data[i].vehiculo1) vehi.push({ p: data[i].vehiculo1, o: data[i].nombre, id: data[i].id });
-        if (data[i].vehiculo2) vehi.push({ p: data[i].vehiculo2, o: data[i].nombre, id: data[i].id });
-    }
-    vehi.sort(function(a,b){ return a.p.localeCompare(b.p); });
-    var html = '';
-    for (var j = 0; j < vehi.length; j++) {
-        html += '<div class="v-card" onclick="verDetalle(\''+vehi[j].id+'\')">';
-        html += '<div class="v-plate">'+vehi[j].p.toUpperCase()+'</div><div class="v-owner">'+h(vehi[j].o)+'</div></div>';
-    }
-    document.getElementById('listaVehiculos').innerHTML = html || '<p style="text-align:center;padding:30px;color:#a0aec0;">Sin vehículos.</p>';
-}
-
-function verDetalle(id) {
-    var p = db.find(function(x){ return String(x.id) === String(id); });
-    if (!p) return;
-    currentId = id;
-    var vArr = (p.vinculo || '').split('|').filter(function(x){ return x; });
-    var vHtml = '';
-    vArr.forEach(function(vName){
-        vHtml += '<span class="chip" onclick="irAVinculo(\''+vName.replace(/'/g,"\\'")+'\')">';
-        vHtml += '🔗 '+h(vName)+' <span class="chip-del" onclick="event.stopPropagation(); borrarVinculo(\''+vName.replace(/'/g,"\\'")+'\')">✕</span></span>';
-    });
-    var html = '<div class="profile-hero"><div class="avatar-l">'+(p.nombre||'??').substring(0,2).toUpperCase()+'</div>';
-    html += '<div><div class="h-name">'+h(p.nombre)+'</div><div class="h-ci">CI: '+h(p.ci)+'</div></div></div>';
-    html += '<div class="section-title">DATOS</div>';
-    html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">'+h(p.domicilio)+'</span></div>';
-    html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">'+h(p.telefono)+'</span></div>';
-    html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
-    html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
-    html += '<div class="data-row"><span class="data-label">Matrícula 2</span><span class="data-value">'+h(p.vehiculo2)+'</span></div>';
-    html += '<div class="section-title">VÍNCULOS</div>';
-    html += '<div style="padding:10px 15px;">'+(vHtml || '<span style="color:#a0aec0">Sin vínculos.</span>')+'</div>';
-    html += '<div class="section-title">NOTAS</div><div class="notes-box">'+h(p.notes)+'</div>';
-    html += '<div class="actions">';
-    html += '<button class="btn btn-green" onclick="abrirVincular()">🔗 Vincular</button>';
-    html += '<button class="btn btn-accent" onclick="abrirVehiculo()">🚗 Matrícula</button>';
-    html += '<button class="btn btn-primary" onclick="editar()">✏️ Editar</button>';
-    html += '<button class="btn btn-danger" onclick="eliminar(\''+p.id+'\')">🗑️</button></div>';
-    document.getElementById('detalleContent').innerHTML = html;
-    irA('view-detail');
-}
-
-function irAVinculo(n) {
-    var p = db.find(function(x){ return x.nombre && x.nombre.toLowerCase() === n.toLowerCase(); });
-    if (p) verDetalle(p.id);
-}
-
-function borrarVinculo(n) {
-    if (!confirm('¿Quitar vínculo?')) return;
-    var p = db.find(function(x){ return String(x.id) === String(currentId); });
-    var v = (p.vinculo || '').split('|').filter(function(x){ return x && x !== n; });
-    updatePersona({ vinculo: v.join('|') });
-}
-
-function abrirVehiculo() {
-    document.getElementById('v-plate').value = '';
-    document.getElementById('modalVeh').classList.add('open');
-}
-
-function guardarVehiculo() {
-    var pos = document.getElementById('v-pos').value;
-    var plate = document.getElementById('v-plate').value.toUpperCase().trim();
-    if (!plate) return alert('Ingresá la matrícula.');
-    var d = {}; d['vehiculo' + pos] = plate;
-    updatePersona(d);
-    document.getElementById('modalVeh').classList.remove('open');
-}
-
-function updatePersona(d) {
-    fetch(SB + '/rest/v1/personas?id=eq.' + currentId, {
-        method: 'PATCH', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(d)
-    }).then(function(){ cargar(); setTimeout(function(){ verDetalle(currentId); }, 500); });
-}
-
-function abrirVincular() {
-    document.getElementById('searchVinc').value = '';
-    dibujarListaVincular(db.filter(function(x){ return String(x.id) !== String(currentId); }));
-    document.getElementById('modalVinc').classList.add('open');
-}
-
-function filtrarVincular() {
-    var t = document.getElementById('searchVinc').value.toLowerCase();
-    var filtered = db.filter(function(x){
-        return String(x.id) !== String(currentId) && 
-               ((x.nombre||'').toLowerCase().includes(t) || (x.ci||'').includes(t));
-    });
-    dibujarListaVincular(filtered);
-}
-
-function dibujarListaVincular(lista) {
-    var html = '';
-    lista.forEach(function(p){
-        html += '<div class="modal-item" onclick="vincular(\''+p.nombre.replace(/'/g,"\\'")+'\')">';
-        html += '<div style="font-weight:600">'+h(p.nombre)+'</div><div style="font-size:0.8rem;color:#718096">CI: '+h(p.ci)+'</div></div>';
-    });
-    document.getElementById('modalList').innerHTML = html || '<p style="padding:20px;text-align:center;color:#718096">No se encontraron resultados.</p>';
-}
-
-function vincular(n) {
-    var p = db.find(function(x){ return String(x.id) === String(currentId); });
-    var v = (p.vinculo || '').split('|').filter(function(x){ return x; });
-    if (v.indexOf(n) < 0) {
-        v.push(n);
-        updatePersona({ vinculo: v.join('|') });
-    }
-    document.getElementById('modalVinc').classList.remove('open');
-}
-
-function vehiculoDirecto() {
-    var p = prompt('Matrícula:'); if (!p) return;
-    var o = prompt('Dueño:'); if (!o) return;
-    fetch(SB + '/rest/v1/personas', {
-        method: 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nombre: o, vehiculo1: p.toUpperCase().trim() })
-    }).then(function(){ cargar(); alert('Guardado.'); });
-}
-
-function irA(v) {
-    document.querySelectorAll('.view').forEach(function(x){ x.classList.remove('active'); });
-    document.getElementById(v).classList.add('active');
-    document.getElementById('nav-p').classList.toggle('active', v==='view-list' || v==='view-detail');
-    document.getElementById('nav-v').classList.toggle('active', v==='view-vehicles');
-}
-
-function abrirForm() {
-    currentId = null;
-    document.getElementById('formTitle').innerText = 'Nuevo Registro';
-    ['nombre','ci','domicilio','tel','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
-    irA('view-form');
-}
-
-function editar() {
-    var p = db.find(function(x){ return String(x.id) === String(currentId); });
-    if (!p) return;
-    document.getElementById('formTitle').innerText = 'Editar Registro';
-    document.getElementById('f-nombre').value = p.nombre || '';
-    document.getElementById('f-ci').value = p.ci || '';
-    document.getElementById('f-domicilio').value = p.domicilio || '';
-    document.getElementById('f-tel').value = p.telefono || '';
-    document.getElementById('f-veh1').value = p.vehiculo1 || '';
-    document.getElementById('f-veh2').value = p.vehiculo2 || '';
-    document.getElementById('f-notas').value = p.notas || '';
-    irA('view-form');
-}
-
-function guardar() {
-    var d = {
-        nombre: document.getElementById('f-nombre').value,
-        ci: document.getElementById('f-ci').value,
-        domicilio: document.getElementById('f-domicilio').value,
-        telefono: document.getElementById('f-tel').value,
-        vehiculo1: document.getElementById('f-veh1').value,
-        vehiculo2: document.getElementById('f-veh2').value,
-        notas: document.getElementById('f-notas').value
+    let currentTab = 'vinculos';
+    let data = {
+        vinculos: [
+            { nombre: "Juan Pérez", cedula: "1.234.567-8", apodo: "El Juanca", tipo: "Sujeto", obs: "Visto frecuentemente en zona céntrica." },
+            { nombre: "María García", cedula: "3.456.789-0", apodo: "Mary", tipo: "Víctima", obs: "Denunciante en caso 442/24." }
+        ],
+        vehiculos: [
+            { placa: "ABC 1234", modelo: "Toyota Corolla", color: "Blanco", obs: "Sin irregularidades." },
+            { placa: "STU 9876", modelo: "VW Gol", color: "Rojo", obs: "Escape ruidoso, vidrios polarizados." }
+        ]
     };
-    if (!d.nombre) return alert('Nombre obligatorio.');
-    var url = currentId ? SB + '/rest/v1/personas?id=eq.' + currentId : SB + '/rest/v1/personas';
-    fetch(url, {
-        method: currentId ? 'PATCH' : 'POST', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY, 'Content-Type': 'application/json' },
-        body: JSON.stringify(d)
-    }).then(function(){ cargar(); irA('view-list'); });
-}
 
-function eliminar(id) {
-    if (!confirm('¿Eliminar?')) return;
-    fetch(SB + '/rest/v1/personas?id=eq.' + id, { method: 'DELETE', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
-    .then(function(){ cargar(); irA('view-list'); });
-}
+    function renderData(filter = '') {
+        const results = document.getElementById('searchResults');
+        results.innerHTML = '';
+        const list = data[currentTab];
+        const query = filter.toLowerCase();
 
-function filtrar() {
-    var t = document.getElementById('searchInput').value.toLowerCase();
-    dibujarPersonas(db.filter(function(p){
-        return (p.nombre||'').toLowerCase().includes(t) || (p.ci||'').includes(t) || 
-        (p.vehiculo1||'').toLowerCase().includes(t) || (p.vehiculo2||'').toLowerCase().includes(t);
-    }));
-}
+        const filtered = list.filter(item => {
+            if (currentTab === 'vinculos') {
+                return item.nombre.toLowerCase().includes(query) || 
+                       item.cedula.toLowerCase().includes(query) ||
+                       item.apodo.toLowerCase().includes(query);
+            } else {
+                return item.placa.toLowerCase().includes(query) || 
+                       item.modelo.toLowerCase().includes(query);
+            }
+        });
 
-function filtrarVehiculos() {
-    var t = document.getElementById('searchVeh').value.toLowerCase();
-    var vList = [];
-    db.forEach(function(p){
-        if ((p.vehiculo1||'').toLowerCase().includes(t)) vList.push({ p: p.vehiculo1, o: p.nombre, id: p.id });
-        if ((p.vehiculo2||'').toLowerCase().includes(t)) vList.push({ p: p.vehiculo2, o: p.nombre, id: p.id });
-    });
-    var html = '';
-    vList.forEach(function(v){
-        html += '<div class="v-card" onclick="verDetalle(\''+v.id+'\')"><div class="v-plate">'+v.p.toUpperCase()+'</div><div class="v-owner">'+h(v.o)+'</div></div>';
-    });
-    document.getElementById('listaVehiculos').innerHTML = html;
-}
+        if (filtered.length === 0) {
+            results.innerHTML = '<div class="no-results">No se encontraron resultados</div>';
+            return;
+        }
 
-window.onload = cargar;
+        filtered.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            
+            if (currentTab === 'vinculos') {
+                card.innerHTML = 
+                    '<div class="card-header">' +
+                        '<strong>' + item.nombre + '</strong>' +
+                        '<span class="tag">' + item.tipo + '</span>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        '<p><i class="fas fa-id-card"></i> CI: ' + item.cedula + '</p>' +
+                        '<p><i class="fas fa-user-tag"></i> Alias: ' + (item.apodo || 'N/A') + '</p>' +
+                        '<p><i class="fas fa-info-circle"></i> ' + item.obs + '</p>' +
+                    '</div>';
+            } else {
+                card.innerHTML = 
+                    '<div class="card-header">' +
+                        '<strong>' + item.placa + '</strong>' +
+                        '<span class="tag">Vehículo</span>' +
+                    '</div>' +
+                    '<div class="card-body">' +
+                        '<p><i class="fas fa-car"></i> Modelo: ' + item.modelo + '</p>' +
+                        '<p><i class="fas fa-palette"></i> Color: ' + item.color + '</p>' +
+                        '<p><i class="fas fa-info-circle"></i> ' + item.obs + '</p>' +
+                    '</div>';
+            }
+            results.appendChild(card);
+        });
+    }
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+        const activeNav = document.querySelector('.nav-item i.fa-' + (tab === 'vinculos' ? 'users' : (tab === 'vehiculos' ? 'car' : 'cog'))).parentElement;
+        activeNav.classList.add('active');
+        
+        document.getElementById('viewTitle').innerText = tab.charAt(0).toUpperCase() + tab.slice(1);
+        document.getElementById('searchInput').value = '';
+        
+        if (tab === 'ajustes') {
+            document.getElementById('searchResults').innerHTML = '<div class="card">Configuración del sistema próximamente...</div>';
+            document.querySelector('.btn-add').style.display = 'none';
+        } else {
+            document.querySelector('.btn-add').style.display = 'flex';
+            renderData();
+        }
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('searchInput').value;
+        renderData(query);
+    }
+
+    function openModal() {
+        const modalId = currentTab === 'vinculos' ? 'modalVinculo' : 'modalVehiculo';
+        document.getElementById(modalId).style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.querySelectorAll('.modal').forEach(m => m.style.display = 'none');
+    }
+
+    // Manejo de formularios
+    document.getElementById('formVinculo').onsubmit = function(e) {
+        e.preventDefault();
+        data.vinculos.push({
+            nombre: document.getElementById('vNombre').value,
+            cedula: document.getElementById('vCedula').value,
+            apodo: document.getElementById('vApodo').value,
+            tipo: document.getElementById('vTipo').value,
+            obs: document.getElementById('vObs').value
+        });
+        closeModal();
+        this.reset();
+        renderData();
+    };
+
+    document.getElementById('formVehiculo').onsubmit = function(e) {
+        e.preventDefault();
+        data.vehiculos.push({
+            placa: document.getElementById('vehPlaca').value,
+            modelo: document.getElementById('vehModelo').value,
+            color: document.getElementById('vehColor').value,
+            obs: document.getElementById('vehObs').value
+        });
+        closeModal();
+        this.reset();
+        renderData();
+    };
+
+    // Cerrar modal al tocar afuera
+    window.onclick = function(event) {
+        if (event.target.className === 'modal') closeModal();
+    }
+
+    // Carga inicial
+    renderData();
 </script>
+
 </body>
 </html>
