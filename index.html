@@ -176,11 +176,11 @@
         </div>
 
         <label>Nombre completo *</label><input type="text" id="f-nombre">
-        <label>Alias</label><input type="text" id="f-alias">
-        <label>Fecha de Nacimiento (Día/Mes/Año)</label><input type="text" id="f-fecha_nac">
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
+        <label>Fecha de Nacimiento (Día/Mes/Año)</label><input type="text" id="f-fecha_nac">
         <label>Domicilio</label><input type="text" id="f-domicilio">
         <label>Teléfono</label><input type="text" id="f-tel">
+        <label>Alias</label><input type="text" id="f-alias">
         <label>Matrícula 1</label><input type="text" id="f-veh1">
         <label>Matrícula 2</label><input type="text" id="f-veh2">
         <label>Antecedentes</label><textarea id="f-antecedentes" rows="3"></textarea>
@@ -297,9 +297,11 @@ function verDetalle(id) {
     html += '<div><div class="h-name">'+h(p.nombre)+'</div><div class="h-ci">Alias: '+h(p.alias)+' | CI: '+h(p.ci)+'</div></div></div>';
     
     html += '<div class="section-title">DATOS</div>';
+    html += '<div class="data-row"><span class="data-label">Cédula</span><span class="data-value">'+h(p.ci)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">F. Nacimiento</span><span class="data-value">'+h(p.fecha_nac)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">'+h(p.domicilio)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">'+h(p.telefono)+'</span></div>';
+    html += '<div class="data-row"><span class="data-label">Alias</span><span class="data-value">'+h(p.alias)+'</span></div>';
     
     html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
     html += '<div class="data-row"><span class="data-label">Matrícula 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
