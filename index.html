@@ -5,107 +5,816 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Registro Policial</title>
   <style>
-    :root { --primary: #1a3a5c; --secondary: #2c5f8a; --accent: #e8a020; --danger: #c0392b; --bg: #f0f2f5; --card: #ffffff; --text: #1a1a2e; --muted: #6c7a8d; --border: #d0d7e3; --radius: 10px; --shadow: 0 2px 12px rgba(0,0,0,0.10); }
+    :root {
+      --primary: #1a3a5c;
+      --secondary: #2c5f8a;
+      --accent: #e8a020;
+      --danger: #c0392b;
+      --bg: #f0f2f5;
+      --card: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6c7a8d;
+      --border: #d0d7e3;
+      --radius: 10px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.10);
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-    header { background: var(--primary); color: #fff; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
-    header h1 { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
-    .loader-overlay { position: fixed; inset: 0; background: rgba(26,58,92,0.18); z-index: 999; display: flex; align-items: center; justify-content: center; }
+
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    header h1 { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; }
+
+    .loader-overlay {
+      position: fixed; inset: 0;
+      background: rgba(26,58,92,0.18);
+      z-index: 999;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(2px);
+    }
     .loader-overlay.hidden { display: none; }
-    .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.4); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 4px solid rgba(255,255,255,0.3);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.88rem; z-index: 998; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-    .toast.show { opacity: 1; }
-    nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.15); }
-    nav button { flex: 1; background: none; border: none; color: rgba(255,255,255,0.65); padding: 12px 0; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
+
+    .toast {
+      position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+      background: #323232; color: #fff; padding: 10px 22px; border-radius: 30px;
+      font-size: 0.88rem; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+
+    nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: var(--primary);
+      display: flex; z-index: 100;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+    }
+    nav button {
+      flex: 1; background: none; border: none; color: rgba(255,255,255,0.6);
+      padding: 12px 0 10px; font-size: 0.72rem; font-weight: 600;
+      display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
+    }
     nav button.active { color: var(--accent); }
-    main { padding: 16px 14px 80px; max-width: 600px; margin: 0 auto; }
-    .view { display: none; } .view.active { display: block; }
-    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px 16px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 14px; }
-    .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--secondary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; overflow: hidden; }
+    nav button .icon { font-size: 1.4rem; }
+
+    main { padding: 16px 14px 90px; max-width: 650px; margin: 0 auto; }
+    .view { display: none; animation: fadeIn 0.3s ease; }
+    .view.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+    .search-container { position: sticky; top: 65px; z-index: 90; background: var(--bg); padding-bottom: 12px; }
+    .search-bar { display: flex; gap: 10px; }
+    .search-bar input {
+      flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-size: 0.95rem; background: var(--card); color: var(--text); box-shadow: var(--shadow);
+    }
+    .search-bar input:focus { outline: none; border-color: var(--secondary); }
+
+    .card {
+      background: var(--card); border-radius: var(--radius); padding: 14px 16px;
+      margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px;
+      box-shadow: var(--shadow); transition: transform 0.1s;
+    }
+    .card:active { transform: scale(0.98); }
+    .avatar {
+      width: 48px; height: 48px; border-radius: 50%; background: var(--secondary);
+      color: #fff; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1.2rem; overflow: hidden; flex-shrink: 0;
+    }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .card-info { flex: 1; } .card-name { font-weight: 700; } .card-sub { font-size: 0.8rem; color: var(--muted); }
-    .fab { position: fixed; bottom: 72px; right: 18px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 1.7rem; box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 99; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1.5px solid var(--border); border-radius: var(--radius); }
-    .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 15px; }
-    .pagination button { padding: 6px 14px; background: var(--secondary); color: white; border: none; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
-    .pagination button:disabled { opacity: 0.5; }
+    .card-info { flex: 1; overflow: hidden; }
+    .card-name { font-weight: 700; font-size: 1.05rem; color: var(--primary); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .card-sub { font-size: 0.82rem; color: var(--muted); }
+    .card-arrow { color: var(--border); font-size: 1.2rem; }
+
+    .fab {
+      position: fixed; bottom: 75px; right: 20px; width: 56px; height: 56px;
+      border-radius: 50%; background: var(--accent); color: #fff; border: none;
+      font-size: 1.8rem; cursor: pointer; box-shadow: 0 4px 16px rgba(232,160,32,0.4);
+      z-index: 99; display: flex; align-items: center; justify-content: center;
+    }
+
+    .form-card { background: var(--card); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 0.85rem; font-weight: 700; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius);
+      font-size: 1rem; background: #fcfcfc;
+    }
+    .form-group input:focus { outline: none; border-color: var(--secondary); background: #fff; }
+
+    .btn-row { display: flex; gap: 10px; margin-top: 25px; }
+    .btn { flex: 1; padding: 14px; border: none; border-radius: var(--radius); font-size: 0.95rem; font-weight: 700; cursor: pointer; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-ghost { background: #eee; color: var(--text); }
+    .btn-danger { background: var(--danger); color: #fff; margin-top: 15px; width: 100%; }
+
+    .detail-header { display: flex; gap: 18px; align-items: center; margin-bottom: 25px; }
+    .detail-avatar { width: 85px; height: 85px; border-radius: 50%; background: var(--secondary); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; font-weight: 700; overflow: hidden; box-shadow: var(--shadow); }
+    .detail-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .detail-name { font-size: 1.4rem; font-weight: 800; color: var(--primary); line-height: 1.2; }
+    .detail-ci { font-size: 0.95rem; color: var(--muted); margin-top: 4px; font-weight: 600; }
+
+    .detail-section { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 15px; box-shadow: var(--shadow); }
+    .detail-section h3 { font-size: 0.8rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+    .detail-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; border-bottom: 1px solid #f9f9f9; padding-bottom: 8px; }
+    .detail-label { color: var(--muted); font-weight: 500; }
+    .detail-value { font-weight: 600; text-align: right; color: var(--text); }
+
+    .chip { display: inline-flex; align-items: center; background: #eef2f7; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; margin: 4px; font-weight: 600; color: var(--primary); border: 1px solid #d0d7e3; }
+    .chip span { margin-left: 8px; color: var(--danger); cursor: pointer; }
+
+    .photo-container { position: relative; width: 120px; height: 120px; margin: 0 auto 20px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 3px solid var(--accent); }
+    .photo-container img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-btn { position: absolute; bottom: 0; right: 0; background: var(--accent); color: white; width: 36px; height: 36px; border-radius: 50%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .modal-overlay.hidden { display: none; }
+    .modal-content { background: white; border-radius: var(--radius); width: 100%; max-width: 400px; padding: 20px; max-height: 80vh; overflow-y: auto; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .modal-header h2 { font-size: 1.1rem; }
+
+    .pagination { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 15px; padding-bottom: 20px; }
+    .btn-pag { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
+    .btn-pag:disabled { background: #ccc; cursor: not-allowed; }
+
+    #videoElement { width: 100%; border-radius: var(--radius); background: #000; transform: scaleX(-1); }
+    .camera-controls { display: flex; justify-content: center; gap: 15px; margin-top: 15px; }
   </style>
 </head>
 <body>
+
 <div class="loader-overlay hidden" id="loader"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
-<header><h1>🛡️ Registro Policial Pro</h1></header>
-<nav>
-  <button class="active" onclick="showTab('personas')">👤 Personas</button>
-  <button onclick="showTab('vehiculos')">🚗 Vehículos</button>
-  <button onclick="showTab('buscar')">🔍 Buscar</button>
-</nav>
+
+<header>
+  <h1><span>🛡️</span> Registro Policial Pro</h1>
+</header>
+
 <main>
+  <!-- VISTA LISTA -->
   <div class="view active" id="view-personas">
-    <div class="search-bar"><input type="search" id="searchPersonas" placeholder="Buscar por nombre o CI..." oninput="buscarPersonas()" style="width:100%;padding:10px;border-radius:10px;border:1px solid #ccc;"></div>
+    <div class="search-container">
+      <div class="search-bar">
+        <input type="search" id="searchPersonas" placeholder="Buscar por nombre o CI..." oninput="debounceSearch()">
+      </div>
+    </div>
     <div id="listaPersonas"></div>
-    <div class="pagination" id="paginacionPersonas"></div>
+    <div class="pagination">
+      <button class="btn-pag" id="prevPage" onclick="changePage(-1)">Anterior</button>
+      <span id="pageInfo" style="font-weight:700;color:var(--muted)">Pág. 1</span>
+      <button class="btn-pag" id="nextPage" onclick="changePage(1)">Siguiente</button>
+    </div>
   </div>
-  <!-- El resto del sistema (Vínculos, Vehículos, etc) se carga con la llave correcta abajo -->
+
+  <!-- VISTA DETALLE -->
+  <div class="view" id="view-detalle-persona">
+    <div id="detallePersonaContent"></div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="showView('view-personas')">Volver</button>
+      <button class="btn btn-primary" id="editPersonaBtn">Editar</button>
+    </div>
+    <button class="btn btn-danger" id="deletePersonaBtn">Eliminar Registro</button>
+  </div>
+
+  <!-- VISTA FORMULARIO -->
+  <div class="view" id="view-form-persona">
+    <div class="form-card">
+      <h2 id="formTitle" style="margin-bottom:20px;color:var(--primary)">Nueva Persona</h2>
+      
+      <div class="photo-container" id="fpPhotoContainer">
+        <img id="fpPhotoPreview" src="" class="hidden">
+        <div id="fpPhotoPlaceholder" style="font-size:3rem">👤</div>
+        <button class="photo-btn" onclick="openCamera()">📷</button>
+      </div>
+
+      <input type="hidden" id="fpId">
+      <div class="form-group">
+        <label>Nombre Completo</label>
+        <input type="text" id="fpNombre" placeholder="Ej: Juan Perez">
+      </div>
+      <div class="form-group">
+        <label>Cédula de Identidad</label>
+        <input type="text" id="fpCi" placeholder="Ej: 12345678">
+      </div>
+      <div class="form-group">
+        <label>Fecha de Nacimiento (DD/MM/AAAA)</label>
+        <input type="text" id="fpFechaNac" placeholder="31/10/1988">
+      </div>
+      <div class="form-group">
+        <label>Domicilio</label>
+        <input type="text" id="fpDomicilio" placeholder="Calle y número">
+      </div>
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="fpTelefono" placeholder="099...">
+      </div>
+      <div class="form-group">
+        <label>Antecedentes / Notas</label>
+        <textarea id="fpNotas" rows="4" placeholder="Observaciones relevantes..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>Vehículos</label>
+        <div id="fpVehiculos" style="margin-bottom:8px"></div>
+        <button class="btn btn-sm btn-ghost" onclick="openModal('modalVehiculo')">+ Agregar Vehículo</button>
+      </div>
+
+      <div class="form-group">
+        <label>Vínculos con Personas</label>
+        <div id="fpVinculos" style="margin-bottom:8px"></div>
+        <button class="btn btn-sm btn-ghost" onclick="openModal('modalVinculo')">+ Agregar Vínculo</button>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="showView('view-personas')">Cancelar</button>
+        <button class="btn btn-primary" onclick="guardarPersona()">Guardar Registro</button>
+      </div>
+    </div>
+  </div>
 </main>
-<button class="fab" onclick="showTab('form-persona')">+</button>
+
+<button class="fab" id="fabAdd" onclick="nuevaPersona()">+</button>
+
+<nav>
+  <button class="active" onclick="showView('view-personas')"><span class="icon">👥</span><span>Personas</span></button>
+  <button onclick="showToast('Próximamente')"><span class="icon">🚗</span><span>Vehículos</span></button>
+  <button onclick="showToast('Próximamente')"><span class="icon">🗺️</span><span>Mapa</span></button>
+</nav>
+
+<!-- MODAL CÁMARA -->
+<div class="modal-overlay hidden" id="modalCamera">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Capturar Foto</h2><button onclick="closeCamera()">✕</button></div>
+    <video id="videoElement" autoplay playsinline></video>
+    <canvas id="canvasElement" class="hidden"></canvas>
+    <div class="camera-controls">
+      <button class="btn btn-primary" onclick="takePhoto()">Capturar</button>
+      <button class="btn btn-ghost" onclick="closeCamera()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VEHÍCULO -->
+<div class="modal-overlay hidden" id="modalVehiculo">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Agregar Vehículo</h2><button onclick="closeModal('modalVehiculo')">✕</button></div>
+    <div class="form-group"><label>Matrícula</label><input type="text" id="mvMatricula" placeholder="Ej: ABC 1234"></div>
+    <div class="form-group"><label>Marca/Modelo</label><input type="text" id="mvMarca" placeholder="Ej: Toyota Hilux"></div>
+    <div class="form-group"><label>Color</label><input type="text" id="mvColor" placeholder="Ej: Blanco"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="addVehiculo()">Agregar</button>
+  </div>
+</div>
+
+<!-- MODAL VÍNCULO -->
+<div class="modal-overlay hidden" id="modalVinculo">
+  <div class="modal-content">
+    <div class="modal-header"><h2>Agregar Vínculo</h2><button onclick="closeModal('modalVinculo')">✕</button></div>
+    <div class="form-group">
+      <label>Buscar Persona</label>
+      <input type="text" id="searchVinculo" placeholder="Nombre o CI..." oninput="buscarVinculo()">
+      <div id="resultsVinculo" style="margin-top:10px; max-height:200px; overflow-y:auto"></div>
+    </div>
+    <div class="form-group">
+      <label>Tipo de Vínculo</label>
+      <select id="vTipo">
+        <option value="Pareja">Pareja</option>
+        <option value="Hijo/a">Hijo/a</option>
+        <option value="Padre/Madre">Padre/Madre</option>
+        <option value="Hermano/a">Hermano/a</option>
+        <option value="Socio/Cómplice">Socio/Cómplice</option>
+        <option value="Conocido">Conocido</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR ELIMINAR -->
+<div class="modal-overlay hidden" id="modalConfirmDelete">
+  <div class="modal-content" style="text-align:center">
+    <h2 style="color:var(--danger);margin-bottom:15px">¿Eliminar Registro?</h2>
+    <p style="margin-bottom:20px;color:var(--muted)">Esta acción no se puede deshacer.</p>
+    <div class="btn-row">
+      <button class="btn btn-ghost" onclick="closeModal('modalConfirmDelete')">Cancelar</button>
+      <button class="btn btn-danger" style="margin:0" id="confirmDeleteBtn">Eliminar Permanente</button>
+    </div>
+  </div>
+</div>
 
 <script>
-// USAMOS TU LLAVE LARGA ORIGINAL PARA QUE VUELVAN LOS 1910 REGISTROS
+// ============================================================
+// SUPABASE CONFIG
+// ============================================================
 const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
+const api = async (method, table, body, params) => {
+  let url = `\({SUPABASE_URL}/rest/v1/\){table}`;
+  if (params) url += '?' + params;
+  const opts = {
+    method,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(url, opts);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+};
+
 const sb = {
-  get: async (table, params) => {
-    const res = await fetch(`\({SUPABASE_URL}/rest/v1/\){table}?${params}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
-    return res.json();
-  },
-  post: async (table, body) => {
-    const res = await fetch(`\({SUPABASE_URL}/rest/v1/\){table}`, {
+  get: (table, params) => api('GET', table, null, params),
+  insert: (table, body) => api('POST', table, body),
+  update: (table, body, params) => api('PATCH', table, body, params),
+  delete: (table, params) => api('DELETE', table, null, params),
+  rpc: async (name, body) => {
+    const res = await fetch(`\({SUPABASE_URL}/rest/v1/rpc/\){name}`, {
       method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     return res.json();
   }
 };
 
-let personasPage = 0;
-const PAGE_SIZE = 30;
+// ============================================================
+// STATE
+// ============================================================
+let currentPage = 1;
+const pageSize = 50;
+let searchQuery = '';
+let personas = [];
+let editingPersonaVehiculos = [];
+let editingPersonaVinculos = [];
+let searchTimeout;
 
+// ============================================================
+// UI HELPERS
+// ============================================================
 function showLoader() { document.getElementById('loader').classList.remove('hidden'); }
 function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
-function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); }
-
-async function renderPersonas(q='') {
-  showLoader();
-  try {
-    const from = personasPage * PAGE_SIZE;
-    let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=\({PAGE_SIZE}&offset=\){from}`;
-    if (q) params += `&or=(nombre.ilike.*\({q}*,ci.ilike.*\){q}*)`;
-    const personas = await sb.get('personas', params);
-    
-    document.getElementById('listaPersonas').innerHTML = personas.map(p => `
-      <div class="card" onclick="alert('CI: ${p.ci||'Sin dato'}')">
-        <div class="avatar">\({p.foto ? `<img src="\){p.foto}">` : p.nombre[0]}</div>
-        <div class="card-info"><b>\({p.nombre}</b><br><small>\){p.ci || ''} • ${p.domicilio || ''}</small></div>
-      </div>`).join('');
-    
-    document.getElementById('paginacionPersonas').innerHTML = `
-      <button onclick="cambiarPagina(-1)" ${personasPage===0?'disabled':''}>Anterior</button>
-      <span>Pág. ${personasPage+1}</span>
-      <button onclick="cambiarPagina(1)" ${personas.length<PAGE_SIZE?'disabled':''}>Siguiente</button>`;
-  } finally { hideLoader(); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function cambiarPagina(d) { personasPage += d; renderPersonas(); }
-function buscarPersonas() { personasPage=0; renderPersonas(document.getElementById('searchPersonas').value); }
-function showTab(t) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); if(document.getElementById('view-'+t)) document.getElementById('view-'+t).classList.add('active'); }
+function showView(viewId, historyMode = true) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+  document.getElementById('fabAdd').style.display = (viewId === 'view-personas') ? 'flex' : 'none';
+  window.scrollTo(0,0);
+}
 
-renderPersonas();
+function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+// ============================================================
+// LISTA & BÚSQUEDA
+// ============================================================
+async function fetchPersonas() {
+  showLoader();
+  try {
+    const offset = (currentPage - 1) * pageSize;
+    let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=\({pageSize}&offset=\){offset}`;
+    if (searchQuery) {
+      params += `&or=(nombre.ilike.*\({searchQuery}*,ci.ilike.*\){searchQuery}*)`;
+    }
+    const data = await sb.get('personas', params);
+    personas = data;
+    renderPersonas();
+    updatePaginationUI(data.length);
+  } catch (e) {
+    showToast('Error al cargar datos');
+    console.error(e);
+  } finally {
+    hideLoader();
+  }
+}
+
+function renderPersonas() {
+  const list = document.getElementById('listaPersonas');
+  if (personas.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:40px;color:var(--muted)">Sin resultados</div>`;
+    return;
+  }
+  list.innerHTML = personas.map(p => `
+    <div class="card" onclick="verPersona('${p.id}')">
+      <div class="avatar">\({p.foto ? `<img src="\){p.foto}">` : iniciales(p.nombre)}</div>
+      <div class="card-info">
+        <div class="card-name">${p.nombre}</div>
+        <div class="card-sub">\({p.ci ? 'CI: '+p.ci : 'Sin CI'} • \){p.domicilio || 'Sin domicilio'}</div>
+      </div>
+      <div class="card-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+function updatePaginationUI(count) {
+  document.getElementById('pageInfo').textContent = `Pág. ${currentPage}`;
+  document.getElementById('prevPage').disabled = (currentPage === 1);
+  document.getElementById('nextPage').disabled = (count < pageSize);
+}
+
+function changePage(delta) {
+  currentPage += delta;
+  fetchPersonas();
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(() => {
+    searchQuery = document.getElementById('searchPersonas').value.trim();
+    currentPage = 1;
+    fetchPersonas();
+  }, 400);
+}
+
+// ============================================================
+// DETALLE
+// ============================================================
+async function verPersona(id) {
+  showLoader();
+  try {
+    const [personaArr, pvs, vinculos] = await Promise.all([
+      sb.get('personas', `id=eq.${id}`),
+      sb.get('persona_vehiculo', `select=vehiculo_id,vehiculos(id,matricula,marca,color)&persona_id=eq.${id}`),
+      sb.get('vinculos', `select=*,personas!vinculos_persona_vinculada_id_fkey(id,nombre)&persona_id=eq.${id}`)
+    ]);
+
+    const p = personaArr[0];
+    if (!p) return;
+
+    const vehiculos = pvs.map(x => x.vehiculos).filter(Boolean);
+    const edad = p.fecha_nac ? calcularEdad(p.fecha_nac) : null;
+
+    let html = `
+      <div class="detail-header">
+        <div class="detail-avatar">\({p.foto ? `<img src="\){p.foto}">` : iniciales(p.nombre)}</div>
+        <div>
+          <div class="detail-name">${p.nombre}</div>
+          <div class="detail-ci">${p.ci ? 'CI: '+p.ci : 'Sin CI'}</div>
+        </div>
+      </div>
+      <div class="detail-section">
+        <h3>Datos Personales</h3>
+        \({p.fecha_nac ? `<div class="detail-row"><span class="detail-label">Nacimiento</span><span class="detail-value">\){formatFecha(p.fecha_nac)} ${edad ? '('+edad+' años)' : ''}</span></div>` : ''}
+        \({p.domicilio ? `<div class="detail-row"><span class="detail-label">Domicilio</span><span class="detail-value">\){p.domicilio}</span></div>` : ''}
+        \({p.telefono ? `<div class="detail-row"><span class="detail-label">Teléfono</span><span class="detail-value">\){p.telefono}</span></div>` : ''}
+      </div>
+      
+      <div class="detail-section">
+        <h3>Antecedentes / Notas</h3>
+        <p style="font-size:0.95rem; line-height:1.5; white-space:pre-wrap">${p.notas || 'Sin anotaciones'}</p>
+      </div>
+    `;
+
+    if (vehiculos.length > 0) {
+      html += `
+        <div class="detail-section">
+          <h3>Vehículos Asociados</h3>
+          ${vehiculos.map(v => `
+            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px">
+              <div style="font-size:1.5rem">🚗</div>
+              <div>
+                <div style="font-weight:700">${v.matricula}</div>
+                <div style="font-size:0.8rem;color:var(--muted)">\({v.marca || ''} \){v.color ? '• '+v.color : ''}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    if (vinculos.length > 0) {
+      html += `
+        <div class="detail-section">
+          <h3>Vínculos</h3>
+          ${vinculos.map(v => `
+            <div class="card" style="padding:8px 12px; margin-bottom:8px" onclick="verPersona('${v.persona_vinculada_id}')">
+              <div class="avatar" style="width:32px; height:32px; font-size:0.8rem">${iniciales(v.personas.nombre)}</div>
+              <div class="card-info">
+                <div style="font-size:0.9rem; font-weight:700">${v.personas.nombre}</div>
+                <div style="font-size:0.75rem; color:var(--muted)">${v.tipo_vinculo}</div>
+              </div>
+              <div class="card-arrow">›</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    document.getElementById('detallePersonaContent').innerHTML = html;
+    document.getElementById('editPersonaBtn').onclick = () => editarPersona(p, vehiculos, vinculos);
+    document.getElementById('deletePersonaBtn').onclick = () => confirmarEliminar(p.id);
+    showView('view-detalle-persona');
+  } catch (e) {
+    showToast('Error al cargar detalle');
+    console.error(e);
+  } finally {
+    hideLoader();
+  }
+}
+
+// ============================================================
+// FORMULARIO & GUARDADO
+// ============================================================
+function nuevaPersona() {
+  document.getElementById('formTitle').textContent = 'Nueva Persona';
+  document.getElementById('fpId').value = '';
+  document.getElementById('fpNombre').value = '';
+  document.getElementById('fpCi').value = '';
+  document.getElementById('fpFechaNac').value = '';
+  document.getElementById('fpDomicilio').value = '';
+  document.getElementById('fpTelefono').value = '';
+  document.getElementById('fpNotas').value = '';
+  document.getElementById('fpPhotoPreview').src = '';
+  document.getElementById('fpPhotoPreview').classList.add('hidden');
+  document.getElementById('fpPhotoPlaceholder').classList.remove('hidden');
+  
+  editingPersonaVehiculos = [];
+  editingPersonaVinculos = [];
+  renderFpVehiculos();
+  renderFpVinculos();
+  showView('view-form-persona');
+}
+
+function editarPersona(p, vehs, vins) {
+  document.getElementById('formTitle').textContent = 'Editar Persona';
+  document.getElementById('fpId').value = p.id;
+  document.getElementById('fpNombre').value = p.nombre;
+  document.getElementById('fpCi').value = p.ci || '';
+  document.getElementById('fpFechaNac').value = p.fecha_nac ? formatFechaInput(p.fecha_nac) : '';
+  document.getElementById('fpDomicilio').value = p.domicilio || '';
+  document.getElementById('fpTelefono').value = p.telefono || '';
+  document.getElementById('fpNotas').value = p.notas || '';
+  
+  if (p.foto) {
+    document.getElementById('fpPhotoPreview').src = p.foto;
+    document.getElementById('fpPhotoPreview').classList.remove('hidden');
+    document.getElementById('fpPhotoPlaceholder').classList.add('hidden');
+  } else {
+    document.getElementById('fpPhotoPreview').classList.add('hidden');
+    document.getElementById('fpPhotoPlaceholder').classList.remove('hidden');
+  }
+
+  editingPersonaVehiculos = vehs.map(v => ({ id: v.id, matricula: v.matricula, marca: v.marca, color: v.color }));
+  editingPersonaVinculos = vins.map(v => ({ personaId: v.persona_vinculada_id, nombre: v.personas.nombre, tipo: v.tipo_vinculo }));
+  
+  renderFpVehiculos();
+  renderFpVinculos();
+  showView('view-form-persona');
+}
+
+async function guardarPersona() {
+  const nombre = document.getElementById('fpNombre').value.trim();
+  if (!nombre) { showToast('El nombre es obligatorio'); return; }
+  showLoader();
+  try {
+    const id = document.getElementById('fpId').value;
+    
+    // NORMALIZAR FECHA PARA QUE ACEPTE 31/10/1988
+    const rawFecha = document.getElementById('fpFechaNac').value;
+    let fechaNac = rawFecha;
+    if (rawFecha && rawFecha.includes('/')) {
+      const pts = rawFecha.split('/');
+      if (pts.length === 3) {
+        if (pts[2].length === 4) fechaNac = `\({pts[2]}-\){pts[1]}-${pts[0]}`;
+        else if (pts[0].length === 4) fechaNac = `\({pts[0]}-\){pts[1]}-${pts[2]}`;
+      }
+    }
+    if (fechaNac) {
+      const parts = fechaNac.split('-');
+      if (parts.length === 3) {
+        const y = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const d = parseInt(parts[2], 10);
+        const testDate = new Date(y, m, d);
+        if (testDate.getFullYear() !== y || testDate.getMonth() !== m || testDate.getDate() !== d) {
+          showToast('Fecha de nacimiento inválida');
+          hideLoader();
+          return;
+        }
+      }
+    }
+
+    const payload = {
+      nombre,
+      ci: document.getElementById('fpCi').value.trim() || null,
+      fecha_nac: fechaNac || null,
+      domicilio: document.getElementById('fpDomicilio').value.trim() || null,
+      telefono: document.getElementById('fpTelefono').value.trim() || null,
+      notas: document.getElementById('fpNotas').value.trim() || null,
+      foto: document.getElementById('fpPhotoPreview').classList.contains('hidden') ? null : document.getElementById('fpPhotoPreview').src
+    };
+
+    let pId = id;
+    if (id) {
+      await sb.update('personas', payload, `id=eq.${id}`);
+    } else {
+      const res = await sb.insert('personas', payload);
+      pId = res[0].id;
+    }
+
+    // Guardar Vehículos
+    await sb.delete('persona_vehiculo', `persona_id=eq.${pId}`);
+    for (const v of editingPersonaVehiculos) {
+      let vId = v.id;
+      if (!vId) {
+        const existing = await sb.get('vehiculos', `matricula=eq.${v.matricula}`);
+        if (existing.length > 0) {
+          vId = existing[0].id;
+        } else {
+          const nv = await sb.insert('vehiculos', { matricula: v.matricula, marca: v.marca, color: v.color });
+          vId = nv[0].id;
+        }
+      }
+      await sb.insert('persona_vehiculo', { persona_id: pId, vehiculo_id: vId });
+    }
+
+    // Guardar Vínculos
+    await sb.delete('vinculos', `persona_id=eq.${pId}`);
+    for (const v of editingPersonaVinculos) {
+      await sb.insert('vinculos', { persona_id: pId, persona_vinculada_id: v.personaId, tipo_vinculo: v.tipo });
+    }
+
+    showToast(id ? '✅ Actualizado' : '✅ Guardado correctamente');
+    fetchPersonas();
+    showView('view-personas');
+  } catch (e) {
+    showToast('Error al guardar');
+    console.error(e);
+  } finally {
+    hideLoader();
+  }
+}
+
+// ============================================================
+// VEHÍCULOS EN FORMULARIO
+// ============================================================
+function addVehiculo() {
+  const m = document.getElementById('mvMatricula').value.trim();
+  if (!m) return;
+  editingPersonaVehiculos.push({
+    matricula: m,
+    marca: document.getElementById('mvMarca').value.trim(),
+    color: document.getElementById('mvColor').value.trim()
+  });
+  renderFpVehiculos();
+  closeModal('modalVehiculo');
+  document.getElementById('mvMatricula').value = '';
+  document.getElementById('mvMarca').value = '';
+  document.getElementById('mvColor').value = '';
+}
+
+function renderFpVehiculos() {
+  document.getElementById('fpVehiculos').innerHTML = editingPersonaVehiculos.map((v, i) => `
+    <span class="chip">\({v.matricula} <span onclick="removeVehiculo(\){i})">✕</span></span>
+  `).join('');
+}
+
+function removeVehiculo(i) {
+  editingPersonaVehiculos.splice(i, 1);
+  renderFpVehiculos();
+}
+
+// ============================================================
+// VÍNCULOS EN FORMULARIO
+// ============================================================
+async function buscarVinculo() {
+  const q = document.getElementById('searchVinculo').value.trim();
+  if (q.length < 2) { document.getElementById('resultsVinculo').innerHTML = ''; return; }
+  const data = await sb.get('personas', `nombre.ilike.*${q}*&limit=5`);
+  document.getElementById('resultsVinculo').innerHTML = data.map(p => `
+    <div class="card" style="padding:8px 10px; margin-bottom:5px" onclick="selectVinculo('\({p.id}', '\){p.nombre.replace(/'/g, "\\'")}')">
+      <div style="font-size:0.9rem; font-weight:600">${p.nombre}</div>
+    </div>
+  `).join('');
+}
+
+function selectVinculo(id, nombre) {
+  const tipo = document.getElementById('vTipo').value;
+  editingPersonaVinculos.push({ personaId: id, nombre: nombre, tipo: tipo });
+  renderFpVinculos();
+  closeModal('modalVinculo');
+  document.getElementById('searchVinculo').value = '';
+  document.getElementById('resultsVinculo').innerHTML = '';
+}
+
+function renderFpVinculos() {
+  document.getElementById('fpVinculos').innerHTML = editingPersonaVinculos.map((v, i) => `
+    <span class="chip">\({v.nombre} (\){v.tipo}) <span onclick="removeVinculo(${i})">✕</span></span>
+  `).join('');
+}
+
+function removeVinculo(i) {
+  editingPersonaVinculos.splice(i, 1);
+  renderFpVinculos();
+}
+
+// ============================================================
+// CÁMARA
+// ============================================================
+let stream;
+function openCamera() {
+  openModal('modalCamera');
+  const video = document.getElementById('videoElement');
+  navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+    .then(s => { stream = s; video.srcObject = s; })
+    .catch(err => { showToast('No se pudo acceder a la cámara'); closeCamera(); });
+}
+
+function closeCamera() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  closeModal('modalCamera');
+}
+
+function takePhoto() {
+  const video = document.getElementById('videoElement');
+  const canvas = document.getElementById('canvasElement');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  const data = canvas.toDataURL('image/jpeg', 0.7);
+  document.getElementById('fpPhotoPreview').src = data;
+  document.getElementById('fpPhotoPreview').classList.remove('hidden');
+  document.getElementById('fpPhotoPlaceholder').classList.add('hidden');
+  closeCamera();
+}
+
+// ============================================================
+// ELIMINAR
+// ============================================================
+function confirmarEliminar(id) {
+  openModal('modalConfirmDelete');
+  document.getElementById('confirmDeleteBtn').onclick = async () => {
+    closeModal('modalConfirmDelete');
+    showLoader();
+    try {
+      await sb.delete('personas', `id=eq.${id}`);
+      showToast('Registro eliminado');
+      fetchPersonas();
+      showView('view-personas');
+    } catch (e) {
+      showToast('Error al eliminar');
+    } finally {
+      hideLoader();
+    }
+  };
+}
+
+// ============================================================
+// UTILS
+// ============================================================
+function iniciales(n) { return n ? n.split(' ').map(x => x[0]).join('').substring(0, 2).toUpperCase() : '?'; }
+
+function formatFecha(f) {
+  if (!f) return '';
+  const d = new Date(f + 'T12:00:00');
+  return d.toLocaleDateString('es-UY');
+}
+
+function formatFechaInput(f) {
+  if (!f) return '';
+  const pts = f.split('-');
+  return `\({pts[2]}/\){pts[1]}/${pts[0]}`;
+}
+
+function calcularEdad(f) {
+  if (!f) return null;
+  const hoy = new Date();
+  const nac = new Date(f + 'T12:00:00');
+  let edad = hoy.getFullYear() - nac.getFullYear();
+  const m = hoy.getMonth() - nac.getMonth();
+  if (m < 0 || (m === 0 && hoy.getDate() < nac.getDate())) edad--;
+  return edad;
+}
+
+// INICIO
+fetchPersonas();
 </script>
 </body>
 </html>
