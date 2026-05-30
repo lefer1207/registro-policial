@@ -153,6 +153,7 @@
         </div>
         <div id="listaVehiculos"></div>
     </div>
+    <button class="fab" onclick="abrirForm()">+</button>
 </div>
 
 <div id="view-detail" class="view">
@@ -179,7 +180,8 @@
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
         <label>Fecha de Nacimiento (Día/Mes/Año)</label><input type="text" id="f-fecha_nac">
         <label>Domicilio</label><input type="text" id="f-domicilio">
-        <label>Teléfono</label><input type="text" id="f-tel">
+        <label>Teléfono 1</label><input type="text" id="f-tel">
+        <label>Teléfono 2</label><input type="text" id="f-tel2">
         <label>Alias</label><input type="text" id="f-alias">
         <label>Matrícula 1</label><input type="text" id="f-veh1">
         <label>Matrícula 2</label><input type="text" id="f-veh2">
@@ -264,6 +266,7 @@ function dibujarPersonas(data) {
         html += '<div class="card" onclick="verDetalle(\''+p.id+'\')">';
         html += '<div class="avatar-s">'+avatar+'</div>';
         html += '<div class="info"><div class="name">'+h(p.nombre)+'</div><div class="sub">CI: '+h(p.ci)+' | '+h(p.vehiculo1)+'</div></div>';
+        html += '<button class="plus-btn" onclick="event.stopPropagation(); currentId=\''+p.id+'\'; abrirVehiculo()">+</button>';
         html += '</div>';
     }
     document.getElementById('listaPersonas').innerHTML = html || '<p style="text-align:center;color:#718096;margin-top:20px;">No se encontraron personas.</p>';
@@ -300,7 +303,8 @@ function verDetalle(id) {
     html += '<div class="data-row"><span class="data-label">Cédula</span><span class="data-value">'+h(p.ci)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">F. Nacimiento</span><span class="data-value">'+h(p.fecha_nac)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Domicilio</span><span class="data-value">'+h(p.domicilio)+'</span></div>';
-    html += '<div class="data-row"><span class="data-label">Teléfono</span><span class="data-value">'+h(p.telefono)+'</span></div>';
+    html += '<div class="data-row"><span class="data-label">Teléfono 1</span><span class="data-value">'+h(p.telefono)+'</span></div>';
+    html += '<div class="data-row"><span class="data-label">Teléfono 2</span><span class="data-value">'+h(p.telefono2)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Alias</span><span class="data-value">'+h(p.alias)+'</span></div>';
     
     html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
@@ -440,7 +444,7 @@ function abrirForm() {
     document.getElementById('f-preview').src = '';
     document.getElementById('f-preview').style.display = 'none';
     document.getElementById('label-text').innerText = '📷 Subir Foto';
-    ['nombre','alias','fecha_nac','antecedentes','ci', 'domicilio','tel','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
+    ['nombre','alias','fecha_nac','antecedentes','ci', 'domicilio','tel','tel2','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
     irA('view-form');
 }
 
@@ -455,6 +459,7 @@ function editar() {
     document.getElementById('f-ci').value = p.ci || '';
     document.getElementById('f-domicilio').value = p.domicilio || '';
     document.getElementById('f-tel').value = p.telefono || '';
+    document.getElementById('f-tel2').value = p.telefono2 || '';
     document.getElementById('f-veh1').value = p.vehiculo1 || '';
     document.getElementById('f-veh2').value = p.vehiculo2 || '';
     document.getElementById('f-notas').value = p.notas || '';
@@ -479,6 +484,7 @@ function guardar() {
         ci: document.getElementById('f-ci').value,
         domicilio: document.getElementById('f-domicilio').value,
         telefono: document.getElementById('f-tel').value,
+        telefono2: document.getElementById('f-tel2').value,
         vehiculo1: document.getElementById('f-veh1').value,
         vehiculo2: document.getElementById('f-veh2').value,
         notas: document.getElementById('f-notas').value,
