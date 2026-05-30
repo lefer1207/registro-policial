@@ -250,27 +250,36 @@ function previewFoto(e) {
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
 
 function cargar() {
-    fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { 
-        headers: { 
-            'apikey': KEY, 
-            'Authorization': 'Bearer '+KEY,
-            'Range': '0-999'
-        } 
-    })
-    .then(function(r){ return r.json(); }).then(function(data1){
+    var total = [];
+    var fetchChunk = function(start) {
+        var end = start + 999;
         fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { 
             headers: { 
                 'apikey': KEY, 
                 'Authorization': 'Bearer '+KEY,
-                'Range': '1000-1999'
+                'Range': start + '-' + end
             } 
         })
-        .then(function(r){ return r.json(); }).then(function(data2){
-            db = (data1 || []).concat(data2 || []);
-            filtrar();
-            dibujarVehiculos(db);
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            if (data && data.length > 0) {
+                total = total.concat(data);
+                // Si trajo 1000 registros, hay más. Seguimos hasta 8000.
+                if (data.length === 1000 && start < 7000) {
+                    fetchChunk(start + 1000);
+                } else {
+                    db = total;
+                    filtrar();
+                    dibujarVehiculos(db);
+                }
+            } else {
+                db = total;
+                filtrar();
+                dibujarVehiculos(db);
+            }
         });
-    });
+    };
+    fetchChunk(0);
 }
 
 function dibujarPersonas(data) {
