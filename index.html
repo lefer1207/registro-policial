@@ -566,8 +566,17 @@ function eliminar(id) {
 function filtrar() {
     var t = document.getElementById('searchInput').value.toLowerCase();
     dibujarPersonas(db.filter(function(p){
-        return (p.nombre||'').toLowerCase().includes(t) || (p.ci||'').includes(t) || (p.alias||'').toLowerCase().includes(t) ||
-        (p.vehiculo1||'').toLowerCase().includes(t) || (p.vehiculo2||'').toLowerCase().includes(t);
+        var al = p.alias || '';
+        var nt = p.notas || '';
+        if (!al && nt.includes('Alias: ')) {
+            var match = nt.match(/Alias: ([^\n]+)/);
+            if (match) al = match[1];
+        }
+        return (p.nombre||'').toLowerCase().includes(t) || 
+               (p.ci||'').includes(t) || 
+               al.toLowerCase().includes(t) ||
+               (p.vehiculo1||'').toLowerCase().includes(t) || 
+               (p.vehiculo2||'').toLowerCase().includes(t);
     }));
 }
 
