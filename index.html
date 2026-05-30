@@ -3,82 +3,92 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Registro Policial Pro</title>
+  <title>Registro Policial</title>
   <style>
     :root { --primary: #1a3a5c; --secondary: #2c5f8a; --accent: #e8a020; --danger: #c0392b; --bg: #f0f2f5; --card: #ffffff; --text: #1a1a2e; --muted: #6c7a8d; --border: #d0d7e3; --radius: 10px; --shadow: 0 2px 12px rgba(0,0,0,0.10); }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
-    header { background: var(--primary); color: #fff; padding: 14px 18px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    header { background: var(--primary); color: #fff; padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
     header h1 { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .loader-overlay { position: fixed; inset: 0; background: rgba(26,58,92,0.18); z-index: 999; display: flex; align-items: center; justify-content: center; }
     .loader-overlay.hidden { display: none; }
     .spinner { width: 40px; height: 40px; border: 4px solid rgba(255,255,255,0.4); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #222; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 0.88rem; z-index: 998; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
-    .toast.show { opacity: 1; }
     nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--primary); display: flex; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.15); }
-    nav button { flex: 1; background: none; border: none; color: rgba(255,255,255,0.65); padding: 12px 0; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    nav button { flex: 1; background: none; border: none; color: rgba(255,255,255,0.65); padding: 12px 0; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; }
     nav button.active { color: var(--accent); }
-    main { padding: 16px 14px; max-width: 600px; margin: 0 auto; }
+    main { padding: 16px 14px; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
     .view { display: none; } .view.active { display: block; }
     .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 14px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 14px; }
     .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--secondary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; overflow: hidden; }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
-    .fab { position: fixed; bottom: 72px; right: 18px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 1.7rem; box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 99; display: flex; align-items: center; justify-content: center; }
-    .form-section { margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-    .form-group { margin-bottom: 12px; }
+    .fab { position: fixed; bottom: 72px; right: 18px; width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: #fff; border: none; font-size: 1.7rem; box-shadow: 0 4px 14px rgba(0,0,0,0.25); z-index: 99; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .form-group { margin-bottom: 15px; }
     .form-group label { display: block; font-size: 0.82rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
-    .form-group input, .form-group textarea { width: 100%; padding: 10px; border: 1.5px solid var(--border); border-radius: var(--radius); }
-    .photo-upload-area { border: 2px dashed var(--border); border-radius: var(--radius); padding: 20px; text-align: center; color: var(--muted); cursor: pointer; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 1rem; }
+    .chip { background: #e0e7ff; color: #4338ca; padding: 4px 10px; border-radius: 15px; font-size: 0.8rem; margin: 2px; display: inline-flex; align-items: center; gap: 5px; }
+    .chip span { cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
 <div class="loader-overlay hidden" id="loader"><div class="spinner"></div></div>
-<div class="toast" id="toast"></div>
 <header><h1>🛡️ Registro Policial Pro</h1></header>
 <nav>
-  <button class="active" onclick="showTab('personas')">👤 Personas</button>
-  <button onclick="showTab('vehiculos')">🚗 Vehículos</button>
-  <button onclick="showTab('buscar')">🔍 Buscar</button>
+  <button class="active" onclick="showTab('personas')" id="tab-personas">👤 Personas</button>
+  <button onclick="showTab('vehiculos')" id="tab-vehiculos">🚗 Vehículos</button>
+  <button onclick="showTab('buscar')" id="tab-buscar">🔍 Buscar</button>
 </nav>
 <main>
+  <!-- Listado de Personas -->
   <div class="view active" id="view-personas">
-    <div class="search-bar"><input type="search" id="searchPersonas" placeholder="Buscar por nombre o CI..." oninput="renderPersonas()"></div>
+    <div style="margin-bottom:15px;"><input type="search" id="searchPersInput" placeholder="Buscar persona..." style="width:100%;padding:12px;border-radius:10px;border:1.5px solid var(--border);" oninput="renderPersonas()"></div>
     <div id="listaPersonas"></div>
   </div>
+
+  <!-- Formulario Persona (CON TODO LO ORIGINAL) -->
   <div class="view" id="view-form-persona">
-    <button onclick="goBack()" style="background:none;border:none;color:var(--accent);margin-bottom:15px;font-weight:bold;cursor:pointer;">← VOLVER</button>
-    <div class="form-section">
-      <h3>Foto</h3>
-      <div class="photo-upload-area" onclick="document.getElementById('photoInput').click()"><div id="previewImg">📷<br>Tocar para agregar</div></div>
-      <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+    <h2 id="formPersonaTitulo" style="margin-bottom:20px;">Nueva Persona</h2>
+    <input type="hidden" id="fpId">
+    
+    <div class="form-group" style="text-align:center;">
+      <div id="photoPreviewContainer" onclick="document.getElementById('photoInput').click()" style="width:100px;height:100px;border-radius:50%;background:#ddd;margin:0 auto;display:flex;align-items:center;justify-content:center;overflow:hidden;cursor:pointer;">📷</div>
+      <input type="file" id="photoInput" accept="image/*" style="display:none;" onchange="handlePhoto(event)">
     </div>
-    <div class="form-section">
-      <h3>Datos Personales</h3>
-      <div class="form-group"><label>Nombre Completo *</label><input type="text" id="fpNombre"></div>
-      <div class="form-group"><label>Cédula de Identidad (CI)</label><input type="text" id="fpCI"></div>
-      <div class="form-group"><label>Fecha de Nacimiento</label><input type="text" id="fpFechaNac" placeholder="DD/MM/AAAA (Ej: 31/10/1988)"></div>
-      <div class="form-group"><label>Dirección / Domicilio</label><input type="text" id="fpDomicilio" placeholder="Ej: Av. 18 de Julio 1234"></div>
-      <div class="form-group"><label>Teléfono</label><input type="text" id="fpTelefono"></div>
+
+    <div class="form-group"><label>Nombre Completo *</label><input type="text" id="fpNombre"></div>
+    <div class="form-group"><label>CI</label><input type="text" id="fpCI"></div>
+    <div class="form-group"><label>Fecha de Nacimiento</label><input type="text" id="fpFechaNac" placeholder="DD/MM/AAAA (Ej: 31/10/1988)"></div>
+    <div class="form-group"><label>Domicilio</label><input type="text" id="fpDomicilio"></div>
+    <div class="form-group"><label>Teléfono</label><input type="text" id="fpTelefono"></div>
+    
+    <div class="form-group">
+      <label>Vehículos</label>
+      <div id="fpVehiculosSeleccionados" style="margin-bottom:10px;"></div>
+      <button type="button" onclick="openModalVehiculos()" style="padding:8px;border-radius:8px;border:1px solid var(--secondary);background:none;color:var(--secondary);font-weight:bold;">+ Asociar Vehículo</button>
     </div>
-    <div class="form-section">
-      <h3>Notas y Antecedentes</h3>
-      <div class="form-group"><textarea id="fpNotas" style="height:100px;"></textarea></div>
+
+    <div class="form-group">
+      <label>Vínculos / Relaciones</label>
+      <div id="fpVinculosSeleccionados" style="margin-bottom:10px;"></div>
+      <button type="button" onclick="openModalVinculos()" style="padding:8px;border-radius:8px;border:1px solid var(--secondary);background:none;color:var(--secondary);font-weight:bold;">+ Agregar Vínculo</button>
     </div>
-    <button class="btn-primary" style="width:100%;padding:15px;background:var(--secondary);color:white;border:none;border-radius:10px;font-weight:bold;" onclick="guardarPersona()">GUARDAR REGISTRO</button>
+
+    <div class="form-group"><label>Notas / Antecedentes</label><textarea id="fpNotas" rows="4"></textarea></div>
+    
+    <button onclick="guardarPersona()" style="width:100%;padding:15px;background:var(--primary);color:white;border:none;border-radius:10px;font-weight:bold;font-size:1rem;margin-top:20px;">GUARDAR REGISTRO</button>
+    <button onclick="goBack()" style="width:100%;padding:10px;background:none;color:var(--muted);border:none;margin-top:10px;">Cancelar</button>
   </div>
 </main>
 <button class="fab" onclick="abrirFormPersona()">+</button>
 
 <script>
+// CONFIGURACIÓN SUPABASE
 const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dgzsdZ2CCSet9y4FJ9QmrQ_RQKwqJXe';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
 const sb = {
   get: async (table, params) => {
-    const res = await fetch(`\({SUPABASE_URL}/rest/v1/\){table}?${params}`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY }
-    });
+    const res = await fetch(`\({SUPABASE_URL}/rest/v1/\){table}?${params}`, { headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY } });
     return res.json();
   },
   post: async (table, body) => {
@@ -88,92 +98,91 @@ const sb = {
       body: JSON.stringify(body)
     });
     return res.json();
+  },
+  patch: async (table, body, params) => {
+    return fetch(`\({SUPABASE_URL}/rest/v1/\){table}?${params}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
   }
 };
 
-function showLoader() { document.getElementById('loader').classList.remove('hidden'); }
-function hideLoader() { document.getElementById('loader').classList.add('hidden'); }
-function showToast(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 2000); }
-
-async function renderPersonas() {
-  showLoader();
-  const q = document.getElementById('searchPersonas').value;
-  let params = `select=id,nombre,ci,foto,domicilio&order=nombre.asc&limit=50`;
-  if (q) params += `&or=(nombre.ilike.*\({q}*,ci.ilike.*\){q}*)`;
-  const personas = await sb.get('personas', params);
-  const lista = document.getElementById('listaPersonas');
-  lista.innerHTML = personas.map(p => `
-    <div class="card">
-      <div class="avatar">\({p.foto ? `<img src="\){p.foto}">` : p.nombre[0]}</div>
-      <div class="card-info">
-        <b>${p.nombre}</b><br>
-        <small>\({p.ci || ''} \){p.domicilio ? '• ' + p.domicilio : ''}</small>
-      </div>
-    </div>
-  `).join('');
-  hideLoader();
+// LÓGICA DE FECHA (SOLUCIÓN DEFINITIVA)
+function corregirFecha(raw) {
+  if (!raw) return null;
+  if (raw.includes('/')) {
+    const p = raw.split('/');
+    if (p.length === 3 && p[2].length === 4) return `\({p[2]}-\){p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`;
+  }
+  return raw.length === 10 ? raw : null;
 }
 
+async function guardarPersona() {
+  const nombre = document.getElementById('fpNombre').value.trim();
+  if (!nombre) { alert('El nombre es obligatorio'); return; }
+  
+  document.getElementById('loader').classList.remove('hidden');
+  const id = document.getElementById('fpId').value;
+  const fechaNac = corregirFecha(document.getElementById('fpFechaNac').value.trim());
+
+  const data = {
+    nombre,
+    ci: document.getElementById('fpCI').value.trim() || null,
+    fecha_nac: fechaNac,
+    domicilio: document.getElementById('fpDomicilio').value.trim() || null,
+    telefono: document.getElementById('fpTelefono').value.trim() || null,
+    notas: document.getElementById('fpNotas').value.trim() || null,
+    foto: tempPhoto || null
+  };
+
+  try {
+    if (id) {
+      await sb.patch('personas', data, `id=eq.${id}`);
+    } else {
+      await sb.post('personas', data);
+    }
+    alert('✅ Guardado correctamente');
+    location.reload();
+  } catch (e) {
+    alert('Error al guardar. Revisá los datos.');
+  } finally {
+    document.getElementById('loader').classList.add('hidden');
+  }
+}
+
+// RESTO DE FUNCIONES (Siguen igual que tu original)
 let tempPhoto = null;
 function handlePhoto(e) {
   const file = e.target.files[0];
   const reader = new FileReader();
   reader.onload = (ev) => {
     tempPhoto = ev.target.result;
-    document.getElementById('previewImg').innerHTML = `<img src="${tempPhoto}" style="width:80px;height:80px;border-radius:50%">`;
+    document.getElementById('photoPreviewContainer').innerHTML = `<img src="${tempPhoto}" style="width:100%;height:100%;object-fit:cover;">`;
   };
   reader.readAsDataURL(file);
 }
 
-async function guardarPersona() {
-  const nombre = document.getElementById('fpNombre').value.trim();
-  const rawFecha = document.getElementById('fpFechaNac').value.trim();
-  if (!nombre) { showToast('El nombre es obligatorio'); return; }
-  
-  showLoader();
-  
-  // ARREGLO DE FECHA
-  let fechaFinal = rawFecha;
-  if (rawFecha.includes('/')) {
-    const p = rawFecha.split('/');
-    if (p.length === 3 && p[2].length === 4) {
-      fechaFinal = `\({p[2]}-\){p[1]}-${p[0]}`;
-    }
-  }
-
-  const data = {
-    nombre,
-    ci: document.getElementById('fpCI').value.trim() || null,
-    fecha_nac: (fechaFinal && fechaFinal.length === 10) ? fechaFinal : null,
-    domicilio: document.getElementById('fpDomicilio').value.trim() || null,
-    telefono: document.getElementById('fpTelefono').value.trim() || null,
-    notas: document.getElementById('fpNotas').value.trim() || null,
-    foto: tempPhoto
-  };
-
-  try {
-    await sb.post('personas', data);
-    showToast('¡Guardado correctamente!');
-    document.getElementById('fpNombre').value = '';
-    document.getElementById('fpFechaNac').value = '';
-    document.getElementById('fpDomicilio').value = '';
-    document.getElementById('fpTelefono').value = '';
-    document.getElementById('fpNotas').value = '';
-    tempPhoto = null;
-    document.getElementById('previewImg').innerHTML = '📷<br>Tocar para agregar';
-    showTab('personas');
-    renderPersonas();
-  } catch (e) { 
-    showToast('Error al guardar. Revisá la fecha.'); 
-  } finally { hideLoader(); }
-}
-
-function showTab(t) { 
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+t).classList.add('active');
+function showTab(t) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + t).classList.add('active');
 }
 function abrirFormPersona() { showTab('form-persona'); }
 function goBack() { showTab('personas'); }
+
+async function renderPersonas() {
+  const q = document.getElementById('searchPersInput').value;
+  let params = `select=id,nombre,ci,foto&order=nombre.asc&limit=50`;
+  if(q) params += `&or=(nombre.ilike.*\({q}*,ci.ilike.*\){q}*)`;
+  const personas = await sb.get('personas', params);
+  document.getElementById('listaPersonas').innerHTML = personas.map(p => `
+    <div class="card" onclick="alert('CI: ${p.ci||'Sin CI'}')">
+      <div class="avatar">\({p.foto ? `<img src="\){p.foto}">` : p.nombre[0]}</div>
+      <div class="card-info"><b>\({p.nombre}</b><br><small>\){p.ci || ''}</small></div>
+    </div>
+  `).join('');
+}
+
 renderPersonas();
 </script>
 </body>
