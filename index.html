@@ -513,22 +513,22 @@ function guardar() {
     var ant = document.getElementById('f-antecedentes').value;
     var nt = document.getElementById('f-notas').value;
     
-    // Si no existen las columnas alias/antecedentes, los guardamos en Notas para no perder info
+    // Si no existen las columnas alias/antecedentes, los guardamos en Notas
     var notasFinales = nt;
     if (al && !nt.includes('Alias: ' + al)) notasFinales += '\nAlias: ' + al;
     if (ant && !nt.includes('Antecedentes: ' + ant)) notasFinales += '\nAntecedentes: ' + ant;
 
     var d = {
         nombre: n,
-        fecha_nac: document.getElementById('f-fecha_nac').value,
-        ci: document.getElementById('f-ci').value,
-        domicilio: document.getElementById('f-domicilio').value,
-        telefono: document.getElementById('f-tel').value,
-        telefono2: document.getElementById('f-tel2').value,
-        vehiculo1: document.getElementById('f-veh1').value,
-        vehiculo2: document.getElementById('f-veh2').value,
-        notas: notasFinales.trim(),
-        foto: currentFoto,
+        ci: document.getElementById('f-ci').value || null,
+        fecha_nac: document.getElementById('f-fecha_nac').value || null,
+        domicilio: document.getElementById('f-domicilio').value || null,
+        telefono: document.getElementById('f-tel').value || null,
+        telefono2: document.getElementById('f-tel2').value || null,
+        vehiculo1: document.getElementById('f-veh1').value || null,
+        vehiculo2: document.getElementById('f-veh2').value || null,
+        notas: notasFinales.trim() || null,
+        foto: currentFoto || null,
         vinculo: pOld ? pOld.vinculo : ''
     };
 
