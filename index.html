@@ -250,11 +250,26 @@ function previewFoto(e) {
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
 
 function cargar() {
-    fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
-    .then(function(r){ return r.json(); }).then(function(data){
-        db = Array.isArray(data) ? data : [];
-        filtrar();
-        dibujarVehiculos(db);
+    fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { 
+        headers: { 
+            'apikey': KEY, 
+            'Authorization': 'Bearer '+KEY,
+            'Range': '0-999'
+        } 
+    })
+    .then(function(r){ return r.json(); }).then(function(data1){
+        fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { 
+            headers: { 
+                'apikey': KEY, 
+                'Authorization': 'Bearer '+KEY,
+                'Range': '1000-1999'
+            } 
+        })
+        .then(function(r){ return r.json(); }).then(function(data2){
+            db = (data1 || []).concat(data2 || []);
+            filtrar();
+            dibujarVehiculos(db);
+        });
     });
 }
 
