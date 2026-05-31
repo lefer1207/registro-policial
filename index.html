@@ -631,9 +631,9 @@ async function renderPersonas(q='') {
       const qClean = q.trim();
       params += `&or=(nombre.ilike.*${qClean}*,alias.ilike.*${qClean}*,ci.ilike.*${qClean}*,notas.ilike.*${qClean}*,antecedentes.ilike.*${qClean}*,domicilio.ilike.*${qClean}*)`;
     }
-    // Debug: document.body.innerHTML += '<div style="position:fixed;top:0;left:0;background:red;color:white;z-index:9999;">API Call...</div>';
+    document.body.innerHTML += '<div id="debug-api-call" style="position:fixed;top:0;left:0;background:red;color:white;z-index:9999;">API Call...</div>';
     const personas = await sb.get('personas', params);
-    // Debug: document.body.innerHTML += '<div style="position:fixed;top:20px;left:0;background:green;color:white;z-index:9999;">Done: '+personas.length+'</div>';
+    document.body.innerHTML += '<div id="debug-done" style="position:fixed;top:20px;left:0;background:green;color:white;z-index:9999;">Done: '+personas.length+'</div>';
     const lista = document.getElementById('listaPersonas');
 
     if (!personas.length) {
