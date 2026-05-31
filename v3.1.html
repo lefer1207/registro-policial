@@ -497,7 +497,7 @@ const api = async (method, table, body, params) => {
     }
   };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(url, opts);
+  console.log('FETCHING:', url); const res = await fetch(url, opts); if(!res.ok) alert('API ERROR: ' + res.status);
   if (!res.ok) {
     const err = await res.text();
     throw new Error(err);
@@ -608,7 +608,7 @@ async function renderPersonas(q='') {
     const to = from + PAGE_SIZE - 1;
     let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=${PAGE_SIZE}&offset=${from}`;
     if (q) params += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*,domicilio.ilike.*${encodeURIComponent(q)}*)`;
-    const personas = await sb.get('personas', params);
+    const personas = await sb.get('personas', params); console.log('PERSONAS RECIBIDAS:', personas);
     const lista = document.getElementById('listaPersonas');
 
     if (!personas.length) {
