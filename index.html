@@ -477,7 +477,7 @@
   </div>
 </div>
 
-<script>
+<script>alert("DEPURACION: CARGANDO V3.1 - RESTAURADO");
 // ============================================================
 // SUPABASE CONFIG
 // ============================================================
@@ -565,7 +565,7 @@ function showTab(tab) {
   document.getElementById('view-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
   currentTab = tab; viewStack = []; updateFab(); window.scrollTo(0,0);
-  if (tab==='personas') { personasPage=0; renderPersonas(); }
+  if (tab==='personas') { personasPage=0; renderPersonas().catch(e=>alert("ERROR DE BASE DE DATOS: "+e)); }
   if (tab==='vehiculos') { vehiculosPage=0; renderVehiculos(); }
 }
 
@@ -582,7 +582,7 @@ function goBack() {
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById(prev).classList.add('active');
     updateFab();
-    if (prev==='view-personas') renderPersonas();
+    if (prev==='view-personas') renderPersonas().catch(e=>alert("ERROR DE BASE DE DATOS: "+e));
     if (prev==='view-vehiculos') renderVehiculos();
   } else { showTab(currentTab); }
 }
@@ -1215,7 +1215,7 @@ function confirmarEliminar(tipo, id) {
 // ============================================================
 // INIT
 // ============================================================
-renderPersonas();
+renderPersonas().catch(e=>alert("ERROR DE BASE DE DATOS: "+e));
 </script>
 </body>
 </html>
