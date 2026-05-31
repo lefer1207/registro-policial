@@ -627,7 +627,10 @@ async function renderPersonas(q='') {
     const from = personasPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=${PAGE_SIZE}&offset=${from}`;
-    if (q) params += `&or=(nombre.ilike.*${q}*,alias.ilike.*${q}*,ci.ilike.*${q}*,notas.ilike.*${q}*,antecedentes.ilike.*${q}*,domicilio.ilike.*${q}*)`;
+    if (q) {
+      const qClean = q.trim();
+      params += `&or=(nombre.ilike.*${qClean}*,alias.ilike.*${qClean}*,ci.ilike.*${qClean}*,notas.ilike.*${qClean}*,antecedentes.ilike.*${qClean}*,domicilio.ilike.*${qClean}*)`;
+    }
     const personas = await sb.get('personas', params);
     const lista = document.getElementById('listaPersonas');
 
@@ -678,7 +681,10 @@ async function renderVehiculos(q='') {
   try {
     const from = vehiculosPage * PAGE_SIZE;
     let params = `select=id,matricula,marca&order=matricula.asc&limit=${PAGE_SIZE}&offset=${from}`;
-    if (q) params += `&or=(matricula.ilike.*${q}*,marca.ilike.*${q}*,notas.ilike.*${q}*)`;
+    if (q) {
+      const qClean = q.trim();
+      params += `&or=(matricula.ilike.*${qClean}*,marca.ilike.*${qClean}*,notas.ilike.*${qClean}*)`;
+    }
     const vehiculos = await sb.get('vehiculos', params);
     const lista = document.getElementById('listaVehiculos');
 
