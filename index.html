@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+<script>
+window.onerror = function(m, u, l) {
+    alert("ERROR FATAL: " + m + " en linea " + l);
+};
+</script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Registro Policial</title>
@@ -293,20 +299,6 @@
   </style>
 </head>
 <body>
-<div id="screen-debug-log" style="position:fixed;bottom:0;left:0;right:0;height:120px;background:#000;color:#0f0;font-family:monospace;font-size:10px;overflow-y:scroll;z-index:99999;border-top:2px solid #0f0;padding:5px;">-- LOGS DE DEPURACION --<br></div>
-<script>
-function screenLog(msg) {
-    const el = document.getElementById('screen-debug-log');
-    if(el) el.innerHTML += msg + '<br>';
-}
-window.onerror = function(m, u, l) {
-    screenLog('ERROR: ' + m + ' en l.' + l);
-};
-console.log = function(...args) {
-    screenLog('LOG: ' + args.join(' '));
-};
-</script>
-
 
 <div class="loader-overlay hidden" id="loader"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
@@ -495,7 +487,7 @@ console.log = function(...args) {
 // ============================================================
 // SUPABASE CONFIG
 // ============================================================
-console.log("Cargando script..."); const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
+const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
 const api = async (method, table, body, params) => {
@@ -579,7 +571,7 @@ function showTab(tab) {
   document.getElementById('view-'+tab).classList.add('active');
   document.getElementById('tab-'+tab).classList.add('active');
   currentTab = tab; viewStack = []; updateFab(); window.scrollTo(0,0);
-  if (tab==='personas') { personasPage=0; console.log("Llamando a renderPersonas..."); renderPersonas().then(()=>console.log("renderPersonas termino exitosamente")).catch(e=>console.log("Error en renderPersonas: " + e)); }
+  if (tab==='personas') { personasPage=0; alert("Llamando a renderPersonas"); renderPersonas().then(()=>alert("OK")).catch(e=>alert("ERROR: "+e)); }
   if (tab==='vehiculos') { vehiculosPage=0; renderVehiculos(); }
 }
 
@@ -596,7 +588,7 @@ function goBack() {
     document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
     document.getElementById(prev).classList.add('active');
     updateFab();
-    if (prev==='view-personas') console.log("Llamando a renderPersonas..."); renderPersonas().then(()=>console.log("renderPersonas termino exitosamente")).catch(e=>console.log("Error en renderPersonas: " + e));
+    if (prev==='view-personas') alert("Llamando a renderPersonas"); renderPersonas().then(()=>alert("OK")).catch(e=>alert("ERROR: "+e));
     if (prev==='view-vehiculos') renderVehiculos();
   } else { showTab(currentTab); }
 }
@@ -1229,7 +1221,7 @@ function confirmarEliminar(tipo, id) {
 // ============================================================
 // INIT
 // ============================================================
-console.log("Llamando a renderPersonas..."); renderPersonas().then(()=>console.log("renderPersonas termino exitosamente")).catch(e=>console.log("Error en renderPersonas: " + e));
+alert("Llamando a renderPersonas"); renderPersonas().then(()=>alert("OK")).catch(e=>alert("ERROR: "+e));
 </script>
 </body>
 </html>
