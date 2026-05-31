@@ -631,9 +631,7 @@ async function renderPersonas(q='') {
       const qClean = q.trim();
       params += `&or=(nombre.ilike.*${qClean}*,alias.ilike.*${qClean}*,ci.ilike.*${qClean}*,notas.ilike.*${qClean}*,antecedentes.ilike.*${qClean}*,domicilio.ilike.*${qClean}*)`;
     }
-    console.log('Fetching personas...');
     const personas = await sb.get('personas', params);
-    console.log('Personas result:', personas);
     const lista = document.getElementById('listaPersonas');
 
     if (!personas.length) {
