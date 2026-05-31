@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<script>
-window.onerror = function(m, u, l) {
-    document.body.innerHTML = '<div style="padding:40px;color:red;background:white;font-family:sans-serif;"><h1>ERROR CRITICO</h1><p>' + m + ' en linea ' + l + '</p></div>';
-};
-</script>
-
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Registro Policial</title>
@@ -488,7 +482,7 @@ window.onerror = function(m, u, l) {
 // SUPABASE CONFIG
 // ============================================================
 const SUPABASE_URL = 'https://pdoeklmwquxggppvigrf.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_dgzsdZ2CCSet9y4FJ9QmrQ_RQKwqJXe';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 
 const api = async (method, table, body, params) => {
   let url = `${SUPABASE_URL}/rest/v1/${table}`;
