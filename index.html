@@ -1215,7 +1215,8 @@ function confirmarEliminar(tipo, id) {
 // ============================================================
 // INIT
 // ============================================================
-renderPersonas();
+console.log('--- APP INIT ---');
+renderPersonas().then(() => console.log('--- RENDER DONE ---')).catch(e => console.error('RENDER ERROR:', e));
 </script>
 </body>
 </html>
