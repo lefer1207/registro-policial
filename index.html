@@ -634,8 +634,14 @@ async function renderPersonas(q='') {
       params += `&or=(nombre.ilike.*${qClean}*,alias.ilike.*${qClean}*,ci.ilike.*${qClean}*,notas.ilike.*${qClean}*,antecedentes.ilike.*${qClean}*,domicilio.ilike.*${qClean}*)`;
     }
     const personas = await sb.get('personas', params);
+    console.log('Fetching personas with params:', params);
+    const personas = await sb.get('personas', params);
     console.log('Personas fetched:', personas);
     const lista = document.getElementById('listaPersonas');
+    if (!lista) {
+      console.error('Element #listaPersonas not found');
+      return;
+    }
 
     if (!personas.length) {
       lista.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>${q?'Sin resultados.':'No hay personas registradas.'}<br>Tocá el + para agregar.</p></div>`;
