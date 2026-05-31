@@ -627,7 +627,7 @@ async function renderPersonas(q='') {
     const from = personasPage * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
     let params = `select=id,nombre,ci,domicilio,foto&order=nombre.asc&limit=${PAGE_SIZE}&offset=${from}`;
-    if (q) params += `&or=(nombre.ilike.*${encodeURIComponent(q)}*,alias.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*,antecedentes.ilike.*${encodeURIComponent(q)}*,domicilio.ilike.*${encodeURIComponent(q)}*)`;
+    if (q) params += `&or=(nombre.ilike.*${q}*,alias.ilike.*${q}*,ci.ilike.*${q}*,notas.ilike.*${q}*,antecedentes.ilike.*${q}*,domicilio.ilike.*${q}*)`;
     const personas = await sb.get('personas', params);
     const lista = document.getElementById('listaPersonas');
 
@@ -678,7 +678,7 @@ async function renderVehiculos(q='') {
   try {
     const from = vehiculosPage * PAGE_SIZE;
     let params = `select=id,matricula,marca&order=matricula.asc&limit=${PAGE_SIZE}&offset=${from}`;
-    if (q) params += `&or=(matricula.ilike.*${encodeURIComponent(q)}*,marca.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*)`;
+    if (q) params += `&or=(matricula.ilike.*${q}*,marca.ilike.*${q}*,notas.ilike.*${q}*)`;
     const vehiculos = await sb.get('vehiculos', params);
     const lista = document.getElementById('listaVehiculos');
 
@@ -740,8 +740,8 @@ async function buscarGlobal() {
     showLoader();
     try {
       const [personas, vehiculos] = await Promise.all([
-        sb.get('personas', `select=id,nombre,ci,foto&or=(nombre.ilike.*${encodeURIComponent(q)}*,alias.ilike.*${encodeURIComponent(q)}*,ci.ilike.*${encodeURIComponent(q)}*,domicilio.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*,antecedentes.ilike.*${encodeURIComponent(q)}*)&limit=20`),
-        sb.get('vehiculos', `select=id,matricula,marca&or=(matricula.ilike.*${encodeURIComponent(q)}*,marca.ilike.*${encodeURIComponent(q)}*,notas.ilike.*${encodeURIComponent(q)}*)&limit=20`)
+        sb.get('personas', `select=id,nombre,ci,foto&or=(nombre.ilike.*${q}*,alias.ilike.*${q}*,ci.ilike.*${q}*,domicilio.ilike.*${q}*,notas.ilike.*${q}*,antecedentes.ilike.*${q}*)&limit=20`),
+        sb.get('vehiculos', `select=id,matricula,marca&or=(matricula.ilike.*${q}*,marca.ilike.*${q}*,notas.ilike.*${q}*)&limit=20`)
       ]);
       let html = '';
       if (personas.length) {
