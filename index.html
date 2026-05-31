@@ -632,9 +632,10 @@ async function renderPersonas(q='') {
       params += `&or=(nombre.ilike.*${qClean}*,alias.ilike.*${qClean}*,ci.ilike.*${qClean}*,notas.ilike.*${qClean}*,antecedentes.ilike.*${qClean}*,domicilio.ilike.*${qClean}*)`;
     }
     document.body.innerHTML += '<div id="debug-api-call" style="position:fixed;top:0;left:0;background:red;color:white;z-index:9999;">API Call...</div>';
-    const personas = await sb.get('personas', params);
-    document.body.innerHTML += '<div id="debug-done" style="position:fixed;top:20px;left:0;background:green;color:white;z-index:9999;">Done: '+personas.length+'</div>';
-    const lista = document.getElementById('listaPersonas');
+    try {
+      const personas = await sb.get('personas', params);
+      document.body.innerHTML += '<div id="debug-done" style="position:fixed;top:20px;left:0;background:green;color:white;z-index:9999;">Done: '+personas.length+'</div>';
+      const lista = document.getElementById('listaPersonas');
 
     if (!personas.length) {
       lista.innerHTML = `<div class="empty-state"><div class="icon">👤</div><p>${q?'Sin resultados.':'No hay personas registradas.'}<br>Tocá el + para agregar.</p></div>`;
@@ -658,9 +659,10 @@ async function renderPersonas(q='') {
       <button onclick="cambiarPaginaPersonas(-1)" ${personasPage===0?'disabled':''}>← Anterior</button>
       <span>Pág. ${personasPage+1}</span>
       <button onclick="cambiarPaginaPersonas(1)" ${personas.length<PAGE_SIZE?'disabled':''}>Siguiente →</button>`;
-  } catch(e) {
-    showToast('Error al cargar personas');
-  } finally { hideLoader(); }
+    } catch (e) {
+      document.body.innerHTML += '<div id="debug-error" style="position:fixed;top:40px;left:0;background:blue;color:white;z-index:9999;">Error: '+e.message+'</div>';
+      showToast('Error al cargar personas');
+    } finally { hideLoader(); }
 }
 
 function cambiarPaginaPersonas(dir) {
