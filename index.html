@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'>
+    <meta http-equiv='Pragma' content='no-cache'>
+    <meta http-equiv='Expires' content='0'>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Registro Policial</title>
@@ -178,7 +181,7 @@
 
         <label>Nombre completo *</label><input type="text" id="f-nombre">
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
-        <label>Fecha de Nacimiento (Día/Mes/Año)</label><input type="text" id="f-fecha_nac">
+        <label>Fecha de Nacimiento</label><input type="date" id="f-fecha_nac">
         <label>Domicilio</label><input type="text" id="f-domicilio">
         <label>Teléfono 1</label><input type="text" id="f-tel">
         <label>Teléfono 2</label><input type="text" id="f-tel2">
@@ -344,6 +347,7 @@ function verDetalle(id) {
     html += '<div class="data-row"><span class="data-label">Teléfono 1</span><span class="data-value">'+h(p.telefono)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Teléfono 2</span><span class="data-value">'+h(p.telefono2)+'</span></div>';
     html += '<div class="data-row"><span class="data-label">Alias</span><span class="data-value">'+h(al)+'</span></div>';
+
     
     html += '<div class="section-title">VEHÍCULOS <button class="plus-btn" onclick="abrirVehiculo()">+</button></div>';
     html += '<div class="data-row"><span class="data-label">Vehículo 1</span><span class="data-value">'+h(p.vehiculo1)+'</span></div>';
@@ -537,11 +541,6 @@ function guardar() {
     var ant = document.getElementById('f-antecedentes').value;
     var nt = document.getElementById('f-notas').value;
     
-    // Si no existen las columnas alias/antecedentes, los guardamos en Notas
-    var notasFinales = nt;
-    if (al && !nt.includes('Alias: ' + al)) notasFinales += '\nAlias: ' + al;
-    if (ant && !nt.includes('Antecedentes: ' + ant)) notasFinales += '\nAntecedentes: ' + ant;
-
     var d = {
         nombre: n,
         ci: document.getElementById('f-ci').value || null,
@@ -551,7 +550,9 @@ function guardar() {
         telefono2: document.getElementById('f-tel2').value || null,
         vehiculo1: document.getElementById('f-veh1').value || null,
         vehiculo2: document.getElementById('f-veh2').value || null,
-        notas: notasFinales.trim() || null,
+        alias: al || null,
+        antecedentes: ant || null,
+        notas: nt || null,
         foto: currentFoto || null,
         vinculo: pOld ? pOld.vinculo : ''
     };
@@ -600,7 +601,7 @@ function filtrar() {
         }
 
         // Creamos un string gigante con toda la info de la persona para buscar ahí
-        var searchString = ((p.nombre||'')+' '+(p.ci||'')+' '+al+' '+(p.vehiculo1||'')+' '+(p.vehiculo2||'')+' '+(p.notas||'')).toLowerCase();
+        var searchString = ((p.nombre||'')+' '+(p.ci||'')+' '+al+' '+(p.antecedentes||'')+' '+(p.vehiculo1||'')+' '+(p.vehiculo2||'')+' '+(p.notas||'')).toLowerCase();
 
         // Verificamos que CADA palabra buscada esté en algún lugar del registro
         return terms.every(function(term) {
