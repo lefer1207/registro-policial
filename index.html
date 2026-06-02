@@ -406,16 +406,25 @@ function abrirVincular() {
 }
 
 function filtrarVincular() {
-    var t = document.getElementById('searchVinc').value.toLowerCase();
+    var t = document.getElementById('searchVinc').value.toLowerCase().trim();
+    var terms = t.split(/\s+/);
+    
     var list = db.filter(function(p){ 
-        return String(p.id) !== String(currentId) && (p.nombre||'').toLowerCase().includes(t); 
+        if (String(p.id) === String(currentId)) return false;
+        
+        var al = p.alias || '';
+        var searchString = ((p.nombre||'')+' '+(p.ci||'')+' '+al+' '+(p.antecedentes||'')+' '+(p.vehiculo1||'')+' '+(p.vehiculo2||'')+' '+(p.notas||'')).toLowerCase();
+        
+        return terms.every(function(term){ return searchString.includes(term); });
     });
+
     var html = '';
     list.forEach(function(p){
-        html += '<div class="data-row" style="cursor:pointer" onclick="vincular(\''+p.nombre.replace(/'/g,"\\'")+'\')">';
-        html += '<span>'+h(p.nombre)+'</span><span style="color:var(--accent)">+</span></div>';
+        var extra = p.ci ? ' (CI: ' + p.ci + ')' : '';
+        html += '<div class="data-row" style="cursor:pointer" onclick="vincular(\''+p.nombre.replace(/'/g,"\'")+'\')">';
+        html += '<span>'+h(p.nombre) + '<small style="color:#718096;margin-left:5px;">' + extra + '</small></span><span style="color:var(--accent)">+</span></div>';
     });
-    document.getElementById('modalList').innerHTML = html || '<p style="padding:15px;text-align:center;color:#718096;">No hay otras personas.</p>';
+    document.getElementById('modalList').innerHTML = html || '<p style="padding:15px;text-align:center;color:#718096;">No hay resultados.</p>';
 }
 
 function vincular(n) {
