@@ -661,13 +661,6 @@ function sincronizarPendientes() {
 
 window.addEventListener('online', sincronizarPendientes);
 setInterval(sincronizarPendientes, 30000);
-        cargar();
-        irA('view-list');
-    }).catch(function(err) {
-        console.error('Error:', err);
-        alert('Error al guardar: ' + err.message);
-    });
-}
 
 function eliminar(id) {
     if (!confirm('¿Eliminar?')) return;
