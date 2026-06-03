@@ -1,5 +1,6 @@
-const CACHE_NAME = 'registro-policial-v1';
+const CACHE_NAME = 'registro-policial-v2'; // Cambiamos la versión para forzar actualización
 const ASSETS = [
+  './index.html',
   './offline_test.html',
   './'
 ];
@@ -24,21 +25,40 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
+  // Para llamadas a la API de Supabase, intentamos red primero, pero cacheamos el resultado exitoso
+  if (event.request.url.includes('supabase.co')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response.status === 200) {
+            const cacheCopy = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, cacheCopy);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request);
+        })
+    );
+    return;
+  }
+
+  // Para el resto de archivos (HTML, etc), usamos Cache-First para asegurar velocidad offline
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Si tenemos red, actualizamos la cache para la proxima vez
-        if (response && response.status === 200) {
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) return cachedResponse;
+      
+      return fetch(event.request).then((response) => {
+        if (response.status === 200) {
           const cacheCopy = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(event.request, cacheCopy);
           });
         }
         return response;
-      })
-      .catch(() => {
-        // Si no hay red, servimos desde cache
-        return caches.match(event.request);
-      })
+      });
+    })
   );
 });
