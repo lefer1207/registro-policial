@@ -25,8 +25,20 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
+    fetch(event.request)
+      .then((response) => {
+        // Si tenemos red, actualizamos la cache para la proxima vez
+        if (response && response.status === 200) {
+          const cacheCopy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, cacheCopy);
+          });
+        }
+        return response;
+      })
+      .catch(() => {
+        // Si no hay red, servimos desde cache
+        return caches.match(event.request);
+      })
   );
 });
