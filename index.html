@@ -133,6 +133,28 @@
         
         .plus-btn { background: var(--accent); color: white; border: none; width: 24px; height: 24px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .back-link { color: var(--accent); font-weight: bold; display: flex; align-items: center; gap: 4px; margin-bottom: 15px; cursor: pointer; }
+
+        .alert-duplicate {
+            background: #fff5f5;
+            border: 1px solid #feb2b2;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .alert-duplicate button {
+            background: #c53030;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +201,7 @@
             </label>
         </div>
 
+        <div id="duplicate-alert" class="alert-duplicate"><span>⚠️ Esta CI ya existe.</span><button onclick="abrirDuplicado()">Ver Registro</button></div>
         <label>Nombre completo *</label><input type="text" id="f-nombre">
         <label>Cédula de Identidad</label><input type="text" id="f-ci">
         <label>Fecha de Nacimiento</label><input type="date" id="f-fecha_nac">
@@ -632,6 +655,42 @@ function filtrarVehiculos() {
     });
     document.getElementById('listaVehiculos').innerHTML = html;
 }
+
+
+function normalizarTexto(t) {
+    return t.normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Quita acentos
+            .replace(/\b\w/g, function(l){ return l.toUpperCase(); }); // Proper Case
+}
+
+function chequearDuplicado() {
+    var ci = document.getElementById('f-ci').value.trim();
+    var alertDiv = document.getElementById('duplicate-alert');
+    if (!ci || currentId) {
+        alertDiv.style.display = 'none';
+        return;
+    }
+    var p = db.find(function(x){ return String(x.ci) === ci; });
+    if (p) {
+        alertDiv.style.display = 'flex';
+        alertDiv.dataset.dupId = p.id;
+    } else {
+        alertDiv.style.display = 'none';
+    }
+}
+
+function abrirDuplicado() {
+    var id = document.getElementById('duplicate-alert').dataset.dupId;
+    if (id) verDetalle(id);
+}
+
+// Listeners para normalizar nombre y alias al perder el foco (blur)
+document.getElementById('f-nombre').addEventListener('blur', function(){
+    this.value = normalizarTexto(this.value);
+});
+document.getElementById('f-alias').addEventListener('blur', function(){
+    this.value = normalizarTexto(this.value);
+});
+document.getElementById('f-ci').addEventListener('input', chequearDuplicado);
 
 window.onload = cargar;
 </script>
