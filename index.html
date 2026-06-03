@@ -565,6 +565,7 @@ function editar() {
     irA('view-form');
 }
 
+
 function guardar() {
     var pOld = currentId ? db.find(function(x){ return String(x.id) === String(currentId); }) : null;
     
@@ -599,20 +600,67 @@ function guardar() {
         headers: { 
             'apikey': KEY, 
             'Authorization': 'Bearer ' + KEY, 
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
         },
         body: JSON.stringify(d)
-    }).then(function(r) {
-        if (!r.ok) {
-            return r.text().then(function(t){ throw new Error(t); });
-        }
+    })
+    .then(function(res) {
+        if (!res.ok) throw new Error('Network error');
         cargar();
         irA('view-list');
-    }).catch(function(err) {
-        console.error('Error:', err);
-        alert('Error al guardar: ' + err.message);
+    })
+    .catch(function(err) {
+        console.log('Error de red, guardando localmente...', err);
+        var pending = JSON.parse(localStorage.getItem('pending_sync') || '[]');
+        pending.push({ url: url, method: method, data: d, timestamp: Date.now() });
+        localStorage.setItem('pending_sync', JSON.stringify(pending));
+        
+        if (!currentId) {
+            d.id = 'local-' + Date.now();
+            db.unshift(d);
+        } else {
+            var idx = db.findIndex(p => p.id == currentId);
+            if (idx !== -1) db[idx] = Object.assign(db[idx], d);
+        }
+        
+        dibujarPersonas(db);
+        alert('⚠️ Sin conexión. Registro guardado en el teléfono. Se subirá automáticamente al recuperar señal.');
+        irA('view-list');
     });
 }
+
+function sincronizarPendientes() {
+    if (!navigator.onLine) return;
+    var pending = JSON.parse(localStorage.getItem('pending_sync') || '[]');
+    if (pending.length === 0) return;
+
+    var item = pending[0];
+    fetch(item.url, {
+        method: item.method,
+        headers: { 
+            'apikey': KEY, 
+            'Authorization': 'Bearer ' + KEY, 
+            'Content-Type': 'application/json' 
+        },
+        body: JSON.stringify(item.data)
+    })
+    .then(function(res) {
+        if (res.ok) {
+            pending.shift();
+            localStorage.setItem('pending_sync', JSON.stringify(pending));
+            if (pending.length > 0) {
+                sincronizarPendientes();
+            } else {
+                cargar();
+            }
+        }
+    })
+    .catch(err => console.log('Fallo re-intento sync', err));
+}
+
+window.addEventListener('online', sincronizarPendientes);
+setInterval(sincronizarPendientes, 30000);
 
 function eliminar(id) {
     if (!confirm('¿Eliminar?')) return;
@@ -693,6 +741,16 @@ document.getElementById('f-alias').addEventListener('blur', function(){
 document.getElementById('f-ci').addEventListener('input', chequearDuplicado);
 
 window.onload = cargar;
+</script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registrado', reg))
+      .catch(err => console.log('Error SW', err));
+  });
+}
 </script>
 </body>
 </html>
