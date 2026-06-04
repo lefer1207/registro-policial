@@ -18,9 +18,22 @@
         #modal { position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 100; }
         .cropper-box { flex: 1; position: relative; overflow: hidden; }
         #image-to-crop { display: block; max-width: 100%; }
-        .footer { padding: 20px; display: flex; gap: 10px; background: black; }
+        .footer { padding: 20px; display: flex; gap: 10px; background: black; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
         .btn-save { background: #38a169; flex: 2; }
         .btn-cancel { background: #e53e3e; flex: 1; }
+
+        /* AJUSTE DE PUNTOS DE LAS ESQUINAS (GIGANTES PARA MÓVIL) */
+        .cropper-point {
+            width: 30px !important;
+            height: 30px !important;
+            background-color: #3182ce !important;
+            opacity: 0.6 !important;
+        }
+        /* Ajustar posición de los puntos para que queden cómodos */
+        .cropper-point.point-nw { top: -15px; left: -15px; }
+        .cropper-point.point-ne { top: -15px; right: -15px; }
+        .cropper-point.point-sw { bottom: -15px; left: -15px; }
+        .cropper-point.point-se { bottom: -15px; right: -15px; }
     </style>
 </head>
 <body>
@@ -77,6 +90,7 @@
                 };
             };
             reader.readAsDataURL(file);
+            input.value = '';
         }
 
         function closeModal() {
@@ -88,7 +102,7 @@
             if (!cropper) return;
             const canvas = cropper.getCroppedCanvas();
             const preview = document.getElementById('final-preview');
-            preview.src = canvas.toDataURL('image/jpeg');
+            preview.src = canvas.toDataURL('image/jpeg', 0.8);
             preview.style.display = 'block';
             closeModal();
         }
