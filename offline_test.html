@@ -206,10 +206,29 @@
         
         <div id="preview-container">
             <img id="f-preview" src="">
-            <label class="file-input-label" for="f-foto">
-                <span id="label-text">📷 Subir Foto</span>
-                <input type="file" id="f-foto" accept="image/*" style="display:none" onchange="previewFoto(event)">
-            </label>
+            <div id="photo-controls">
+                <label class="file-input-label" for="f-foto">
+                    <span id="label-text">📷 Subir</span>
+                    <input type="file" id="f-foto" accept="image/*" style="display:none" onchange="previewFoto(event)">
+                </label>
+                <button type="button" class="cam-btn" onclick="abrirCamara()">📸</button>
+            </div>
+        </div>
+        <div id="camera-modal">
+            <video id="video-preview" autoplay playsinline></video>
+            <div class="camera-ui">
+                <span style="color:white;cursor:pointer" onclick="cerrarCamara()">Cerrar</span>
+                <button class="shutter-btn" onclick="tomarFoto()"></button>
+                <span style="opacity:0">Cerrar</span>
+            </div>
+        </div>
+        <div id="cropper-modal">
+            <div style="color:white;padding:20px;font-weight:bold">RECORTE CUADRADO</div>
+            <canvas id="crop-canvas"></canvas>
+            <div style="padding:20px;display:flex;gap:20px;width:100%;max-width:400px">
+                <button style="background:#e53e3e;color:white;flex:1;padding:10px;border-radius:8px;border:none" onclick="cerrarCropper()">CANCELAR</button>
+                <button style="background:#38a169;color:white;flex:1;padding:10px;border-radius:8px;border:none" onclick="guardarRecorte()">ACEPTAR</button>
+            </div>
         </div>
 
         <div id="duplicate-alert" class="alert-duplicate"><span>⚠️ Esta CI ya existe.</span><button onclick="abrirDuplicado()">Ver Registro</button></div>
