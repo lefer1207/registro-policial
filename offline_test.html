@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <title>Editor de Fotos</title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
+</head>
+<body>
+    <div style='max-width:500px;margin:20px auto;text-align:center;font-family:sans-serif;'>
+        <h3>Editor de Fotos (Prueba)</h3>
+        <img id='f-preview' style='width:120px;height:120px;border-radius:50%;object-fit:cover;display:none;margin:20px auto;border:3px solid #ccc;'>
+        <button onclick='abrirCamara()' style='padding:15px;width:100%;font-weight:bold;background:#edf2f7;border:none;border-radius:8px;'>📸 SACAR FOTO</button>
+    </div>
+    <div id='camera-modal' style='position:fixed;inset:0;background:black;z-index:1000;display:none;flex-direction:column;'>
+        <video id='video-preview' autoplay playsinline style='width:100%;flex-grow:1;object-fit:cover;'></video>
+        <div style='padding:20px;display:flex;gap:10px;background:black;'>
+            <button onclick='cerrarCamara()' style='flex:1;padding:15px;background:#4a5568;color:white;border:none;border-radius:8px;'>CANCELAR</button>
+            <button onclick='tomarFoto()' style='flex:2;padding:15px;background:white;font-weight:bold;border:none;border-radius:8px;'>CAPTURAR</button>
+        </div>
+    </div>
+    <div id='cropper-modal' style='position:fixed;inset:0;background:black;z-index:2000;display:none;flex-direction:column;'>
+        <div style='color:white;padding:15px;text-align:center;'>ACOMODÁ LA FOTO</div>
+        <div style='flex-grow:1;overflow:hidden;background:#1a1a1a;display:flex;align-items:center;justify-content:center;'>
+            <img id='crop-image' style='max-width:100%;display:block;'>
+        </div>
+        <div style='padding:20px;display:flex;gap:10px;background:black;'>
+            <button onclick='cerrarCropper()' style='flex:1;padding:15px;background:#4a5568;color:white;border:none;border-radius:8px;'>CANCELAR</button>
+            <button onclick='guardarRecorte()' style='flex:2;padding:15px;background:#38a169;color:white;font-weight:bold;border:none;border-radius:8px;'>LISTO</button>
+        </div>
+    </div>
+    <script>
+        let stream = null, cropper = null;
+        function abrirCamara() {
+            document.getElementById('camera-modal').style.display = 'flex';
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; });
+        }
+        function cerrarCamara() { if(stream) stream.getTracks().forEach(t=>t.stop()); document.getElementById('camera-modal').style.display = 'none'; }
+        function tomarFoto() {
+            const v = document.getElementById('video-preview');
+            const c = document.createElement('canvas');
+            c.width = v.videoWidth; c.height = v.videoHeight;
+            c.getContext('2d').drawImage(v, 0, 0);
+            cerrarCamara(); abrirCropper(c.toDataURL('image/jpeg'));
+        }
+        function abrirCropper(url) {
+            const img = document.getElementById('crop-image');
+            img.src = url;
+            document.getElementById('cropper-modal').style.display = 'flex';
+            if(cropper) cropper.destroy();
+            setTimeout(() => {
+                cropper = new Cropper(img, { aspectRatio: 1, viewMode: 1, dragMode: 'move', autoCropArea: 0.8 });
+            }, 100);
+        }
+        function cerrarCropper() { document.getElementById('cropper-modal').style.display = 'none'; if(cropper) cropper.destroy(); }
+        function guardarRecorte() {
+            const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+            document.getElementById('f-preview').src = canvas.toDataURL('image/jpeg');
+            document.getElementById('f-preview').style.display = 'block';
+            cerrarCropper();
+        }
+    </script>
+</body>
+</html>
