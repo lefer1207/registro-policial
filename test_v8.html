@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <title>Editor V8 - Perfeccionado</title>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
+    <style>
+        body { font-family: sans-serif; background: #1a202c; color: white; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        .header { background: #2d3748; padding: 15px; text-align: center; font-weight: bold; }
+        .main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .preview-img { width: 150px; height: 150px; border-radius: 10px; border: 3px solid white; display: none; margin-bottom: 20px; }
+        .btn { background: #3182ce; color: white; padding: 20px; border-radius: 12px; width: 100%; max-width: 300px; text-align: center; font-weight: bold; margin-bottom: 15px; cursor: pointer; text-decoration: none; border: none; font-size: 16px; }
+        
+        #modal { position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 10000; }
+        .cropper-box { flex: 1; position: relative; overflow: hidden; }
+        #image-to-crop { display: block; max-width: 100%; }
+        .footer { padding: 20px; display: flex; gap: 10px; background: black; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+        
+        /* PUNTOS DE LAS ESQUINAS UN TOQUE MÁS CHICOS (14px) */
+        .cropper-point {
+            width: 14px !important;
+            height: 14px !important;
+            background-color: #3182ce !important; 
+            opacity: 1 !important;
+            border: 1.5px solid white !important; 
+            border-radius: 0 !important; 
+        }
+        
+        .cropper-point.point-nw { top: -7px !important; left: -7px !important; }
+        .cropper-point.point-ne { top: -7px !important; right: -7px !important; }
+        .cropper-point.point-sw { bottom: -7px !important; left: -7px !important; }
+        .cropper-point.point-se { bottom: -7px !important; right: -7px !important; }
+        
+        .cropper-point.point-n, .cropper-point.point-w, .cropper-point.point-e, .cropper-point.point-s {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class='header'>EDITOR POLICIAL V8</div>
+    <div class='main'>
+        <img id='final-preview' class='preview-img'>
+        <label class='btn'>
+            📸 TOMAR FOTO
+            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='loadFile(this)'>
+        </label>
+    </div>
+
+    <div id='modal'>
+        <div style='padding:10px; text-align:center; font-size:12px; color: #a0aec0;'>AJUSTÁ EL RECUADRO DESDE LAS ESQUINAS</div>
+        <div class='cropper-box'>
+            <img id='image-to-crop'>
+        </div>
+        <div class='footer'>
+            <button class='btn' style='background:#e53e3e; flex:1' onclick='closeModal()'>CANCELAR</button>
+            <button class='btn' style='background:#38a169; flex:2' onclick='saveResult()'>ACEPTAR</button>
+        </div>
+    </div>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
+    <script>
+        let cropper = null;
+        function loadFile(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const modal = document.getElementById('modal');
+                const img = document.getElementById('image-to-crop');
+                img.src = e.target.result;
+                modal.style.display = 'flex';
+                if (cropper) cropper.destroy();
+                img.onload = function() {
+                    cropper = new Cropper(img, {
+                        aspectRatio: NaN,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        background: false
+                    });
+                };
+            };
+            reader.readAsDataURL(file);
+            input.value = '';
+        }
+        function closeModal() {
+            document.getElementById('modal').style.display = 'none';
+            if (cropper) cropper.destroy();
+        }
+        function saveResult() {
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas();
+            const preview = document.getElementById('final-preview');
+            preview.src = canvas.toDataURL('image/jpeg', 0.8);
+            preview.style.display = 'block';
+            closeModal();
+        }
+    </script>
+</body>
+</html>
