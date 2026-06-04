@@ -7,176 +7,122 @@
     <title>Editor Policial Pro</title>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; color: #1a202c; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
-        
-        #header { padding: 15px; text-align: center; background: #1a202c; color: white; font-weight: bold; font-size: 18px; }
-        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
-        
-        #f-preview { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 25px; display: none; background: #ddd; }
-        .welcome-text { color: #718096; margin-bottom: 30px; font-size: 15px; }
-        
-        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; max-width: 300px; margin-bottom: 15px; transition: 0.2s; -webkit-appearance: none; }
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; height: 100vh; display: flex; flex-direction: column; }
+        #log-area { background: #fee2e2; color: #991b1b; padding: 10px; font-size: 11px; max-height: 100px; overflow-y: auto; border-bottom: 1px solid #f87171; }
+        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #f-preview { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none; }
+        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; width: 100%; max-width: 300px; margin-bottom: 15px; text-align: center; cursor: pointer; }
         .btn-blue { background: #3182ce; color: white; }
-        .btn-white { background: white; color: #2d3748; border: 1px solid #cbd5e0; }
+        .btn-gray { background: #e2e8f0; color: #4a5568; }
         .btn-green { background: #38a169; color: white; }
-        
         #modal-editor { position: fixed; inset: 0; background: black; z-index: 9999; display: none; flex-direction: column; }
-        .editor-header { background: #000; color: white; padding: 15px; text-align: center; font-size: 13px; border-bottom: 1px solid #222; }
-        .cropper-container-wrapper { flex-grow: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
-        #crop-image { display: block; max-width: 100%; }
-        
-        .editor-footer { padding: 20px; display: flex; gap: 12px; background: #000; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-        
-        #loading { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; color: #2d3748; font-weight: bold; }
+        .cropper-box { flex-grow: 1; background: #000; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        #crop-image { max-width: 100%; display: block; }
+        .footer { padding: 20px; display: flex; gap: 10px; background: #000; }
     </style>
 </head>
 <body>
-    <div id='loading'>PROCESANDO FOTO...</div>
-    <div id='header'>REGISTRO POLICIAL</div>
-    
+    <div id='log-area'>Sistema listo.</div>
     <div id='main-view'>
         <img id='f-preview'>
-        <div id='msg' class='welcome-text'>Sacá una foto para empezar</div>
-        
         <label class='btn btn-blue'>
             📸 SACAR FOTO
-            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='handleInput(this)'>
+            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='processFile(this)'>
         </label>
-
-        <label class='btn btn-white'>
+        <label class='btn btn-gray'>
             📁 GALERÍA
-            <input type='file' accept='image/*' style='display:none' onchange='handleInput(this)'>
+            <input type='file' accept='image/*' style='display:none' onchange='processFile(this)'>
         </label>
-
-        <button id='btn-reset' class='btn btn-white' style='display:none; margin-top: 20px' onclick='location.reload()'>LIMPIAR</button>
     </div>
 
-    <!-- MODAL EDITOR -->
     <div id='modal-editor'>
-        <div class='editor-header'>MOVER Y ACERCAR CON LOS DEDOS</div>
-        <div class='cropper-container-wrapper'>
+        <div style='color:white; padding:15px; text-align:center; font-size:12px;'>ACOMODÁ LA IMAGEN</div>
+        <div class='cropper-box'>
             <img id='crop-image'>
         </div>
-        <div class='editor-footer'>
-            <button class='btn btn-white' style='flex:1; margin-bottom:0' onclick='cerrarEditor()'>ATRÁS</button>
-            <button class='btn btn-green' style='flex:2; margin-bottom:0' onclick='finalizarRecorte()'>LISTO</button>
+        <div class='footer'>
+            <button class='btn btn-gray' style='flex:1' onclick='closeEditor()'>ATRÁS</button>
+            <button class='btn btn-green' style='flex:2' onclick='saveCrop()'>LISTO</button>
         </div>
     </div>
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
     <script>
         let cropper = null;
+        function log(m) {
+            const area = document.getElementById('log-area');
+            area.innerHTML += '<br>• ' + m;
+            area.scrollTop = area.scrollHeight;
+        }
 
-        async function handleInput(input) {
+        function processFile(input) {
             const file = input.files[0];
-            if (!file) return;
-
-            document.getElementById('loading').style.display = 'flex';
+            if (!file) { log('No se seleccionó archivo'); return; }
+            log('Archivo: ' + file.name + ' (' + Math.round(file.size/1024) + ' KB)');
             
-            try {
-                // REDIMENSIONAR IMAGEN (Evita que el celular se trabe con fotos pesadas)
-                const optimizedUrl = await resizeImage(file, 1200);
-                abrirEditor(optimizedUrl);
-            } catch (err) {
-                alert('Error al procesar la imagen: ' + err.message);
-            } finally {
-                document.getElementById('loading').style.display = 'none';
-                input.value = ''; // Reset input
-            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                log('Imagen leída correctamente');
+                openEditor(e.target.result);
+            };
+            reader.onerror = function() { log('Error al leer el archivo'); };
+            reader.readAsDataURL(file);
         }
 
-        function resizeImage(file, maxSide) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > height) {
-                            if (width > maxSide) {
-                                height *= maxSide / width;
-                                width = maxSide;
-                            }
-                        } else {
-                            if (height > maxSide) {
-                                width *= maxSide / height;
-                                height = maxSide;
-                            }
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.85));
-                    };
-                    img.onerror = reject;
-                    img.src = e.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
-        }
-
-        function abrirEditor(dataUrl) {
+        function openEditor(src) {
+            log('Abriendo editor...');
             const modal = document.getElementById('modal-editor');
             const img = document.getElementById('crop-image');
             
             modal.style.display = 'flex';
-            img.src = dataUrl;
+            img.src = src;
             
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
+            if (cropper) cropper.destroy();
 
-            img.onload = () => {
-                cropper = new Cropper(img, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 0.8,
-                    background: false,
-                    guides: true,
-                    center: true,
-                    highlight: false,
-                    cropBoxMovable: false,
-                    cropBoxResizable: false,
-                    toggleDragModeOnDblclick: false,
-                    ready() {
-                        console.log('Cropper listo');
-                    }
-                });
+            img.onload = function() {
+                log('Imagen cargada en el editor, iniciando Cropper...');
+                try {
+                    cropper = new Cropper(img, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        background: false,
+                        modal: true,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: false,
+                        cropBoxResizable: false,
+                        toggleDragModeOnDblclick: false,
+                        ready() { log('¡EDITOR LISTO! Ya podés mover la foto.'); },
+                        error() { log('Error en Cropper.js'); }
+                    });
+                } catch(e) {
+                    log('Error crítico: ' + e.message);
+                }
             };
         }
 
-        function cerrarEditor() {
+        function closeEditor() {
             document.getElementById('modal-editor').style.display = 'none';
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
+            if (cropper) cropper.destroy();
         }
 
-        function finalizarRecorte() {
-            if (!cropper) return;
-            
-            const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
-            const result = canvas.toDataURL('image/jpeg', 0.85);
-            
-            const preview = document.getElementById('f-preview');
-            preview.src = result;
-            preview.style.display = 'block';
-            
-            document.getElementById('msg').style.display = 'none';
-            document.getElementById('btn-reset').style.display = 'block';
-            
-            cerrarEditor();
+        function saveCrop() {
+            if (!cropper) { log('Error: no hay editor activo'); return; }
+            log('Guardando recorte...');
+            try {
+                const canvas = cropper.getCroppedCanvas({ width: 400, height: 400 });
+                const result = canvas.toDataURL('image/jpeg', 0.8);
+                document.getElementById('f-preview').src = result;
+                document.getElementById('f-preview').style.display = 'block';
+                log('Recorte guardado con éxito');
+                closeEditor();
+            } catch(e) {
+                log('Error al guardar: ' + e.message);
+            }
         }
     </script>
 </body>
