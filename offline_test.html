@@ -4,62 +4,64 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-    <title>Editor de Fotos Pro</title>
+    <title>Editor Policial Pro</title>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; color: #1a202c; height: 100vh; display: flex; flex-direction: column; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; color: #1a202c; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         
-        #header { padding: 20px; text-align: center; background: #1a202c; color: white; font-weight: bold; }
-        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        #header { padding: 15px; text-align: center; background: #1a202c; color: white; font-weight: bold; font-size: 18px; }
+        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center; }
         
-        #f-preview { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 30px; display: none; }
-        .welcome-msg { text-align: center; color: #718096; margin-bottom: 30px; }
+        #f-preview { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); margin-bottom: 25px; display: none; background: #ddd; }
+        .welcome-text { color: #718096; margin-bottom: 30px; font-size: 15px; }
         
-        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; max-width: 300px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-primary { background: #3182ce; color: white; }
-        .btn-secondary { background: white; color: #4a5568; }
-        .btn-success { background: #38a169; color: white; }
+        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; max-width: 300px; margin-bottom: 15px; transition: 0.2s; -webkit-appearance: none; }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-blue { background: #3182ce; color: white; }
+        .btn-white { background: white; color: #2d3748; border: 1px solid #cbd5e0; }
+        .btn-green { background: #38a169; color: white; }
         
-        /* Modal de Recorte */
-        #modal-recorte { position: fixed; inset: 0; background: black; z-index: 5000; display: none; flex-direction: column; }
-        .cropper-container { flex-grow: 1; background: #000; overflow: hidden; }
+        #modal-editor { position: fixed; inset: 0; background: black; z-index: 9999; display: none; flex-direction: column; }
+        .editor-header { background: #000; color: white; padding: 15px; text-align: center; font-size: 13px; border-bottom: 1px solid #222; }
+        .cropper-container-wrapper { flex-grow: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         #crop-image { display: block; max-width: 100%; }
         
-        .footer-controls { padding: 20px; display: flex; gap: 10px; background: #000; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+        .editor-footer { padding: 20px; display: flex; gap: 12px; background: #000; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+        
+        #loading { position: fixed; inset: 0; background: rgba(255,255,255,0.8); display: none; align-items: center; justify-content: center; z-index: 10000; color: #2d3748; font-weight: bold; }
     </style>
 </head>
 <body>
+    <div id='loading'>PROCESANDO FOTO...</div>
     <div id='header'>REGISTRO POLICIAL</div>
     
     <div id='main-view'>
         <img id='f-preview'>
-        <div id='empty-msg' class='welcome-msg'>No hay foto seleccionada</div>
+        <div id='msg' class='welcome-text'>Sacá una foto para empezar</div>
         
-        <!-- BOTÓN 1: CÁMARA NATIVA (Lo más confiable) -->
-        <label class='btn btn-primary'>
+        <label class='btn btn-blue'>
             📸 SACAR FOTO
-            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='cargarImagen(event)'>
+            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='handleInput(this)'>
         </label>
 
-        <!-- BOTÓN 2: GALERÍA -->
-        <label class='btn btn-secondary'>
+        <label class='btn btn-white'>
             📁 GALERÍA
-            <input type='file' accept='image/*' style='display:none' onchange='cargarImagen(event)'>
+            <input type='file' accept='image/*' style='display:none' onchange='handleInput(this)'>
         </label>
 
-        <button id='btn-reset' class='btn btn-secondary' style='display:none; margin-top: 20px;' onclick='location.reload()'>LIMPIAR</button>
+        <button id='btn-reset' class='btn btn-white' style='display:none; margin-top: 20px' onclick='location.reload()'>LIMPIAR</button>
     </div>
 
-    <!-- MODAL DEL EDITOR -->
-    <div id='modal-recorte'>
-        <div style='background:#000; color:white; padding:15px; text-align:center; font-size:13px; font-weight:bold;'>ACOMODÁ LA IMAGEN</div>
-        <div class='cropper-container'>
+    <!-- MODAL EDITOR -->
+    <div id='modal-editor'>
+        <div class='editor-header'>MOVER Y ACERCAR CON LOS DEDOS</div>
+        <div class='cropper-container-wrapper'>
             <img id='crop-image'>
         </div>
-        <div class='footer-controls'>
-            <button class='btn btn-secondary' style='flex:1' onclick='cerrarRecorte()'>ATRÁS</button>
-            <button class='btn btn-success' style='flex:2' onclick='procesarRecorte()'>GUARDAR</button>
+        <div class='editor-footer'>
+            <button class='btn btn-white' style='flex:1; margin-bottom:0' onclick='cerrarEditor()'>ATRÁS</button>
+            <button class='btn btn-green' style='flex:2; margin-bottom:0' onclick='finalizarRecorte()'>LISTO</button>
         </div>
     </div>
 
@@ -67,65 +69,114 @@
     <script>
         let cropper = null;
 
-        function cargarImagen(e) {
-            const file = e.target.files[0];
-            if(!file) return;
+        async function handleInput(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            document.getElementById('loading').style.display = 'flex';
             
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                abrirEditor(event.target.result);
-            };
-            reader.readAsDataURL(file);
+            try {
+                // REDIMENSIONAR IMAGEN (Evita que el celular se trabe con fotos pesadas)
+                const optimizedUrl = await resizeImage(file, 1200);
+                abrirEditor(optimizedUrl);
+            } catch (err) {
+                alert('Error al procesar la imagen: ' + err.message);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+                input.value = ''; // Reset input
+            }
+        }
+
+        function resizeImage(file, maxSide) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > maxSide) {
+                                height *= maxSide / width;
+                                width = maxSide;
+                            }
+                        } else {
+                            if (height > maxSide) {
+                                width *= maxSide / height;
+                                height = maxSide;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
         }
 
         function abrirEditor(dataUrl) {
-            const modal = document.getElementById('modal-recorte');
+            const modal = document.getElementById('modal-editor');
             const img = document.getElementById('crop-image');
             
             modal.style.display = 'flex';
             img.src = dataUrl;
             
-            if(cropper) { cropper.destroy(); cropper = null; }
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
 
-            img.onload = function() {
+            img.onload = () => {
                 cropper = new Cropper(img, {
                     aspectRatio: 1,
                     viewMode: 1,
                     dragMode: 'move',
-                    autoCropArea: 0.9,
+                    autoCropArea: 0.8,
                     background: false,
-                    modal: true,
                     guides: true,
                     center: true,
                     highlight: false,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
+                    cropBoxMovable: false,
+                    cropBoxResizable: false,
+                    toggleDragModeOnDblclick: false,
                     ready() {
-                        console.log('Editor listo');
+                        console.log('Cropper listo');
                     }
                 });
             };
         }
 
-        function cerrarRecorte() {
-            document.getElementById('modal-recorte').style.display = 'none';
-            if(cropper) { cropper.destroy(); cropper = null; }
+        function cerrarEditor() {
+            document.getElementById('modal-editor').style.display = 'none';
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
         }
 
-        function procesarRecorte() {
-            if(!cropper) return;
+        function finalizarRecorte() {
+            if (!cropper) return;
             
             const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
-            const result = canvas.toDataURL('image/jpeg', 0.8);
+            const result = canvas.toDataURL('image/jpeg', 0.85);
             
             const preview = document.getElementById('f-preview');
             preview.src = result;
             preview.style.display = 'block';
             
-            document.getElementById('empty-msg').style.display = 'none';
+            document.getElementById('msg').style.display = 'none';
             document.getElementById('btn-reset').style.display = 'block';
             
-            cerrarRecorte();
+            cerrarEditor();
         }
     </script>
 </body>
