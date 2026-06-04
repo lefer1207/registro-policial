@@ -134,7 +134,18 @@
         .plus-btn { background: var(--accent); color: white; border: none; width: 24px; height: 24px; border-radius: 12px; font-weight: bold; cursor: pointer; }
         .back-link { color: var(--accent); font-weight: bold; display: flex; align-items: center; gap: 4px; margin-bottom: 15px; cursor: pointer; }
 
-        .alert-duplicate {
+        
+        #photo-controls { display: flex; justify-content: center; gap: 15px; align-items: center; margin-top: 10px; }
+        .cam-btn { background: #edf2f7; color: #4a5568; width: 44px; height: 44px; border-radius: 22px; display: flex; align-items: center; justify-content: center; font-size: 20px; border: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; }
+        #camera-modal { position: fixed; inset: 0; background: black; z-index: 300; display: none; flex-direction: column; }
+        #camera-modal.open { display: flex; }
+        #video-preview { width: 100%; flex-grow: 1; object-fit: cover; }
+        .camera-ui { position: absolute; bottom: 30px; left: 0; right: 0; display: flex; justify-content: space-around; align-items: center; }
+        .shutter-btn { width: 70px; height: 70px; border-radius: 35px; background: white; border: 5px solid rgba(255,255,255,0.3); }
+        #cropper-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 400; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        #cropper-modal.open { display: flex; }
+        #crop-canvas { max-width: 90%; max-height: 70vh; border: 2px solid white; border-radius: 12px; }
+            .alert-duplicate {
             background: #fff5f5;
             border: 1px solid #feb2b2;
             color: #c53030;
@@ -259,7 +270,48 @@ var db = [];
 var currentId = null;
 var currentFoto = null;
 
+
+let stream = null;
+function abrirCamara() {
+    document.getElementById('camera-modal').classList.add('open');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
+    .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; })
+    .catch(err => { alert('Error: ' + err.message); cerrarCamara(); });
+}
+function cerrarCamara() { if (stream) stream.getTracks().forEach(t => t.stop()); document.getElementById('camera-modal').classList.remove('open'); }
+function tomarFoto() {
+    const v = document.getElementById('video-preview');
+    const c = document.createElement('canvas');
+    c.width = v.videoWidth; c.height = v.videoHeight;
+    c.getContext('2d').drawImage(v, 0, 0);
+    cerrarCamara(); abrirCropper(c.toDataURL('image/jpeg'));
+}
+function abrirCropper(url) {
+    const img = new Image();
+    img.onload = function() {
+        const c = document.getElementById('crop-canvas');
+        const ctx = c.getContext('2d');
+        const s = Math.min(img.width, img.height, 1000);
+        c.width = s; c.height = s;
+        ctx.drawImage(img, (img.width-s)/2, (img.height-s)/2, s, s, 0, 0, s, s);
+        document.getElementById('cropper-modal').classList.add('open');
+    };
+    img.src = url;
+}
+function cerrarCropper() { document.getElementById('cropper-modal').classList.remove('open'); }
+function guardarRecorte() {
+    currentFoto = document.getElementById('crop-canvas').toDataURL('image/jpeg', 0.7);
+    document.getElementById('f-preview').src = currentFoto;
+    document.getElementById('f-preview').style.display = 'block';
+    document.getElementById('label-text').innerText = 'Cambiar';
+    cerrarCropper();
+}
 function previewFoto(e) {
+    const f = e.target.files[0]; if (!f) return;
+    const r = new FileReader(); r.onload = (ev) => abrirCropper(ev.target.result);
+    r.readAsDataURL(f);
+}
+function previewFoto_old(e) {
     var file = e.target.files[0];
     if (!file) return;
     var reader = new FileReader();
