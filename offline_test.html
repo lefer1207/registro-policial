@@ -8,105 +8,77 @@
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: -apple-system, sans-serif; background: #000; margin: 0; color: white; overflow: hidden; height: 100vh; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; color: #1a202c; height: 100vh; display: flex; flex-direction: column; }
         
-        #main-view { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #111; padding: 20px; }
-        #f-preview { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; border: 4px solid #3182ce; margin-bottom: 20px; display: none; background: #222; }
+        #header { padding: 20px; text-align: center; background: #1a202c; color: white; font-weight: bold; }
+        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         
-        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; max-width: 300px; margin-bottom: 12px; }
+        #f-preview { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; border: 5px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin-bottom: 30px; display: none; }
+        .welcome-msg { text-align: center; color: #718096; margin-bottom: 30px; }
+        
+        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; width: 100%; max-width: 300px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .btn-primary { background: #3182ce; color: white; }
-        .btn-secondary { background: #2d3748; color: white; }
+        .btn-secondary { background: white; color: #4a5568; }
         .btn-success { background: #38a169; color: white; }
         
-        .full-modal { position: fixed; inset: 0; background: black; z-index: 5000; display: none; flex-direction: column; }
-        #video-preview { width: 100%; flex-grow: 1; object-fit: cover; background: #000; }
-        
-        .cropper-area { flex-grow: 1; position: relative; background: #000; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        /* Modal de Recorte */
+        #modal-recorte { position: fixed; inset: 0; background: black; z-index: 5000; display: none; flex-direction: column; }
+        .cropper-container { flex-grow: 1; background: #000; overflow: hidden; }
         #crop-image { display: block; max-width: 100%; }
         
         .footer-controls { padding: 20px; display: flex; gap: 10px; background: #000; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
-        #status-log { position: fixed; top: 10px; left: 10px; font-size: 10px; color: #4ade80; z-index: 9999; background: rgba(0,0,0,0.5); padding: 2px 5px; }
     </style>
 </head>
 <body>
-    <div id='status-log'>Listo</div>
+    <div id='header'>REGISTRO POLICIAL</div>
     
     <div id='main-view'>
         <img id='f-preview'>
-        <div id='msg' style='color:#718096; margin-bottom:20px'>Cargá una foto para probar</div>
-        <button class='btn btn-primary' onclick='abrirCamara()'>📸 SACAR FOTO</button>
+        <div id='empty-msg' class='welcome-msg'>No hay foto seleccionada</div>
+        
+        <!-- BOTÓN 1: CÁMARA NATIVA (Lo más confiable) -->
+        <label class='btn btn-primary'>
+            📸 SACAR FOTO
+            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='cargarImagen(event)'>
+        </label>
+
+        <!-- BOTÓN 2: GALERÍA -->
         <label class='btn btn-secondary'>
             📁 GALERÍA
-            <input type='file' accept='image/*' style='display:none' onchange='subirDeGaleria(event)'>
+            <input type='file' accept='image/*' style='display:none' onchange='cargarImagen(event)'>
         </label>
+
+        <button id='btn-reset' class='btn btn-secondary' style='display:none; margin-top: 20px;' onclick='location.reload()'>LIMPIAR</button>
     </div>
 
-    <div id='modal-camara' class='full-modal'>
-        <video id='video-preview' autoplay playsinline></video>
-        <div class='footer-controls'>
-            <button class='btn btn-secondary' style='flex:1' onclick='cerrarCamara()'>CANCELAR</button>
-            <button class='btn btn-primary' style='flex:2' onclick='tomarCaptura()'>📸 CAPTURAR</button>
-        </div>
-    </div>
-
-    <div id='modal-recorte' class='full-modal'>
-        <div style='background:#000; padding:15px; text-align:center; font-size:13px; font-weight:bold; border-bottom:1px solid #222'>ACOMODÁ LA IMAGEN</div>
-        <div class='cropper-area'>
+    <!-- MODAL DEL EDITOR -->
+    <div id='modal-recorte'>
+        <div style='background:#000; color:white; padding:15px; text-align:center; font-size:13px; font-weight:bold;'>ACOMODÁ LA IMAGEN</div>
+        <div class='cropper-container'>
             <img id='crop-image'>
         </div>
         <div class='footer-controls'>
             <button class='btn btn-secondary' style='flex:1' onclick='cerrarRecorte()'>ATRÁS</button>
-            <button class='btn btn-success' style='flex:2' onclick='procesarRecorte()'>ACEPTAR</button>
+            <button class='btn btn-success' style='flex:2' onclick='procesarRecorte()'>GUARDAR</button>
         </div>
     </div>
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
     <script>
-        let stream = null;
         let cropper = null;
 
-        function log(m) { document.getElementById('status-log').innerText = m; console.log(m); }
-
-        function abrirCamara() {
-            log('Iniciando...');
-            document.getElementById('modal-camara').style.display = 'flex';
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-            .then(s => { stream = s; document.getElementById('video-preview').srcObject = s; log('Cámara activa'); })
-            .catch(e => { alert('Error: ' + e.message); cerrarCamara(); });
-        }
-
-        function cerrarCamara() {
-            if(stream) stream.getTracks().forEach(t => t.stop());
-            document.getElementById('modal-camara').style.display = 'none';
-        }
-
-        function tomarCaptura() {
-            log('Capturando...');
-            const video = document.getElementById('video-preview');
-            const canvas = document.createElement('canvas');
-            // Asegurar que el canvas tenga dimensiones válidas
-            canvas.width = video.videoWidth || 1280;
-            canvas.height = video.videoHeight || 720;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-            cerrarCamara();
-            
-            // PEQUEÑO RETRASO para que el DOM se asiente antes de abrir el editor
-            setTimeout(() => iniciarEditor(dataUrl), 300);
-        }
-
-        function subirDeGaleria(e) {
+        function cargarImagen(e) {
             const file = e.target.files[0];
             if(!file) return;
+            
             const reader = new FileReader();
-            reader.onload = ev => iniciarEditor(ev.target.result);
+            reader.onload = function(event) {
+                abrirEditor(event.target.result);
+            };
             reader.readAsDataURL(file);
         }
 
-        function iniciarEditor(dataUrl) {
-            log('Cargando editor...');
+        function abrirEditor(dataUrl) {
             const modal = document.getElementById('modal-recorte');
             const img = document.getElementById('crop-image');
             
@@ -115,26 +87,23 @@
             
             if(cropper) { cropper.destroy(); cropper = null; }
 
-            // Esperar a que la imagen cargue Y el modal esté visible
             img.onload = function() {
-                log('Imagen cargada, iniciando Cropper...');
-                setTimeout(() => {
-                    cropper = new Cropper(img, {
-                        aspectRatio: 1,
-                        viewMode: 1,
-                        dragMode: 'move',
-                        autoCropArea: 0.8,
-                        background: false,
-                        modal: true,
-                        guides: true,
-                        center: true,
-                        highlight: false,
-                        cropBoxMovable: false,
-                        cropBoxResizable: false,
-                        toggleDragModeOnDblclick: false,
-                        ready() { log('¡Listo para editar!'); }
-                    });
-                }, 100);
+                cropper = new Cropper(img, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.9,
+                    background: false,
+                    modal: true,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    ready() {
+                        console.log('Editor listo');
+                    }
+                });
             };
         }
 
@@ -145,16 +114,17 @@
 
         function procesarRecorte() {
             if(!cropper) return;
-            log('Procesando...');
+            
             const canvas = cropper.getCroppedCanvas({ width: 500, height: 500 });
             const result = canvas.toDataURL('image/jpeg', 0.8);
             
             const preview = document.getElementById('f-preview');
             preview.src = result;
             preview.style.display = 'block';
-            document.getElementById('msg').style.display = 'none';
             
-            log('Hecho');
+            document.getElementById('empty-msg').style.display = 'none';
+            document.getElementById('btn-reset').style.display = 'block';
+            
             cerrarRecorte();
         }
     </script>
