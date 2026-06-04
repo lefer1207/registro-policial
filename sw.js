@@ -1,4 +1,4 @@
-const CACHE_NAME = 'registro-policial-v2'; // Cambiamos la versión para forzar actualización
+const CACHE_NAME = 'registro-policial-v3'; // Cambiamos la versión para forzar actualización
 const ASSETS = [
   './index.html',
   './offline_test.html',
