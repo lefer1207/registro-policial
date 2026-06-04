@@ -4,97 +4,112 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-    <title>Editor Libre</title>
+    <title>Editor Policial Pro</title>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, sans-serif; background: #f0f2f5; margin: 0; height: 100vh; display: flex; flex-direction: column; }
-        #log-area { background: #fee2e2; color: #991b1b; padding: 10px; font-size: 11px; max-height: 80px; overflow-y: auto; }
-        #main-view { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        #f-preview { width: 180px; height: 180px; border-radius: 10px; object-fit: cover; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; display: none; }
-        .btn { padding: 18px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; width: 100%; max-width: 300px; margin-bottom: 15px; text-align: center; cursor: pointer; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: #000; margin: 0; height: 100vh; overflow: hidden; }
+        
+        #main-view { height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1a202c; padding: 20px; }
+        #f-preview { width: 180px; height: 180px; border-radius: 12px; object-fit: cover; border: 4px solid white; margin-bottom: 30px; display: none; }
+        
+        .btn { padding: 20px; border: none; border-radius: 15px; font-weight: bold; font-size: 18px; width: 100%; max-width: 320px; margin-bottom: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .btn-blue { background: #3182ce; color: white; }
-        .btn-gray { background: #e2e8f0; color: #4a5568; }
+        .btn-gray { background: #edf2f7; color: #2d3748; }
         .btn-green { background: #38a169; color: white; }
-        #modal-editor { position: fixed; inset: 0; background: black; z-index: 9999; display: none; flex-direction: column; }
-        .cropper-box { flex-grow: 1; background: #000; overflow: hidden; }
-        #crop-image { max-width: 100%; display: block; }
-        .footer { padding: 20px; display: flex; gap: 10px; background: #000; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+
+        /* Pantalla completa del editor */
+        #modal-editor { position: fixed; inset: 0; background: #000; z-index: 10000; display: none; flex-direction: column; }
+        .editor-header { padding: 15px; color: white; text-align: center; font-size: 14px; background: #000; font-weight: bold; }
+        
+        .cropper-wrapper { flex-grow: 1; position: relative; background: #000; overflow: hidden; }
+        #crop-image { display: block; max-width: 100%; }
+        
+        .editor-footer { padding: 20px; display: flex; gap: 15px; background: #000; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+        
+        /* Ajustes para Cropper en móvil */
+        .cropper-view-box, .cropper-face { border-radius: 0; }
+        .cropper-line, .cropper-point { background-color: #3182ce; height: 10px; width: 10px; opacity: 0.8; }
+        .cropper-point.point-se { width: 30px; height: 30px; opacity: 0.5; } /* Punto de agarre más grande */
     </style>
 </head>
 <body>
-    <div id='log-area'>Modo: Editor Libre Activo</div>
     <div id='main-view'>
         <img id='f-preview'>
         <label class='btn btn-blue'>
             📸 SACAR FOTO
-            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='processFile(this)'>
+            <input type='file' accept='image/*' capture='environment' style='display:none' onchange='handleFile(this)'>
         </label>
         <label class='btn btn-gray'>
             📁 GALERÍA
-            <input type='file' accept='image/*' style='display:none' onchange='processFile(this)'>
+            <input type='file' accept='image/*' style='display:none' onchange='handleFile(this)'>
         </label>
     </div>
 
     <div id='modal-editor'>
-        <div style='color:white; padding:15px; text-align:center; font-size:12px;'>AJUSTÁ LOS BORDES DEL RECUADRO</div>
-        <div class='cropper-box'>
+        <div class='editor-header'>MOVER LA FOTO O AJUSTAR EL RECUADRO</div>
+        <div class='cropper-wrapper'>
             <img id='crop-image'>
         </div>
-        <div class='footer'>
-            <button class='btn btn-gray' style='flex:1' onclick='closeEditor()'>ATRÁS</button>
-            <button class='btn btn-green' style='flex:2' onclick='saveCrop()'>LISTO</button>
+        <div class='editor-footer'>
+            <button class='btn btn-gray' style='flex:1; margin:0' onclick='cerrar()'>ATRÁS</button>
+            <button class='btn btn-green' style='flex:2; margin:0' onclick='guardar()'>ACEPTAR</button>
         </div>
     </div>
 
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
     <script>
         let cropper = null;
-        function log(m) { document.getElementById('log-area').innerHTML += '<br>• ' + m; }
 
-        function processFile(input) {
+        function handleFile(input) {
             const file = input.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = e => openEditor(e.target.result);
-            reader.readAsDataURL(file);
-        }
+            reader.onload = e => {
+                const modal = document.getElementById('modal-editor');
+                const img = document.getElementById('crop-image');
+                modal.style.display = 'flex';
+                img.src = e.target.result;
+                
+                if (cropper) cropper.destroy();
 
-        function openEditor(src) {
-            const modal = document.getElementById('modal-editor');
-            const img = document.getElementById('crop-image');
-            modal.style.display = 'flex';
-            img.src = src;
-            if (cropper) cropper.destroy();
-            img.onload = () => {
-                cropper = new Cropper(img, {
-                    viewMode: 1,
-                    dragMode: 'crop', // Permite crear recuadros nuevos
-                    autoCropArea: 0.8,
-                    background: false,
-                    modal: true,
-                    guides: true,
-                    center: true,
-                    highlight: true,
-                    cropBoxMovable: true, // Se puede mover el recuadro
-                    cropBoxResizable: true, // Se pueden ajustar las esquinas
-                    toggleDragModeOnDblclick: true,
-                    ready() { log('Editor libre listo'); }
-                });
+                img.onload = () => {
+                    cropper = new Cropper(img, {
+                        viewMode: 1,
+                        dragMode: 'move', // Por defecto mueve la foto
+                        autoCropArea: 0.8,
+                        background: false,
+                        responsive: true,
+                        restore: false,
+                        checkOrientation: true,
+                        modal: true,
+                        guides: true,
+                        center: true,
+                        highlight: false,
+                        cropBoxMovable: true, // Permitir mover el recuadro
+                        cropBoxResizable: true, // Permitir ajustar tamaño
+                        ready() {
+                            console.log('Editor Ultra listo');
+                        }
+                    });
+                };
             };
+            reader.readAsDataURL(file);
+            input.value = ''; // Limpiar para permitir repetir
         }
 
-        function closeEditor() {
+        function cerrar() {
             document.getElementById('modal-editor').style.display = 'none';
             if (cropper) cropper.destroy();
         }
 
-        function saveCrop() {
+        function guardar() {
             if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas();
-            document.getElementById('f-preview').src = canvas.toDataURL('image/jpeg', 0.8);
-            document.getElementById('f-preview').style.display = 'block';
-            closeEditor();
+            const canvas = cropper.getCroppedCanvas({ imageSmoothingQuality: 'high' });
+            const preview = document.getElementById('f-preview');
+            preview.src = canvas.toDataURL('image/jpeg', 0.8);
+            preview.style.display = 'block';
+            cerrar();
         }
     </script>
 </body>
