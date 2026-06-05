@@ -158,7 +158,7 @@
     </style>
 
     <!-- Cropper.js CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
         #modal-editor { position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 99999; }
         .cropper-box { flex: 1; position: relative; overflow: hidden; }
@@ -167,7 +167,6 @@
         .btn-editor { padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; }
         .btn-cancel { background: #e53e3e; flex: 1; }
         .btn-save { background: #38a169; flex: 2; }
-        /* Puntos de control delicados */
         .cropper-point { width: 14px !important; height: 14px !important; background-color: #3182ce !important; opacity: 1 !important; border: 1.5px solid white !important; border-radius: 0 !important; }
         .cropper-point.point-nw { top: -7px !important; left: -7px !important; }
         .cropper-point.point-ne { top: -7px !important; right: -7px !important; }
@@ -286,37 +285,34 @@ function previewFoto(e) {
     var reader = new FileReader();
     reader.onload = function(event) { abrirEditor(event.target.result); };
     reader.readAsDataURL(file);
-    e.target.value = "";
+    e.target.value = '';
 }
 function abrirEditor(src) {
-    var modal = document.getElementById("modal-editor");
-    var img = document.getElementById("image-to-crop");
+    var modal = document.getElementById('modal-editor');
+    var img = document.getElementById('image-to-crop');
     img.src = src;
-    modal.style.display = "flex";
+    modal.style.display = 'flex';
     if (cropper) cropper.destroy();
     img.onload = function() {
         cropper = new Cropper(img, {
-            aspectRatio: NaN, viewMode: 1, dragMode: "move",
+            aspectRatio: NaN, viewMode: 1, dragMode: 'move',
             autoCropArea: 0.8, cropBoxMovable: true, cropBoxResizable: true, background: false
         });
     };
 }
 function cerrarEditor() {
-    document.getElementById("modal-editor").style.display = "none";
+    document.getElementById('modal-editor').style.display = 'none';
     if (cropper) cropper.destroy();
 }
 function guardarRecorte() {
     if (!cropper) return;
     var canvas = cropper.getCroppedCanvas();
-    currentFoto = canvas.toDataURL("image/jpeg", 0.8);
-    var imgPreview = document.getElementById("f-preview");
+    currentFoto = canvas.toDataURL('image/jpeg', 0.8);
+    var imgPreview = document.getElementById('f-preview');
     imgPreview.src = currentFoto;
-    imgPreview.style.display = "block";
-    document.getElementById("label-text").innerText = "Cambiar Foto";
+    imgPreview.style.display = 'block';
+    document.getElementById('label-text').innerText = 'Cambiar Foto';
     cerrarEditor();
-}
-;
-    reader.readAsDataURL(file);
 }
 
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
@@ -799,17 +795,17 @@ if ('serviceWorker' in navigator) {
 }
 </script>
 
-    <!-- Editor Policial Pro (V8) -->
-    <div id="modal-editor">
-        <div style="padding:10px; text-align:center; font-size:12px; color: #a0aec0; background: #000;">AJUSTÁ EL RECUADRO DESDE LAS ESQUINAS</div>
-        <div class="cropper-box"><img id="image-to-crop"></div>
-        <div class="footer-editor">
-            <button class="btn-editor btn-cancel" onclick="cerrarEditor()">CANCELAR</button>
-            <button class="btn-editor btn-save" onclick="guardarRecorte()">ACEPTAR</button>
+    <div id='modal-editor'>
+        <div style='padding:10px; text-align:center; font-size:12px; color: #a0aec0; background: #000;'>AJUSTÁ EL RECUADRO DESDE LAS ESQUINAS</div>
+        <div class='cropper-box'><img id='image-to-crop'></div>
+        <div class='footer-editor'>
+            <button class='btn-editor btn-cancel' onclick='cerrarEditor()'>CANCELAR</button>
+            <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
