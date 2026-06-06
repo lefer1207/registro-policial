@@ -61,7 +61,7 @@
             display: flex; flex-direction: column; align-items: center; text-align: center;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        .avatar-l { 
+        .avatar-l { border: 2px dashed #cbd5e0; 
             width: 120px; height: 120px; border-radius: 12px; background: #e2e8f0; margin-bottom: 15px;
             display: flex; align-items: center; justify-content: center; font-size: 40px;
             overflow: hidden; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
@@ -618,7 +618,7 @@ function editar() {
         document.getElementById('f-preview').src = currentFoto;
         document.getElementById('f-preview').style.display = 'block';
         document.getElementById('f-placeholder').style.display = 'none';
-        document.getElementById('label-text').innerText = 'Cambiar Foto';
+        //
     } else {
         document.getElementById('f-preview').style.display = 'none';
         document.getElementById('f-placeholder').style.display = 'flex';
@@ -824,10 +824,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v12.2 (Con Marco)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v12.3 (Estable)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
