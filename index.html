@@ -277,7 +277,6 @@ var db = [];
 var currentId = null;
 var currentFoto = null;
 
-
 var cropper = null;
 function previewFoto(e) {
     var file = e.target.files[0];
@@ -314,9 +313,6 @@ function guardarRecorte() {
     imgPreview.style.display = 'block';
     document.getElementById('label-text').innerText = 'Cambiar Foto';
     cerrarEditor();
-}
-;
-    reader.readAsDataURL(file);
 }
 
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
@@ -807,7 +803,7 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.3</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.4</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
