@@ -310,16 +310,25 @@ function cerrarEditor() {
     document.getElementById('modal-editor').style.display = 'none';
     if (cropper) cropper.destroy();
 }
+
 function guardarRecorte() {
-    if (!cropper) return;
-    var canvas = cropper.getCroppedCanvas();
-    currentFoto = canvas.toDataURL('image/jpeg', 0.8);
-    var imgPreview = document.getElementById('f-preview');
-    imgPreview.src = currentFoto;
-    imgPreview.style.display = 'block';
-    // Foto actualizada
-    cerrarEditor();
+    console.log('Botón ACEPTAR tocado');
+    if (!cropper) { alert('Error: El editor no se inició correctamente.'); return; }
+    try {
+        var canvas = cropper.getCroppedCanvas();
+        if(!canvas) { alert('Error: No se pudo generar el recorte.'); return; }
+        currentFoto = canvas.toDataURL('image/jpeg', 0.8);
+        var imgPreview = document.getElementById('f-preview');
+        if(imgPreview) {
+            imgPreview.src = currentFoto;
+            imgPreview.style.display = 'block';
+        }
+        cerrarEditor();
+    } catch(e) {
+        alert('Error al guardar: ' + e.message);
+    }
 }
+
 
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
 
@@ -809,10 +818,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.6</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.7 (Debug Aceptar)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
