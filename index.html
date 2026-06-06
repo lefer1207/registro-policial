@@ -211,12 +211,18 @@
     <div class="container form-content">
         <h3 id="formTitle" style="margin:0 0 16px;color:var(--primary);">Registro</h3>
         
-        <div id="preview-container">
-            <img id="f-preview" src="">
-            <label class="file-input-label" for="f-foto">
-                <span id="label-text">📷 Subir Foto</span>
-                <input type="file" id="f-foto" accept="image/*" style="display:none" onchange="previewFoto(event)">
-            </label>
+        <div id='preview-container'>
+            <img id='f-preview' src=''>
+            <div style='display: flex; gap: 10px; margin-top: 10px;'>
+                <label class='file-input-label' style='flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; background: #2d3748;'>
+                    <span>📷 Cámara</span>
+                    <input type='file' accept='image/*' capture='environment' style='display:none' onchange='previewFoto(event)'>
+                </label>
+                <label class='file-input-label' style='flex: 1; margin: 0; display: flex; align-items: center; justify-content: center; background: #4a5568;'>
+                    <span>📁 Galería</span>
+                    <input type='file' accept='image/*' style='display:none' onchange='previewFoto(event)'>
+                </label>
+            </div>
         </div>
 
         <div id="duplicate-alert" class="alert-duplicate"><span>⚠️ Esta CI ya existe.</span><button onclick="abrirDuplicado()">Ver Registro</button></div>
@@ -803,10 +809,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.4</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.5</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
