@@ -160,10 +160,10 @@
     <!-- Cropper.js CSS -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
-        #modal-editor { position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 100000; width: 100vw !important; height: 100vh !important; }
-        .cropper-box { flex: 1; position: relative; overflow: hidden; }
+        #modal-editor { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; z-index: 100000; width: 100vw !important; height: 100vh !important; }
+        .cropper-box { flex: 1; min-height: 300px; position: relative; overflow: hidden; }
         #image-to-crop { display: block; max-width: 100%; }
-        .footer-editor { padding: 20px; display: flex; gap: 10px; background: black; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+        .footer-editor { padding: 20px; display: flex; gap: 10px; background: rgba(0,0,0,0.8); padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
         .btn-editor { padding: 15px; border-radius: 10px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; }
         .btn-cancel { background: #e53e3e; flex: 1; }
         .btn-save { background: #38a169; flex: 2; }
@@ -818,10 +818,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.8</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.9</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
