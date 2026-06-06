@@ -574,7 +574,7 @@ function abrirForm() {
     document.getElementById('formTitle').innerText = 'Nuevo Registro';
     document.getElementById('f-preview').src = '';
     document.getElementById('f-preview').style.display = 'none';
-    document.getElementById('label-text').innerText = '📷 Subir Foto';
+    // label-text removido
     ['nombre','alias','fecha_nac','antecedentes','ci', 'domicilio','tel','tel2','veh1','veh2','notas'].forEach(function(id){ document.getElementById('f-'+id).value = ''; });
     currentFoto = null;
     irA('view-form');
@@ -617,7 +617,7 @@ function editar() {
         // Foto actualizada
     } else {
         document.getElementById('f-preview').style.display = 'none';
-        document.getElementById('label-text').innerText = '📷 Subir Foto';
+        // label-text removido
     }
     irA('view-form');
 }
@@ -818,10 +818,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.7 (Debug Aceptar)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.8</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
