@@ -160,7 +160,7 @@
     <!-- Cropper.js CSS -->
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css'>
     <style>
-        #modal-editor { width: 100vw !important; height: 100vh !important;  position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 99999; }
+        #modal-editor { position: fixed; inset: 0; background: black; display: none; flex-direction: column; z-index: 100000; width: 100vw !important; height: 100vh !important; }
         .cropper-box { flex: 1; position: relative; overflow: hidden; }
         #image-to-crop { display: block; max-width: 100%; }
         .footer-editor { padding: 20px; display: flex; gap: 10px; background: black; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
@@ -287,30 +287,18 @@ function previewFoto(e) {
     reader.readAsDataURL(file);
     e.target.value = '';
 }
-
 function abrirEditor(src) {
-    console.log('Abriendo editor...');
     var modal = document.getElementById('modal-editor');
     var img = document.getElementById('image-to-crop');
-    if(!modal) { alert('Error: No se encontró el modal-editor'); return; }
-    if(!img) { alert('Error: No se encontró la imagen image-to-crop'); return; }
+    if(!modal || !img) return;
     img.src = src;
     modal.style.display = 'flex';
-    modal.style.zIndex = '100000';
     if (cropper) cropper.destroy();
     img.onload = function() {
-        try {
-            cropper = new Cropper(img, {
-                aspectRatio: NaN, viewMode: 1, dragMode: 'move',
-                autoCropArea: 0.8, cropBoxMovable: true, cropBoxResizable: true, background: false
-            });
-            console.log('Cropper cargado');
-        } catch(e) {
-            alert('Error al cargar el editor de recorte: ' + e.message);
-        }
-    };
-}
-);
+        cropper = new Cropper(img, {
+            aspectRatio: NaN, viewMode: 1, dragMode: 'move',
+            autoCropArea: 0.8, cropBoxMovable: true, cropBoxResizable: true, background: false
+        });
     };
 }
 function cerrarEditor() {
@@ -326,6 +314,9 @@ function guardarRecorte() {
     imgPreview.style.display = 'block';
     document.getElementById('label-text').innerText = 'Cambiar Foto';
     cerrarEditor();
+}
+;
+    reader.readAsDataURL(file);
 }
 
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
@@ -816,11 +807,10 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
+    <div style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v11.3</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
-<div style="position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;">v11.2 (Debug)</div></body>
+</body>
 </html>
-
-
 
 
 
