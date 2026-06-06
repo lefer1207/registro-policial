@@ -212,7 +212,7 @@
         <h3 id="formTitle" style="margin:0 0 16px;color:var(--primary);">Registro</h3>
         
         <div id='preview-container'>
-            <div id='f-preview-empty' style='width:100%; height:200px; border:2px dashed #4a5568; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#718096; margin-bottom:10px; overflow:hidden;'>
+            <div id='f-preview-empty' style='width:160px; height:210px; border:2px dashed #4a5568; border-radius:12px; display:flex; align-items:center; justify-content:center; color:#718096; margin:0 auto 15px; overflow:hidden; background:#f7fafc;'>
                 <img id='f-preview' src='' style='width:100%; height:100%; object-fit:cover; display:none;'>
                 <span id='f-placeholder'>Sin Foto</span>
             </div>
@@ -304,7 +304,7 @@ function abrirEditor(src) {
     if (cropper) cropper.destroy();
     img.onload = function() {
         cropper = new Cropper(img, {
-            aspectRatio: NaN, viewMode: 1, dragMode: 'move',
+            aspectRatio: 3/4, viewMode: 1, dragMode: 'move',
             autoCropArea: 0.8, cropBoxMovable: true, cropBoxResizable: true, background: false
         });
     };
@@ -824,10 +824,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v12.3 (Estable)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v12.4 (Foto Carnet)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
