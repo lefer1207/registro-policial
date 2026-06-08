@@ -293,6 +293,13 @@
 var SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
 var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
 var db = [];
+function validarPIN() {
+    var pass = prompt('Ingrese PIN de seguridad para realizar cambios:');
+    if (pass === '1207') return true;
+    alert('PIN incorrecto. No tiene permiso para realizar cambios.');
+    return false;
+}
+
 var MODO_CONSULTA = window.location.search.includes('rol=invitado');
 if (MODO_CONSULTA) {
     document.body.classList.add('readonly');
@@ -559,7 +566,7 @@ function abrirVehiculo() {
     document.getElementById('modalVeh').classList.add('open');
 }
 
-function guardarVehiculo() { if(MODO_CONSULTA) return;
+function guardarVehiculo() { if(!validarPIN()) return; if(MODO_CONSULTA) return;
     var pos = document.getElementById('v-pos').value;
     var plate = document.getElementById('v-plate').value.trim();
     if (!plate) return alert('Ingrese matrícula.');
@@ -645,7 +652,7 @@ function editar() {
 }
 
 
-function guardar() { if(MODO_CONSULTA) return;
+function guardar() { if(!validarPIN()) return; if(MODO_CONSULTA) return;
     var pOld = currentId ? db.find(function(x){ return String(x.id) === String(currentId); }) : null;
     
     var n = document.getElementById('f-nombre').value;
@@ -741,7 +748,7 @@ function sincronizarPendientes() {
 window.addEventListener('online', sincronizarPendientes);
 setInterval(sincronizarPendientes, 30000);
 
-function eliminar(id) { if(MODO_CONSULTA) return;
+function eliminar(id) { if(!validarPIN()) return; if(MODO_CONSULTA) return;
     if (!confirm('¿Eliminar?')) return;
     fetch(SB + '/rest/v1/personas?id=eq.' + id, { method: 'DELETE', headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY } })
     .then(function(){ cargar(); irA('view-list'); });
@@ -840,10 +847,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v13.0 (Modo Consulta Protegido)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v13.1 (Proteccion por PIN 1207)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
