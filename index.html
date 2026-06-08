@@ -66,7 +66,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 40px;
             overflow: hidden; border: 4px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .avatar-l img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-l img { width: 100%; height: 100%; object-fit: cover; display: block; }
         .h-name { font-size: 22px; font-weight: bold; margin-bottom: 4px; }
         .h-ci { color: #718096; font-size: 15px; }
         
@@ -213,7 +213,7 @@
         
         <div id='preview-container'>
             <div id='f-preview-empty' style='width:180px; height:220px; border:1px solid #4a5568; border-radius:4px; display:flex; align-items:center; justify-content:center; color:#718096; margin:0 auto 15px; overflow:hidden; background:#fff; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);'>
-                <img id='f-preview' src='' style='max-width:100%; max-height:100%; object-fit:contain; display:none;'>
+                <img id='f-preview' src='' style='width:100%; height:100%; object-fit:cover; display:none;'>
                 <span id='f-placeholder'>Sin Foto</span>
             </div>
             <div style='display: flex; gap: 10px;'>
@@ -824,10 +824,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v12.8 (Recorte Libre Restaurado)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v12.9 (Mejora Visual Foto)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
