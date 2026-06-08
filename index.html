@@ -356,7 +356,9 @@ function guardarRecorte() {
 
 function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') : '---'; }
 
+
 function cargar() {
+    console.log('Iniciando carga de datos...');
     var total = [];
     var fetchChunk = function(start) {
         var end = start + 999;
@@ -367,11 +369,13 @@ function cargar() {
                 'Range': start + '-' + end
             } 
         })
-        .then(function(r){ return r.json(); })
+        .then(function(r){ 
+            if (!r.ok) return r.text().then(t => { throw new Error(t) });
+            return r.json(); 
+        })
         .then(function(data){
-            if (data && data.length > 0) {
+            if (Array.isArray(data) && data.length > 0) {
                 total = total.concat(data);
-                // Si trajo 1000 registros, hay más. Seguimos hasta 8000.
                 if (data.length === 1000 && start < 7000) {
                     fetchChunk(start + 1000);
                 } else {
@@ -379,15 +383,32 @@ function cargar() {
                     filtrar();
                     dibujarVehiculos(db);
                 }
-            } else {
+            } else if (Array.isArray(data)) {
                 db = total;
                 filtrar();
                 dibujarVehiculos(db);
+            } else {
+                console.error('Data no es array:', data);
+                alert('Error en formato de datos de la base.');
+            }
+        })
+        .catch(function(err){
+            console.error('Error al cargar:', err);
+            // Intentar cargar desde caché local si falla la red
+            var localData = localStorage.getItem('db_cache');
+            if (localData) {
+                db = JSON.parse(localData);
+                filtrar();
+                dibujarVehiculos(db);
+                alert('Sin conexión. Cargando datos locales.');
+            } else {
+                alert('Error de conexión con la base de datos.');
             }
         });
     };
     fetchChunk(0);
 }
+
 
 function dibujarPersonas(data) {
     var html = '';
