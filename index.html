@@ -358,19 +358,29 @@ function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') 
 
 
 
+
 function cargar() {
-    console.log('Iniciando carga optimizada v14...');
+    console.log('Iniciando carga robusta v14.1...');
+    var status = document.getElementById('listaPersonas');
+    
     var localData = localStorage.getItem('db_cache');
-    var lastUpdate = localStorage.getItem('db_last_update') || '2000-01-01T00:00:00Z';
     
     if (localData) {
-        db = JSON.parse(localData);
-        filtrar();
-        dibujarVehiculos(db);
+        try {
+            db = JSON.parse(localData);
+            filtrar();
+            dibujarVehiculos(db);
+        } catch(e) {
+            console.error('Error parseando cache:', e);
+            db = [];
+        }
+    } else {
+        db = [];
+        status.innerHTML = '<p style="text-align:center;padding:20px;color:#718096;">Cargando base de datos por primera vez... (esto puede demorar unos segundos)</p>';
     }
 
-    // Solo pedir lo que se creó después de la última actualización guardada
-    fetch(SB + '/rest/v1/personas?select=*&created_at=gt.' + lastUpdate + '&order=nombre.asc', { 
+    // Descarga completa para asegurar que tras el bloqueo todo esté sincronizado
+    fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc', { 
         headers: { 
             'apikey': KEY, 
             'Authorization': 'Bearer '+KEY
@@ -378,21 +388,26 @@ function cargar() {
     })
     .then(r => r.json())
     .then(newData => {
-        if (newData && newData.length > 0) {
-            // Unir datos nuevos con los locales evitando duplicados por ID
-            var combined = newData.concat(db.filter(old => !newData.find(n => n.id === old.id)));
-            db = combined.sort((a,b) => (a.nombre > b.nombre) ? 1 : -1);
-            
+        if (newData && Array.isArray(newData) && newData.length > 0) {
+            console.log('Datos sincronizados:', newData.length);
+            db = newData;
             localStorage.setItem('db_cache', JSON.stringify(db));
             localStorage.setItem('db_last_update', new Date().toISOString());
+            localStorage.setItem('app_version', '14.1');
             
             filtrar();
             dibujarVehiculos(db);
+        } else if (db.length === 0) {
+            status.innerHTML = '<p style="text-align:center;padding:20px;">No se encontraron registros activos.</p>';
         }
     })
-    .catch(err => console.error('Error en carga incremental:', err));
+    .catch(err => {
+        console.error('Error en carga:', err);
+        if (db.length === 0) {
+           status.innerHTML = '<p style="text-align:center;padding:20px;color:red;">Error de conexión. Intente refrescar la página.</p>';
+        }
+    });
 }
-
 
 
 function dibujarPersonas(data) {
@@ -853,10 +868,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v14.0 (Ahorro de Datos Extremo)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v14.1 (Carga Robusta)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
