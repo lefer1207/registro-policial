@@ -361,7 +361,7 @@ function h(v) { return v ? String(v).replace(/&/g,'&amp;').replace(/</g,'&lt;') 
 
 function cargar() {
     console.log('Iniciando carga robusta v14.1...');
-    var status = document.getElementById('listaPersonas'); var trigger = document.getElementById('manual-trigger'); if(trigger) trigger.style.display='none';
+    var status = document.getElementById('listaPersonas'); if(status) status.innerHTML = '<p style="text-align:center;padding:20px;">⌛ Cargando base de datos...</p>'; var trigger = document.getElementById('manual-trigger'); if(trigger) trigger.style.display='none';
     
     var localData = localStorage.getItem('db_cache');
     
@@ -868,10 +868,11 @@ if ('serviceWorker' in navigator) {
             <button class='btn-editor btn-save' onclick='guardarRecorte()'>ACEPTAR</button>
         </div>
     </div>
-    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v15.2 (Carga Manual)</div>
+    <div id='version-tag' style='position:fixed; bottom:70px; right:10px; background:rgba(0,0,0,0.5); color:white; font-size:10px; padding:2px 5px; border-radius:3px; z-index:9999;'>v15.3 (Restauración)</div>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js'></script>
 </body>
 </html>
+
 
 
 
