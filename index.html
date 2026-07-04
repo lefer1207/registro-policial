@@ -3,7 +3,7 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Registro Pro v17</title>
+    <title>Registro Pro v17.1</title>
     <script src='https://cdn.tailwindcss.com'></script>
 </head>
 <body class='bg-gray-100 min-h-screen'>
@@ -11,20 +11,20 @@
         <h2 class='text-2xl font-bold mb-6 text-gray-800'>Acceso Seguro</h2>
         <input type='password' id='pin-input' placeholder='PIN' class='border-2 border-gray-300 p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 outline-none'>
         <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg'>ENTRAR</button>
-        <p class='mt-10 text-gray-400 text-xs'>v17.0 (Reset Total)</p>
+        <p class='mt-10 text-gray-400 text-xs'>v17.1 (Buscador Arreglado)</p>
     </div>
 
     <div id='app' class='hidden'>
-        <header class='bg-gray-800 text-white p-4 sticky top-0 shadow-md'>
+        <header class='bg-gray-800 text-white p-4 sticky top-0 shadow-md z-30'>
             <h1 class='text-lg font-bold'>Registro Policial Pro</h1>
-            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔎 Buscar...' class='w-full mt-2 p-3 rounded text-black outline-none'>
+            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔎 Buscar por nombre o CI...' class='w-full mt-2 p-3 rounded text-black outline-none focus:ring-2 focus:ring-blue-500'>
         </header>
         <main class='p-4'>
-            <div id='status' class='text-center py-10'>
-                <p class='text-gray-600 font-bold'>⌛ Cargando base de datos...</p>
-                <button onclick='cargarDatos()' class='mt-4 bg-gray-500 text-white px-4 py-2 rounded'>Reintentar</button>
+            <div id='status' class='text-center py-5'>
+                <p id='status-text' class='text-gray-600 font-bold'>⌛ Cargando base de datos...</p>
+                <p id='count-text' class='text-xs text-gray-500'></p>
             </div>
-            <div id='contenedor-personas' class='space-y-3'></div>
+            <div id='contenedor-personas' class='space-y-3 pb-20'></div>
         </main>
     </div>
 
@@ -43,19 +43,24 @@
 
         async function cargarDatos() {
             try {
-                const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion&order=nombre.asc&limit=300', {
+                const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion&order=nombre.asc', {
                     headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
                 });
                 db = await res.json();
                 document.getElementById('status').style.display = 'none';
                 dibujar(db);
             } catch (err) {
-                document.getElementById('status').innerHTML = '<p class="text-red-500">Error de red. Use Datos Móviles.</p>';
+                document.getElementById('status-text').innerHTML = '<span class="text-red-500">Error de red. Use Datos Móviles.</span>';
             }
         }
 
         function dibujar(datos) {
-            document.getElementById('contenedor-personas').innerHTML = datos.map(p => `
+            const container = document.getElementById('contenedor-personas');
+            if (datos.length === 0) {
+                container.innerHTML = '<p class="text-center py-10 text-gray-500">No se encontraron resultados.</p>';
+                return;
+            }
+            container.innerHTML = datos.map(p => `
                 <div class='bg-white p-4 rounded shadow border-l-4 border-gray-500'>
                     <h3 class='font-bold uppercase text-gray-800'>${p.nombre || 'Sin nombre'}</h3>
                     <p class='text-sm text-gray-600'>CI: ${p.ci || 'S/D'}</p>
@@ -63,8 +68,17 @@
         }
 
         function filtrar() {
-            const txt = document.getElementById('buscador').value.toLowerCase();
-            dibujar(db.filter(p => (p.nombre || '').toLowerCase().includes(txt) || (p.ci || '').includes(txt)));
+            const txt = document.getElementById('buscador').value.toLowerCase().trim();
+            if (!txt) {
+                dibujar(db);
+                return;
+            }
+            const filtrados = db.filter(p => {
+                const n = (p.nombre || '').toLowerCase();
+                const c = (p.ci || '').toString();
+                return n.includes(txt) || c.includes(txt);
+            });
+            dibujar(filtrados);
         }
     </script>
 </body>
