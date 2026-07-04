@@ -2,33 +2,62 @@
 <html lang='es'>
 <head>
     <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Registro Pro v18.0</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <title>Registro Policial Pro</title>
     <script src='https://cdn.tailwindcss.com'></script>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .persona-card { border-left: 5px solid #1e3a8a; transition: all 0.2s; }
+        .persona-card:active { background-color: #f3f4f6; transform: scale(0.98); }
+        .btn-blue { background-color: #1e3a8a; color: white; font-weight: bold; }
+    </style>
 </head>
-<body class='bg-gray-100 min-h-screen'>
-    <div id='pin-screen' class='fixed inset-0 bg-white z-50 flex flex-col items-center justify-center p-6'>
-        <h2 class='text-2xl font-bold mb-6 text-gray-800'>Acceso Seguro</h2>
-        <input type='password' id='pin-input' placeholder='PIN' class='border-2 border-gray-300 p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 outline-none'>
-        <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg'>ENTRAR</button>
-        <p class='mt-10 text-gray-400 text-xs'>v18.0 (Diagnóstico)</p>
+<body class='bg-slate-100'>
+    <!-- Pantalla PIN -->
+    <div id='pin-screen' class='fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 text-white'>
+        <i class='fas fa-shield-halved text-6xl mb-6 text-blue-400'></i>
+        <h2 class='text-2xl font-bold mb-6'>Registro Policial</h2>
+        <input type='password' id='pin-input' placeholder='PIN de Acceso' class='border-none p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-500'>
+        <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg active:scale-95 transition-all'>ENTRAR</button>
+        <p class='mt-10 text-slate-500 text-xs'>v19.0 (Motor Estable)</p>
     </div>
 
-    <div id='app' class='hidden'>
-        <header class='bg-gray-800 text-white p-4 sticky top-0 shadow-md z-30'>
-            <h1 class='text-lg font-bold'>Registro Policial Pro</h1>
-            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔎 Buscar...' class='w-full mt-2 p-3 rounded text-black outline-none'>
-        </header>
-        <main class='p-4'>
-            <div id='status' class='text-center py-6 bg-white rounded-lg shadow mb-4'>
-                <p id='status-text' class='text-gray-700 font-bold text-lg'>⌛ Preparando...</p>
-                <button id='btn-cargar' onclick='cargarDatos()' class='mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-lg shadow hidden'>
-                    👆 TOCAR PARA CARGAR
-                </button>
-                <p id='count-text' class='text-xs text-gray-500 mt-2'></p>
+    <!-- App Principal -->
+    <div id='app' class='hidden flex flex-col min-h-screen'>
+        <header class='bg-slate-800 text-white p-4 sticky top-0 shadow-xl z-40'>
+            <div class='flex justify-between items-center mb-3'>
+                <h1 class='text-lg font-bold'><i class='fas fa-id-card mr-2 text-blue-400'></i>REGISTRO PRO</h1>
+                <span id='count-badge' class='bg-blue-600 text-[10px] px-2 py-1 rounded-full'>0</span>
             </div>
-            <div id='contenedor-personas' class='space-y-3 pb-20'></div>
+            <div class='relative'>
+                <i class='fas fa-search absolute left-3 top-3.5 text-slate-400'></i>
+                <input type='text' id='buscador' oninput='filtrar()' placeholder='Nombre o Cédula...' class='w-full p-3 pl-10 rounded-xl text-black outline-none focus:ring-2 focus:ring-blue-500 bg-white'>
+            </div>
+        </header>
+
+        <main class='flex-grow p-4'>
+            <!-- Estado de carga -->
+            <div id='status-container' class='bg-white p-6 rounded-2xl shadow-sm text-center mb-6'>
+                <p id='status-text' class='text-slate-600 font-bold'>Base de datos lista</p>
+                <button id='btn-cargar' onclick='cargarDatos()' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold shadow-md'>
+                   <i class='fas fa-sync-alt mr-2'></i> CARGAR REGISTROS
+                </button>
+                <div id='progress-bar-container' class='hidden mt-4 w-full bg-slate-200 rounded-full h-2'>
+                    <div id='progress-bar' class='bg-blue-600 h-2 rounded-full transition-all duration-300' style='width: 0%'></div>
+                </div>
+            </div>
+
+            <!-- Lista -->
+            <div id='contenedor-personas' class='grid gap-3'></div>
         </main>
+
+        <!-- Navbar Inferior (Estilo App) -->
+        <nav class='bg-white border-t border-slate-200 p-2 flex justify-around items-center sticky bottom-0 z-40'>
+            <button class='text-blue-700 flex flex-col items-center'><i class='fas fa-users text-xl'></i><span class='text-[10px] uppercase font-bold'>Personas</span></button>
+            <button class='text-slate-400 flex flex-col items-center'><i class='fas fa-car text-xl'></i><span class='text-[10px] uppercase font-bold'>Vehículos</span></button>
+            <button onclick='location.reload()' class='text-slate-400 flex flex-col items-center'><i class='fas fa-arrow-rotate-right text-xl'></i><span class='text-[10px] uppercase font-bold'>Reiniciar</span></button>
+        </nav>
     </div>
 
     <script>
@@ -40,83 +69,74 @@
             if (document.getElementById('pin-input').value === '3268') {
                 document.getElementById('pin-screen').style.display = 'none';
                 document.getElementById('app').classList.remove('hidden');
-                // Mostrar botón grande inmediatamente - SIN carga automática
-                document.getElementById('status-text').innerHTML = '👇 Toque el botón para cargar';
-                document.getElementById('btn-cargar').classList.remove('hidden');
             } else { alert('PIN Incorrecto'); }
         }
 
         async function cargarDatos() {
             const statusText = document.getElementById('status-text');
             const btn = document.getElementById('btn-cargar');
-            const countText = document.getElementById('count-text');
+            const progressContainer = document.getElementById('progress-bar-container');
+            const progressBar = document.getElementById('progress-bar');
+            const badge = document.getElementById('count-badge');
             
-            btn.style.display = 'none';
-            statusText.innerHTML = '⏳ Conectando con servidor...';
-            countText.innerHTML = '';
+            btn.classList.add('hidden');
+            progressContainer.classList.remove('hidden');
+            statusText.innerHTML = 'Conectando...';
+            db = [];
 
             try {
-                // Pedimos solo los primeros 50 para ver si entra ALGO
-                const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci&order=nombre.asc&limit=50', {
-                    headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
-                });
-                
-                if (!res.ok) {
-                    statusText.innerHTML = '❌ Error del servidor (' + res.status + ')';
-                    btn.classList.remove('hidden');
-                    return;
-                }
-                
-                db = await res.json();
-                countText.innerHTML = '✅ Recibidos: ' + db.length;
-                
-                if (db.length === 0) {
-                    statusText.innerHTML = '⚠️ Base de datos vacía';
-                    return;
-                }
-                
-                // Si llegaron, pedir más
-                statusText.innerHTML = '⏳ Cargando más registros...';
-                let offset = 50;
-                let limit = 200;
+                let offset = 0;
+                let limit = 250;
                 let hasMore = true;
-                
+                const totalEstimado = 1950;
+
                 while (hasMore) {
-                    const r2 = await fetch(SB + '/rest/v1/personas?select=nombre,ci&order=nombre.asc&offset=' + offset + '&limit=' + limit, {
+                    const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion&order=nombre.asc&offset=' + offset + '&limit=' + limit, {
                         headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
                     });
-                    const d2 = await r2.json();
-                    if (d2 && d2.length > 0) {
-                        db = db.concat(d2);
+                    const data = await res.json();
+                    
+                    if (data && data.length > 0) {
+                        db = db.concat(data);
                         offset += limit;
-                        countText.innerHTML = '✅ Cargados: ' + db.length;
+                        
+                        let porc = Math.min((db.length / totalEstimado) * 100, 100);
+                        progressBar.style.width = porc + '%';
+                        statusText.innerHTML = 'Descargando: ' + db.length;
+                        badge.innerText = db.length;
+                        
                         dibujar(db);
-                        if (d2.length < limit) hasMore = false;
+                        if (data.length < limit) hasMore = false;
                     } else { hasMore = false; }
                 }
                 
-                statusText.innerHTML = '✅ Listo! Total: ' + db.length;
-                setTimeout(() => { document.getElementById('status').style.display = 'none'; }, 1500);
-                
+                statusText.innerHTML = '✅ ' + db.length + ' registros listos';
+                setTimeout(() => { document.getElementById('status-container').classList.add('hidden'); }, 2000);
             } catch (err) {
-                console.error(err);
-                statusText.innerHTML = '❌ Sin conexión. Use DATOS MÓVILES (no Wi-Fi)';
+                statusText.innerHTML = '❌ Error. Use Datos Móviles.';
                 btn.classList.remove('hidden');
+                progressContainer.classList.add('hidden');
             }
         }
 
         function dibujar(datos) {
-            document.getElementById('contenedor-personas').innerHTML = datos.map(p => `
-                <div class='bg-white p-4 rounded shadow border-l-4 border-gray-500'>
-                    <h3 class='font-bold uppercase text-gray-800'>${p.nombre || 'Sin nombre'}</h3>
-                    <p class='text-sm text-gray-600'>CI: ${p.ci || 'S/D'}</p>
+            const container = document.getElementById('contenedor-personas');
+            container.innerHTML = datos.map(p => `
+                <div class='bg-white p-4 rounded-xl shadow-sm persona-card'>
+                    <div class='flex justify-between items-start'>
+                        <div>
+                            <h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'Sin nombre'}</h3>
+                            <p class='text-xs text-slate-500 font-mono mt-1'>CI: ${p.ci || 'S/D'}</p>
+                        </div>
+                        <i class='fas fa-chevron-right text-slate-300 text-xs'></i>
+                    </div>
                 </div>`).join('');
         }
 
         function filtrar() {
             const txt = document.getElementById('buscador').value.toLowerCase().trim();
-            if (!txt) { dibujar(db); return; }
-            dibujar(db.filter(p => (p.nombre || '').toLowerCase().includes(txt) || (p.ci || '').toString().includes(txt)));
+            const filtrados = db.filter(p => (p.nombre || '').toLowerCase().includes(txt) || (p.ci || '').toString().includes(txt));
+            dibujar(filtrados);
         }
     </script>
 </body>
