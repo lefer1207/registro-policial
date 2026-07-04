@@ -7,48 +7,57 @@
     <script src='https://cdn.tailwindcss.com'></script>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>
     <style>
-        .persona-card { border-left: 5px solid #1e3a8a; }
-        .persona-card:active { background-color: #f1f5f9; }
+        body { font-family: -apple-system, system-ui, sans-serif; background: #f1f5f9; }
+        .persona-card { border-left: 5px solid #1e3a8a; transition: transform 0.1s; }
+        .persona-card:active { transform: scale(0.98); background: #f8fafc; }
     </style>
 </head>
-<body class='bg-slate-100'>
+<body>
+    <!-- PIN SCREEN -->
     <div id='pin-screen' class='fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 text-white text-center'>
         <i class='fas fa-shield-halved text-6xl mb-6 text-blue-400'></i>
-        <h2 class='text-2xl font-bold'>Registro Policial</h2>
-        <p class='text-slate-500 mb-6 text-xs'>v23.0 (Versión Restaurada)</p>
-        <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none'>
-        <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg'>ENTRAR</button>
+        <h1 class='text-2xl font-bold'>REGISTRO POLICIAL PRO</h1>
+        <p class='text-slate-400 mb-6'>v23.1 (Diseño Original Restaurado)</p>
+        <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none focus:ring-2 focus:ring-blue-500'>
+        <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg active:scale-95 transition-all'>INGRESAR</button>
     </div>
 
+    <!-- MAIN APP -->
     <div id='app' class='hidden flex flex-col min-h-screen'>
         <header class='bg-slate-800 text-white p-4 sticky top-0 shadow-xl z-40'>
             <div class='flex justify-between items-center mb-3'>
-                <h1 class='text-lg font-bold'>REGISTRO PRO</h1>
-                <span id='count-badge' class='bg-blue-600 text-xs px-2 py-1 rounded-full font-mono'>0</span>
+                <h1 class='text-lg font-bold'><i class='fas fa-id-badge mr-2'></i>REGISTRO</h1>
+                <span id='count' class='bg-blue-600 text-[10px] px-2 py-1 rounded-full font-mono'>0</span>
             </div>
-            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔍 Buscar...' class='w-full p-3 rounded-xl text-black outline-none bg-white'>
+            <div class='relative'>
+                <i class='fas fa-search absolute left-3 top-3.5 text-slate-400'></i>
+                <input type='text' id='buscador' oninput='filtrar()' placeholder='Buscar nombre o cédula...' class='w-full p-3 pl-10 rounded-xl text-black outline-none bg-white'>
+            </div>
         </header>
 
         <main class='p-4'>
+            <!-- CARGADOR MANUAL (Lo que hace que funcione) -->
             <div id='loader' class='bg-white p-6 rounded-2xl shadow-sm text-center mb-6 border-2 border-blue-100'>
-                <p id='st-text' class='text-slate-600 font-bold'>Sincronización necesaria</p>
-                <button onclick='conectar()' id='btn-con' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold'>
-                   👆 TOCAR PARA CARGAR DATOS
+                <p id='st-text' class='text-slate-600 font-bold'>Sincronización Pendiente</p>
+                <button onclick='conectar()' id='btn-con' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold shadow-md'>
+                   <i class='fas fa-sync-alt mr-2'></i> CARGAR MI APLICACIÓN
                 </button>
-                <div id='prog' class='hidden mt-4 w-full bg-slate-200 rounded-full h-2'><div id='bar' class='bg-blue-600 h-2 rounded-full transition-all duration-300' style='width:0%'></div></div>
+                <div id='prog' class='hidden mt-4 w-full bg-slate-200 rounded-full h-2'><div id='bar' class='bg-blue-600 h-2 rounded-full' style='width:0%'></div></div>
             </div>
-            <div id='lista' class='grid gap-3 pb-20'></div>
+
+            <div id='lista' class='grid gap-3 pb-24'></div>
         </main>
 
+        <!-- DETALLE MODAL -->
         <div id='modal' class='fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4' onclick='this.classList.add("hidden")'>
-            <div class='bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl' onclick='event.stopPropagation()'>
+            <div class='bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl relative' onclick='event.stopPropagation()'>
                 <h2 id='m-n' class='text-xl font-bold uppercase text-slate-800 border-b pb-2 mb-4'></h2>
-                <div class='space-y-3 text-sm text-slate-700'>
-                    <p><strong>CÉDULA:</strong> <span id='m-c' class='text-blue-700 font-bold'></span></p>
-                    <p><strong>DIRECCIÓN:</strong> <span id='m-d'></span></p>
-                    <p><strong>NOTAS:</strong> <br><span id='m-no' class='text-red-600'></span></p>
+                <div class='space-y-4'>
+                    <div><p class='text-[10px] font-bold text-slate-400 uppercase'>Cédula de Identidad</p><p id='m-c' class='text-blue-700 font-bold text-lg'></p></div>
+                    <div><p class='text-[10px] font-bold text-slate-400 uppercase'>Dirección</p><p id='m-d' class='text-slate-700'></p></div>
+                    <div><p class='text-[10px] font-bold text-slate-400 uppercase'>Notas / Registro</p><p id='m-no' class='text-red-600 font-medium'></p></div>
                 </div>
-                <button onclick='document.getElementById("modal").classList.add("hidden")' class='mt-6 w-full bg-slate-800 text-white py-3 rounded-xl font-bold'>VOLVER</button>
+                <button onclick='document.getElementById("modal").classList.add("hidden")' class='mt-8 w-full bg-slate-800 text-white py-3 rounded-xl font-bold'>CERRAR</button>
             </div>
         </div>
     </div>
@@ -69,43 +78,46 @@
             const st = document.getElementById('st-text');
             const btn = document.getElementById('btn-con');
             const bar = document.getElementById('bar');
-            document.getElementById('prog').classList.remove('hidden');
+            const prog = document.getElementById('prog');
+            prog.classList.remove('hidden');
             btn.classList.add('hidden');
             st.innerText = 'Iniciando...';
+            db = [];
             try {
-                let off = 0; let lim = 200; let more = true;
+                let off = 0; let lim = 250; let more = true;
                 while (more) {
                     const r = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion,notas&order=nombre.asc&offset=' + off + '&limit=' + lim, {
                         headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
                     });
-                    const d = await r.json();
-                    if (d && d.length > 0) {
-                        db = db.concat(d);
+                    const data = await r.json();
+                    if (data && data.length > 0) {
+                        db = db.concat(data);
                         off += lim;
-                        st.innerText = 'Descargando: ' + db.length;
+                        st.innerText = 'Cargando: ' + db.length;
                         bar.style.width = Math.min((db.length/1950)*100, 100) + '%';
-                        document.getElementById('count-badge').innerText = db.length;
+                        document.getElementById('count').innerText = db.length;
                         dibujar(db);
-                        if (d.length < lim) more = false;
+                        if (data.length < lim) more = false;
                     } else { more = false; }
                 }
                 document.getElementById('loader').style.display = 'none';
             } catch (e) {
-                st.innerText = 'Error. Pruebe sin Wi-Fi.';
+                st.innerHTML = '<span class="text-red-500">Error de red. Use Datos Móviles.</span>';
                 btn.classList.remove('hidden');
             }
         }
 
         function dibujar(datos) {
-            document.getElementById('lista').innerHTML = datos.map((p, index) => `
-                <div onclick='ver(${db.indexOf(p)})' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
+            document.getElementById('lista').innerHTML = datos.map(p => `
+                <div onclick='ver("${p.ci}")' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
                     <div><h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3><p class='text-xs text-slate-500'>CI: ${p.ci || '---'}</p></div>
                     <i class='fas fa-chevron-right text-slate-300'></i>
                 </div>`).join('');
         }
 
-        function ver(i) {
-            const p = db[i];
+        function ver(ci) {
+            const p = db.find(x => x.ci == ci);
+            if(!p) return;
             document.getElementById('m-n').innerText = p.nombre || 'S/N';
             document.getElementById('m-c').innerText = p.ci || '---';
             document.getElementById('m-d').innerText = p.direccion || '---';
@@ -114,7 +126,7 @@
         }
 
         function filtrar() {
-            const t = document.getElementById('buscador').value.toLowerCase();
+            const t = document.getElementById('buscador').value.toLowerCase().trim();
             const f = db.filter(p => (p.nombre||'').toLowerCase().includes(t) || (p.ci||'').toString().includes(t));
             dibujar(f);
         }
