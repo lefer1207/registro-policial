@@ -2,44 +2,54 @@
 <html lang='es'>
 <head>
     <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-    <title>Registro v21</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
+    <title>Registro Policial Pro</title>
+    <script src='https://cdn.tailwindcss.com'></script>
+    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
-        .header { background: #000; color: white; padding: 15px; position: sticky; top: 0; }
-        .letras-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; padding: 10px; background: white; }
-        .btn-letra { padding: 10px; border: 1px solid #ddd; background: #fff; border-radius: 5px; font-weight: bold; font-size: 14px; }
-        .btn-letra:active { background: #000; color: #fff; }
-        .card { background: white; padding: 15px; border-radius: 8px; margin: 10px; border-left: 5px solid #000; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card h3 { margin: 0; font-size: 14px; text-transform: uppercase; }
-        .card p { margin: 5px 0 0; font-size: 12px; color: #666; }
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 100; align-items: center; justify-content: center; padding: 20px; color: #fff; }
-        .modal-content { background: #fff; color: #000; padding: 20px; border-radius: 10px; width: 100%; max-width: 400px; }
+        .persona-card { border-left: 5px solid #1e3a8a; }
+        .persona-card:active { background-color: #f1f5f9; }
     </style>
 </head>
-<body>
-    <div id='pin-screen' style='height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #000; color: white;'>
-        <h2>REGISTRO POLICIAL</h2>
-        <input type='password' id='pin-input' placeholder='PIN' style='padding: 15px; font-size: 20px; text-align: center; margin-bottom: 15px;'>
-        <button onclick='verificarPIN()' style='padding: 15px 40px; background: #fff; border: none; font-weight: bold;'>ENTRAR</button>
-        <p style='margin-top: 20px; font-size: 10px;'>v21.0 (Carga Segmentada)</p>
+<body class='bg-slate-100'>
+    <div id='pin-screen' class='fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 text-white text-center'>
+        <i class='fas fa-shield-halved text-6xl mb-6 text-blue-400'></i>
+        <h2 class='text-2xl font-bold'>Registro Policial</h2>
+        <p class='text-slate-500 mb-6 text-xs'>v23.0 (Versión Restaurada)</p>
+        <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none'>
+        <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg'>ENTRAR</button>
     </div>
 
-    <div id='app' style='display:none;'>
-        <div class='header'><strong>REGISTRO PRO</strong></div>
-        <div style='background: #e3f2fd; padding: 10px; text-align: center; font-size: 12px;'>Seleccione una letra para cargar:</div>
-        <div class='letras-grid' id='letras'></div>
-        <div id='status' style='text-align:center; padding: 10px; font-weight: bold; color: blue;'></div>
-        <div id='lista'></div>
-    </div>
+    <div id='app' class='hidden flex flex-col min-h-screen'>
+        <header class='bg-slate-800 text-white p-4 sticky top-0 shadow-xl z-40'>
+            <div class='flex justify-between items-center mb-3'>
+                <h1 class='text-lg font-bold'>REGISTRO PRO</h1>
+                <span id='count-badge' class='bg-blue-600 text-xs px-2 py-1 rounded-full font-mono'>0</span>
+            </div>
+            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔍 Buscar...' class='w-full p-3 rounded-xl text-black outline-none bg-white'>
+        </header>
 
-    <div id='modal' class='modal' onclick='cerrar()'>
-        <div class='modal-content' onclick='event.stopPropagation()'>
-            <h2 id='m-n'></h2>
-            <p><strong>CI:</strong> <span id='m-c'></span></p>
-            <p><strong>DIRECCIÓN:</strong> <span id='m-d'></span></p>
-            <p><strong>NOTAS:</strong> <br><span id='m-no' style='color:red;'></span></p>
-            <button onclick='cerrar()' style='width:100%; padding:15px; margin-top:20px;'>VOLVER</button>
+        <main class='p-4'>
+            <div id='loader' class='bg-white p-6 rounded-2xl shadow-sm text-center mb-6 border-2 border-blue-100'>
+                <p id='st-text' class='text-slate-600 font-bold'>Sincronización necesaria</p>
+                <button onclick='conectar()' id='btn-con' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold'>
+                   👆 TOCAR PARA CARGAR DATOS
+                </button>
+                <div id='prog' class='hidden mt-4 w-full bg-slate-200 rounded-full h-2'><div id='bar' class='bg-blue-600 h-2 rounded-full transition-all duration-300' style='width:0%'></div></div>
+            </div>
+            <div id='lista' class='grid gap-3 pb-20'></div>
+        </main>
+
+        <div id='modal' class='fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4' onclick='this.classList.add("hidden")'>
+            <div class='bg-white w-full max-w-md rounded-2xl p-6 shadow-2xl' onclick='event.stopPropagation()'>
+                <h2 id='m-n' class='text-xl font-bold uppercase text-slate-800 border-b pb-2 mb-4'></h2>
+                <div class='space-y-3 text-sm text-slate-700'>
+                    <p><strong>CÉDULA:</strong> <span id='m-c' class='text-blue-700 font-bold'></span></p>
+                    <p><strong>DIRECCIÓN:</strong> <span id='m-d'></span></p>
+                    <p><strong>NOTAS:</strong> <br><span id='m-no' class='text-red-600'></span></p>
+                </div>
+                <button onclick='document.getElementById("modal").classList.add("hidden")' class='mt-6 w-full bg-slate-800 text-white py-3 rounded-xl font-bold'>VOLVER</button>
+            </div>
         </div>
     </div>
 
@@ -47,54 +57,67 @@
         const SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
         const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
         let db = [];
-        const letras = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
 
         function verificarPIN() {
             if (document.getElementById('pin-input').value === '3268') {
                 document.getElementById('pin-screen').style.display = 'none';
-                document.getElementById('app').style.display = 'block';
-                crearBotones();
+                document.getElementById('app').classList.remove('hidden');
             } else { alert('PIN Incorrecto'); }
         }
 
-        function crearBotones() {
-            const cont = document.getElementById('letras');
-            cont.innerHTML = letras.map(l => `<button class='btn-letra' onclick='cargarLetra("${l}")'>${l}</button>`).join('');
-        }
-
-        async function cargarLetra(letra) {
-            const st = document.getElementById('status');
-            const list = document.getElementById('lista');
-            st.innerText = 'Cargando letra ' + letra + '...';
-            list.innerHTML = '';
+        async function conectar() {
+            const st = document.getElementById('st-text');
+            const btn = document.getElementById('btn-con');
+            const bar = document.getElementById('bar');
+            document.getElementById('prog').classList.remove('hidden');
+            btn.classList.add('hidden');
+            st.innerText = 'Iniciando...';
             try {
-                const r = await fetch(SB + '/rest/v1/personas?nombre=ilike.' + letra + '*&select=nombre,ci,direccion,notas&order=nombre.asc', {
-                    headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
-                });
-                db = await r.json();
-                st.innerText = 'Letra ' + letra + ': ' + db.length + ' encontrados';
-                dibujar();
-            } catch (e) { st.innerText = 'Error. Pruebe sin Wi-Fi.'; }
+                let off = 0; let lim = 200; let more = true;
+                while (more) {
+                    const r = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion,notas&order=nombre.asc&offset=' + off + '&limit=' + lim, {
+                        headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
+                    });
+                    const d = await r.json();
+                    if (d && d.length > 0) {
+                        db = db.concat(d);
+                        off += lim;
+                        st.innerText = 'Descargando: ' + db.length;
+                        bar.style.width = Math.min((db.length/1950)*100, 100) + '%';
+                        document.getElementById('count-badge').innerText = db.length;
+                        dibujar(db);
+                        if (d.length < lim) more = false;
+                    } else { more = false; }
+                }
+                document.getElementById('loader').style.display = 'none';
+            } catch (e) {
+                st.innerText = 'Error. Pruebe sin Wi-Fi.';
+                btn.classList.remove('hidden');
+            }
         }
 
-        function dibujar() {
-            document.getElementById('lista').innerHTML = db.map((p, i) => `
-                <div class='card' onclick='ver(${i})'>
-                    <h3>${p.nombre}</h3>
-                    <p>CI: ${p.ci}</p>
+        function dibujar(datos) {
+            document.getElementById('lista').innerHTML = datos.map((p, index) => `
+                <div onclick='ver(${db.indexOf(p)})' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
+                    <div><h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3><p class='text-xs text-slate-500'>CI: ${p.ci || '---'}</p></div>
+                    <i class='fas fa-chevron-right text-slate-300'></i>
                 </div>`).join('');
         }
 
         function ver(i) {
             const p = db[i];
-            document.getElementById('m-n').innerText = p.nombre;
+            document.getElementById('m-n').innerText = p.nombre || 'S/N';
             document.getElementById('m-c').innerText = p.ci || '---';
             document.getElementById('m-d').innerText = p.direccion || '---';
             document.getElementById('m-no').innerText = p.notas || '---';
-            document.getElementById('modal').style.display = 'flex';
+            document.getElementById('modal').classList.remove('hidden');
         }
 
-        function cerrar() { document.getElementById('modal').style.display = 'none'; }
+        function filtrar() {
+            const t = document.getElementById('buscador').value.toLowerCase();
+            const f = db.filter(p => (p.nombre||'').toLowerCase().includes(t) || (p.ci||'').toString().includes(t));
+            dibujar(f);
+        }
     </script>
 </body>
 </html>
