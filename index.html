@@ -3,38 +3,62 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-    <title>Registro Pro v19.1</title>
+    <title>Registro Pro v19.2</title>
     <script src='https://cdn.tailwindcss.com'></script>
     <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>
+    <style>
+        .persona-card:active { background-color: #f1f5f9; scale: 0.98; }
+        #modal-detalle { transition: transform 0.3s ease-out; }
+    </style>
 </head>
-<body class='bg-slate-100'>
+<body class='bg-slate-100 min-h-screen'>
+    <!-- Pantalla PIN -->
     <div id='pin-screen' class='fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 text-white'>
         <i class='fas fa-shield-halved text-6xl mb-6 text-blue-400'></i>
-        <h2 class='text-2xl font-bold mb-6'>Registro Policial</h2>
+        <h2 class='text-2xl font-bold mb-2'>Registro Policial</h2>
+        <p class='text-slate-400 mb-6'>v19.2 (Detalles Habilitados)</p>
         <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none'>
         <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg'>ENTRAR</button>
-        <p class='mt-10 text-slate-500 text-xs'>v19.1 (Carga Asegurada)</p>
     </div>
 
+    <!-- App Principal -->
     <div id='app' class='hidden flex flex-col min-h-screen'>
         <header class='bg-slate-800 text-white p-4 sticky top-0 shadow-xl z-40'>
             <div class='flex justify-between items-center mb-3'>
                 <h1 class='text-lg font-bold'>REGISTRO PRO</h1>
-                <span id='count-badge' class='bg-blue-600 text-xs px-2 py-1 rounded-full'>0</span>
+                <span id='count-badge' class='bg-blue-600 text-xs px-2 py-1 rounded-full font-mono'>0</span>
             </div>
-            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔍 Buscar...' class='w-full p-3 rounded-xl text-black outline-none bg-white'>
+            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔍 Nombre o Cédula...' class='w-full p-3 rounded-xl text-black outline-none bg-white'>
         </header>
 
         <main class='p-4'>
-            <div id='status-container' class='bg-white p-6 rounded-2xl shadow-sm text-center mb-6'>
+            <div id='status-container' class='bg-white p-6 rounded-2xl shadow-sm text-center mb-6 border-2 border-blue-100'>
                 <p id='status-text' class='text-slate-600 font-bold'>Base de datos lista</p>
-                <button id='btn-cargar' onclick='cargarDatos()' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold'>
+                <button id='btn-cargar' onclick='cargarDatos()' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95'>
                    👆 TOCAR PARA CARGAR
                 </button>
-                <p id='error-hint' class='hidden text-red-500 text-xs mt-2 italic'>Si no avanza, apague el Wi-Fi</p>
             </div>
-            <div id='contenedor-personas' class='grid gap-3 pb-20'></div>
+            <div id='contenedor-personas' class='grid gap-3 pb-24'></div>
         </main>
+
+        <!-- MODAL DE DETALLES (Se abre al tocar una persona) -->
+        <div id='modal-detalle' class='fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-4'>
+            <div class='bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative'>
+                <button onclick='cerrarDetalle()' class='absolute right-4 top-4 text-slate-400'><i class='fas fa-times-circle text-2xl'></i></button>
+                <div class='flex items-center gap-4 mb-6 border-b pb-4'>
+                    <div class='bg-blue-100 p-4 rounded-full'><i class='fas fa-user text-3xl text-blue-700'></i></div>
+                    <div>
+                        <h2 id='det-nombre' class='text-xl font-bold uppercase text-slate-800 leading-tight'></h2>
+                        <p id='det-ci' class='text-blue-600 font-mono font-bold'></p>
+                    </div>
+                </div>
+                <div class='space-y-4'>
+                    <div><label class='text-[10px] uppercase font-bold text-slate-400 block'>Dirección</label><p id='det-dir' class='text-slate-700'></p></div>
+                    <div><label class='text-[10px] uppercase font-bold text-slate-400 block'>Observaciones / Notas</label><p id='det-notas' class='text-slate-700 italic'></p></div>
+                </div>
+                <button onclick='cerrarDetalle()' class='mt-8 w-full bg-slate-800 text-white py-4 rounded-xl font-bold uppercase tracking-wider'>Volver</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -53,24 +77,18 @@
             const statusText = document.getElementById('status-text');
             const btn = document.getElementById('btn-cargar');
             const badge = document.getElementById('count-badge');
-            const hint = document.getElementById('error-hint');
-            
             btn.classList.add('hidden');
-            hint.classList.add('hidden');
-            statusText.innerHTML = '⏳ Conectando...';
+            statusText.innerHTML = '⏳ Sincronizando...';
             db = [];
-
             try {
                 let offset = 0;
-                let limit = 150; // Bloques más pequeños para mayor seguridad
+                let limit = 200;
                 let hasMore = true;
-
                 while (hasMore) {
-                    const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci&order=nombre.asc&offset=' + offset + '&limit=' + limit, {
+                    const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion,notas&order=nombre.asc&offset=' + offset + '&limit=' + limit, {
                         headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
                     });
                     const data = await res.json();
-                    
                     if (data && data.length > 0) {
                         db = db.concat(data);
                         offset += limit;
@@ -82,23 +100,52 @@
                 }
                 setTimeout(() => { document.getElementById('status-container').style.display = 'none'; }, 1000);
             } catch (err) {
-                statusText.innerHTML = '❌ Error de Conexión';
+                statusText.innerHTML = '❌ Error. Use Datos Móviles.';
                 btn.classList.remove('hidden');
-                hint.classList.remove('hidden');
             }
         }
 
         function dibujar(datos) {
-            document.getElementById('contenedor-personas').innerHTML = datos.map(p => `
-                <div class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900'>
-                    <h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3>
-                    <p class='text-xs text-slate-500 font-mono'>CI: ${p.ci || 'S/D'}</p>
+            document.getElementById('contenedor-personas').innerHTML = datos.map((p, index) => `
+                <div onclick='verDetalle(${index})' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
+                    <div>
+                        <h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3>
+                        <p class='text-xs text-slate-500 font-mono'>CI: ${p.ci || 'S/D'}</p>
+                    </div>
+                    <i class='fas fa-chevron-right text-slate-300'></i>
                 </div>`).join('');
+        }
+
+        function verDetalle(index) {
+            const p = db[index];
+            document.getElementById('det-nombre').innerText = p.nombre || 'Sin nombre';
+            document.getElementById('det-ci').innerText = 'CI: ' + (p.ci || 'S/D');
+            document.getElementById('det-dir').innerText = p.direccion || 'No registrada';
+            document.getElementById('det-notas').innerText = p.notas || 'Sin observaciones';
+            document.getElementById('modal-detalle').classList.remove('hidden');
+        }
+
+        function cerrarDetalle() {
+            document.getElementById('modal-detalle').classList.add('hidden');
         }
 
         function filtrar() {
             const txt = document.getElementById('buscador').value.toLowerCase().trim();
-            dibujar(db.filter(p => (p.nombre || '').toLowerCase().includes(txt) || (p.ci || '').toString().includes(txt)));
+            const filtrados = db.filter(p => (p.nombre || '').toLowerCase().includes(txt) || (p.ci || '').toString().includes(txt));
+            // Nota: dibujar usa el index del array db, por lo que filtrar necesita pasar el objeto original o manejar IDs.
+            // Para simplicidad, filtramos sobre el db y redibujamos.
+            const container = document.getElementById('contenedor-personas');
+            container.innerHTML = db.map((p, index) => {
+                const n = (p.nombre || '').toLowerCase();
+                const c = (p.ci || '').toString();
+                if (n.includes(txt) || c.includes(txt)) {
+                    return `<div onclick='verDetalle(${index})' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
+                        <div><h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3><p class='text-xs text-slate-500 font-mono'>CI: ${p.ci || 'S/D'}</p></div>
+                        <i class='fas fa-chevron-right text-slate-300'></i>
+                    </div>`;
+                }
+                return '';
+            }).join('');
         }
     </script>
 </body>
