@@ -2,62 +2,56 @@
 <html lang='es'>
 <head>
     <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no'>
-    <title>Registro Pro v19.2</title>
-    <script src='https://cdn.tailwindcss.com'></script>
-    <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Registro v20</title>
     <style>
-        .persona-card:active { background-color: #f1f5f9; scale: 0.98; }
-        #modal-detalle { transition: transform 0.3s ease-out; }
+        body { font-family: sans-serif; background: #f0f2f5; margin: 0; padding: 0; }
+        .header { background: #1a237e; color: white; padding: 15px; position: sticky; top: 0; z-index: 10; }
+        .search-box { width: 100%; padding: 12px; border-radius: 8px; border: none; margin-top: 10px; box-sizing: border-box; font-size: 16px; }
+        .main { padding: 15px; }
+        .status-card { background: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-cargar { background: #00c853; color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; font-size: 16px; width: 100%; cursor: pointer; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #1a237e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .card h3 { margin: 0; font-size: 14px; text-transform: uppercase; color: #333; }
+        .card p { margin: 5px 0 0; font-size: 12px; color: #666; }
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 100%; max-width: 400px; position: relative; }
+        .btn-cerrar { background: #333; color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; margin-top: 20px; font-weight: bold; }
+        .hidden { display: none; }
     </style>
 </head>
-<body class='bg-slate-100 min-h-screen'>
-    <!-- Pantalla PIN -->
-    <div id='pin-screen' class='fixed inset-0 bg-slate-900 z-50 flex flex-col items-center justify-center p-6 text-white'>
-        <i class='fas fa-shield-halved text-6xl mb-6 text-blue-400'></i>
-        <h2 class='text-2xl font-bold mb-2'>Registro Policial</h2>
-        <p class='text-slate-400 mb-6'>v19.2 (Detalles Habilitados)</p>
-        <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none'>
-        <button onclick='verificarPIN()' class='bg-blue-600 text-white px-8 py-4 rounded-xl font-bold w-full max-w-xs shadow-lg'>ENTRAR</button>
+<body>
+    <div id='pin-screen' style='height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #1a237e; color: white; padding: 20px;'>
+        <h2>REGISTRO POLICIAL</h2>
+        <input type='password' id='pin-input' placeholder='PIN' style='padding: 15px; border-radius: 8px; border: none; width: 100%; max-width: 250px; text-align: center; font-size: 20px; margin-bottom: 15px;'>
+        <button onclick='verificarPIN()' style='padding: 15px 40px; border-radius: 8px; border: none; background: #00c853; color: white; font-weight: bold; font-size: 18px;'>ENTRAR</button>
+        <p style='margin-top: 20px; font-size: 10px; color: #9fa8da;'>v20.0 (Máxima Compatibilidad)</p>
     </div>
 
-    <!-- App Principal -->
-    <div id='app' class='hidden flex flex-col min-h-screen'>
-        <header class='bg-slate-800 text-white p-4 sticky top-0 shadow-xl z-40'>
-            <div class='flex justify-between items-center mb-3'>
-                <h1 class='text-lg font-bold'>REGISTRO PRO</h1>
-                <span id='count-badge' class='bg-blue-600 text-xs px-2 py-1 rounded-full font-mono'>0</span>
+    <div id='app' class='hidden'>
+        <div class='header'>
+            <div style='display: flex; justify-content: space-between;'>
+                <strong>REGISTRO PRO</strong>
+                <span id='badge'>0</span>
             </div>
-            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔍 Nombre o Cédula...' class='w-full p-3 rounded-xl text-black outline-none bg-white'>
-        </header>
+            <input type='text' id='buscador' oninput='filtrar()' placeholder='🔎 Buscar nombre o CI...' class='search-box'>
+        </div>
+        <div class='main'>
+            <div id='status-card' class='status-card'>
+                <p id='status-text' style='font-weight: bold;'>Listo para sincronizar</p>
+                <button id='btn-cargar' onclick='cargarDatos()' class='btn-cargar'>CARGAR REGISTROS</button>
+            </div>
+            <div id='lista'></div>
+        </div>
+    </div>
 
-        <main class='p-4'>
-            <div id='status-container' class='bg-white p-6 rounded-2xl shadow-sm text-center mb-6 border-2 border-blue-100'>
-                <p id='status-text' class='text-slate-600 font-bold'>Base de datos lista</p>
-                <button id='btn-cargar' onclick='cargarDatos()' class='mt-4 w-full bg-blue-700 text-white py-4 rounded-xl font-bold shadow-lg active:scale-95'>
-                   👆 TOCAR PARA CARGAR
-                </button>
-            </div>
-            <div id='contenedor-personas' class='grid gap-3 pb-24'></div>
-        </main>
-
-        <!-- MODAL DE DETALLES (Se abre al tocar una persona) -->
-        <div id='modal-detalle' class='fixed inset-0 bg-black/60 z-50 hidden flex items-end sm:items-center justify-center p-4'>
-            <div class='bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl relative'>
-                <button onclick='cerrarDetalle()' class='absolute right-4 top-4 text-slate-400'><i class='fas fa-times-circle text-2xl'></i></button>
-                <div class='flex items-center gap-4 mb-6 border-b pb-4'>
-                    <div class='bg-blue-100 p-4 rounded-full'><i class='fas fa-user text-3xl text-blue-700'></i></div>
-                    <div>
-                        <h2 id='det-nombre' class='text-xl font-bold uppercase text-slate-800 leading-tight'></h2>
-                        <p id='det-ci' class='text-blue-600 font-mono font-bold'></p>
-                    </div>
-                </div>
-                <div class='space-y-4'>
-                    <div><label class='text-[10px] uppercase font-bold text-slate-400 block'>Dirección</label><p id='det-dir' class='text-slate-700'></p></div>
-                    <div><label class='text-[10px] uppercase font-bold text-slate-400 block'>Observaciones / Notas</label><p id='det-notas' class='text-slate-700 italic'></p></div>
-                </div>
-                <button onclick='cerrarDetalle()' class='mt-8 w-full bg-slate-800 text-white py-4 rounded-xl font-bold uppercase tracking-wider'>Volver</button>
-            </div>
+    <div id='modal' class='modal'>
+        <div class='modal-content'>
+            <h2 id='m-nombre' style='margin-top:0; color: #1a237e; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; font-size: 18px;'></h2>
+            <p><strong>CÉDULA:</strong> <span id='m-ci'></span></p>
+            <p><strong>DIRECCIÓN:</strong> <span id='m-dir'></span></p>
+            <p><strong>NOTAS:</strong> <br><span id='m-notas' style='color: #d32f2f;'></span></p>
+            <button onclick='cerrar()' class='btn-cerrar'>VOLVER</button>
         </div>
     </div>
 
@@ -74,77 +68,63 @@
         }
 
         async function cargarDatos() {
-            const statusText = document.getElementById('status-text');
+            const st = document.getElementById('status-text');
             const btn = document.getElementById('btn-cargar');
-            const badge = document.getElementById('count-badge');
-            btn.classList.add('hidden');
-            statusText.innerHTML = '⏳ Sincronizando...';
+            btn.style.display = 'none';
+            st.innerText = 'Cargando...';
             db = [];
             try {
-                let offset = 0;
-                let limit = 200;
-                let hasMore = true;
-                while (hasMore) {
-                    const res = await fetch(SB + '/rest/v1/personas?select=nombre,ci,direccion,notas&order=nombre.asc&offset=' + offset + '&limit=' + limit, {
-                        headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
+                let offset = 0; let limit = 200; let more = true;
+                while (more) {
+                    const r = await fetch(SB+'/rest/v1/personas?select=nombre,ci,direccion,notas&order=nombre.asc&offset='+offset+'&limit='+limit, {
+                        headers: { 'apikey': KEY, 'Authorization': 'Bearer '+KEY }
                     });
-                    const data = await res.json();
-                    if (data && data.length > 0) {
-                        db = db.concat(data);
+                    const d = await r.json();
+                    if (d && d.length > 0) {
+                        db = db.concat(d);
                         offset += limit;
-                        statusText.innerHTML = '✅ Cargados: ' + db.length;
-                        badge.innerText = db.length;
+                        st.innerText = 'Cargados: ' + db.length;
+                        document.getElementById('badge').innerText = db.length;
                         dibujar(db);
-                        if (data.length < limit) hasMore = false;
-                    } else { hasMore = false; }
+                        if (d.length < limit) more = false;
+                    } else { more = false; }
                 }
-                setTimeout(() => { document.getElementById('status-container').style.display = 'none'; }, 1000);
-            } catch (err) {
-                statusText.innerHTML = '❌ Error. Use Datos Móviles.';
-                btn.classList.remove('hidden');
+                document.getElementById('status-card').style.display = 'none';
+            } catch (e) {
+                st.innerText = 'Error de red. Use Datos.';
+                btn.style.display = 'block';
             }
         }
 
         function dibujar(datos) {
-            document.getElementById('contenedor-personas').innerHTML = datos.map((p, index) => `
-                <div onclick='verDetalle(${index})' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
-                    <div>
-                        <h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3>
-                        <p class='text-xs text-slate-500 font-mono'>CI: ${p.ci || 'S/D'}</p>
-                    </div>
-                    <i class='fas fa-chevron-right text-slate-300'></i>
+            document.getElementById('lista').innerHTML = datos.map((p, i) => `
+                <div class='card' onclick='ver(${i})'>
+                    <h3>${p.nombre || 'SIN NOMBRE'}</h3>
+                    <p>CI: ${p.ci || '---'}</p>
                 </div>`).join('');
         }
 
-        function verDetalle(index) {
-            const p = db[index];
-            document.getElementById('det-nombre').innerText = p.nombre || 'Sin nombre';
-            document.getElementById('det-ci').innerText = 'CI: ' + (p.ci || 'S/D');
-            document.getElementById('det-dir').innerText = p.direccion || 'No registrada';
-            document.getElementById('det-notas').innerText = p.notas || 'Sin observaciones';
-            document.getElementById('modal-detalle').classList.remove('hidden');
+        function ver(i) {
+            const p = db[i];
+            document.getElementById('m-nombre').innerText = p.nombre || 'S/N';
+            document.getElementById('m-ci').innerText = p.ci || '---';
+            document.getElementById('m-dir').innerText = p.direccion || '---';
+            document.getElementById('m-notas').innerText = p.notas || '---';
+            document.getElementById('modal').style.display = 'flex';
         }
 
-        function cerrarDetalle() {
-            document.getElementById('modal-detalle').classList.add('hidden');
-        }
+        function cerrar() { document.getElementById('modal').style.display = 'none'; }
 
         function filtrar() {
-            const txt = document.getElementById('buscador').value.toLowerCase().trim();
-            const filtrados = db.filter(p => (p.nombre || '').toLowerCase().includes(txt) || (p.ci || '').toString().includes(txt));
-            // Nota: dibujar usa el index del array db, por lo que filtrar necesita pasar el objeto original o manejar IDs.
-            // Para simplicidad, filtramos sobre el db y redibujamos.
-            const container = document.getElementById('contenedor-personas');
-            container.innerHTML = db.map((p, index) => {
-                const n = (p.nombre || '').toLowerCase();
-                const c = (p.ci || '').toString();
-                if (n.includes(txt) || c.includes(txt)) {
-                    return `<div onclick='verDetalle(${index})' class='bg-white p-4 rounded-xl shadow-sm border-l-4 border-blue-900 persona-card flex justify-between items-center'>
-                        <div><h3 class='font-bold uppercase text-slate-800 text-sm'>${p.nombre || 'S/N'}</h3><p class='text-xs text-slate-500 font-mono'>CI: ${p.ci || 'S/D'}</p></div>
-                        <i class='fas fa-chevron-right text-slate-300'></i>
-                    </div>`;
-                }
-                return '';
+            const t = document.getElementById('buscador').value.toLowerCase();
+            const f = db.filter(p => (p.nombre||'').toLowerCase().includes(t) || (p.ci||'').toString().includes(t));
+            document.getElementById('lista').innerHTML = f.map((p, i) => {
+                // Buscamos el index original para que el 'ver(i)' funcione
+                const originalIndex = db.indexOf(p);
+                return `<div class='card' onclick='ver(${originalIndex})'>
+                    <h3>${p.nombre || 'SIN NOMBRE'}</h3>
+                    <p>CI: ${p.ci || '---'}</p>
+                </div>`;
             }).join('');
         }
     </script>
