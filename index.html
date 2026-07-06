@@ -18,7 +18,7 @@
     <div id='pin-screen' class='fixed inset-0 bg-header z-50 flex flex-col items-center justify-center p-6 text-white text-center'>
         <i class='fas fa-shield-halved text-6xl mb-4 text-blue-400'></i>
         <h2 class='text-2xl font-bold mb-1 uppercase'>Registro Policial Pro</h2>
-        <p class='text-slate-500 mb-8 text-[10px]'>v31.0 - CARGA ANTI-CORTE</p>
+        <p class='text-slate-500 mb-8 text-[10px]'>v32.0 - CARGA RESILIENTE</p>
         <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-2xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none'>
         <button onclick='entrar()' class='bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold w-full max-w-xs shadow-lg active:scale-95'>INGRESAR</button>
     </div>
@@ -43,14 +43,14 @@
             </div>
 
             <div id='sync-zone' class='bg-white p-6 rounded-3xl shadow-sm border-2 border-dashed border-blue-200 text-center mb-6'>
-                <p id='st-status' class='text-blue-600 font-bold text-sm mb-4 uppercase'>Sincronización Paso a Paso</p>
-                <button onclick='sincronizar()' id='btn-sync' class='w-full bg-blue-700 text-white py-4 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all'>
-                    <i class='fas fa-sync-alt'></i> CARGAR REGISTROS
+                <p id='st-status' class='text-blue-600 font-bold text-sm mb-4 uppercase italic'>Buscando datos...</p>
+                <button onclick='sincronizar()' id='btn-sync' class='w-full bg-blue-700 text-white py-4 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 active:scale-95'>
+                    <i class='fas fa-sync-alt'></i> INICIAR CARGA
                 </button>
-                <div id='prog' class='hidden mt-4 text-center'>
+                <div id='prog' class='hidden mt-4'>
                     <div class='w-full bg-slate-100 rounded-full h-4 overflow-hidden shadow-inner'><div id='bar' class='bg-blue-600 h-full transition-all duration-300' style='width:0%'></div></div>
-                    <p id='st-count' class='text-[10px] font-bold text-blue-800 mt-3'>Conectando...</p>
-                    <p class='text-[9px] text-slate-400 mt-1 italic'>No cierre la aplicación hasta terminar</p>
+                    <p id='st-count' class='text-[11px] font-bold text-blue-800 mt-3'>Conectando...</p>
+                    <p class='text-[9px] text-slate-400 mt-1 italic'>Se retomará automáticamente si falla</p>
                 </div>
             </div>
 
@@ -62,12 +62,14 @@
         const SB = 'https://pdoeklmwquxggppvigrf.supabase.co';
         const KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBkb2VrbG13cXV4Z2dwcHZpZ3JmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk5OTc1NzIsImV4cCI6MjA5NTU3MzU3Mn0.VDVsGgC3b00tJHWkiyPze9wGrqMVQAbKeMxBvMsHQRM';
         let db = [];
+        let offset = 0;
+        let limit = 50;
 
         function entrar() {
             if (document.getElementById('pin-input').value === '3268') {
                 document.getElementById('pin-screen').style.display = 'none';
                 document.getElementById('app').classList.remove('hidden');
-                const cache = localStorage.getItem('db_police_v31');
+                const cache = localStorage.getItem('db_final_police');
                 if(cache) {
                     db = JSON.parse(cache);
                     document.getElementById('count').innerText = db.length;
@@ -86,39 +88,36 @@
             
             btn.classList.add('hidden');
             prog.classList.remove('hidden');
-            stStatus.innerText = '⌛ Cargando bloques pequeños...';
-            db = [];
+            stStatus.innerText = '⌛ Sincronizando...';
             
             try {
-                let off = 0; 
-                let lim = 100; // Bloques MUY pequeños para que no se corte NUNCA
                 let more = true;
                 while (more) {
-                    const r = await fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc&offset=' + off + '&limit=' + lim, {
+                    const r = await fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc&offset=' + offset + '&limit=' + limit, {
                         headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
                     });
-                    if (!r.ok) throw new Error('Corte de red');
+                    if (!r.ok) throw new Error('Corte');
                     const d = await r.json();
                     if (d && d.length > 0) {
                         db = db.concat(d);
-                        off += lim;
-                        stCount.innerText = 'DESCARGADO: ' + db.length + ' / 1950';
+                        offset += limit;
+                        stCount.innerText = 'CARGADO: ' + db.length + ' / ~1950';
                         bar.style.width = Math.min((db.length/1950)*100, 100) + '%';
                         document.getElementById('count').innerText = db.length;
                         dibujar(db);
-                        if (d.length < lim) more = false;
-                        // Pequeña pausa para no saturar la conexión del móvil
-                        await new Promise(res => setTimeout(res, 100));
+                        if (d.length < limit) more = false;
+                        await new Promise(res => setTimeout(res, 50));
                     } else { more = false; }
                 }
-                localStorage.setItem('db_police_v31', JSON.stringify(db));
+                localStorage.setItem('db_final_police', JSON.stringify(db));
                 document.getElementById('sync-zone').style.display = 'none';
-                alert('¡ÉXITO! ' + db.length + ' registros guardados en tu celular.');
+                alert('¡Sincronización Completa!');
             } catch (e) {
-                alert('CONEXIÓN INTERRUMPIDA. Por favor, asegúrate de estar con DATOS MÓVILES y vuelve a tocar el botón.');
+                stStatus.innerText = '⚠️ Conexión inestable. Retomando...';
+                stCount.innerText = 'Falló en ' + db.length + '. Reintentando en 2 seg...';
+                btn.innerText = 'REINTENTAR DESDE ' + db.length;
                 btn.classList.remove('hidden');
-                prog.classList.add('hidden');
-                stStatus.innerText = '⚠️ Falló el bloque ' + db.length + '. Reintente.';
+                setTimeout(sincronizar, 2000);
             }
         }
 
