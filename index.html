@@ -12,15 +12,13 @@
         .bg-btn-persona { background-color: #1e3a8a; }
         .bg-btn-matricula { background-color: #334155; }
         .persona-card { border-left: 6px solid #1e3a8a; }
-        .persona-card:active { background-color: #f8fafc; }
-        input::placeholder { color: #94a3b8; }
     </style>
 </head>
 <body>
     <div id='pin-screen' class='fixed inset-0 bg-header z-50 flex flex-col items-center justify-center p-6 text-white text-center'>
         <i class='fas fa-shield-halved text-6xl mb-4 text-blue-400'></i>
-        <h2 class='text-2xl font-bold mb-1'>REGISTRO POLICIAL PRO</h2>
-        <p class='text-slate-500 mb-8 text-[10px] uppercase tracking-widest'>v29.0 - Restauración Manual</p>
+        <h2 class='text-2xl font-bold mb-1 uppercase'>Registro Policial Pro</h2>
+        <p class='text-slate-500 mb-8 text-[10px]'>v30.0 - CARGA FORZADA</p>
         <input type='password' id='pin-input' placeholder='PIN' class='border-none p-4 rounded-2xl w-full max-w-xs text-center text-2xl mb-4 bg-slate-800 text-white outline-none'>
         <button onclick='entrar()' class='bg-blue-600 text-white px-10 py-4 rounded-2xl font-bold w-full max-w-xs shadow-lg active:scale-95'>INGRESAR</button>
     </div>
@@ -47,31 +45,19 @@
                 </button>
             </div>
 
-            <div id='sync-zone' class='bg-white p-6 rounded-3xl shadow-sm border-2 border-dashed border-blue-100 text-center mb-6'>
-                <p class='text-slate-500 font-bold text-sm mb-4 uppercase'>Sincronización Pendiente</p>
-                <button onclick='sincronizar()' id='btn-sync' class='w-full bg-blue-700 text-white py-4 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 active:scale-95'>
-                    <i class='fas fa-sync-alt'></i> CARGAR AHORA
+            <div id='sync-zone' class='bg-white p-6 rounded-3xl shadow-sm border-2 border-dashed border-red-200 text-center mb-6'>
+                <p id='st-status' class='text-red-500 font-bold text-sm mb-4 uppercase'>⚠️ Datos no cargados</p>
+                <button onclick='sincronizar()' id='btn-sync' class='w-full bg-blue-700 text-white py-4 rounded-2xl font-bold shadow-xl flex items-center justify-center gap-3 active:scale-95 transition-all'>
+                    <i class='fas fa-sync-alt'></i> CARGAR 1.950 REGISTROS
                 </button>
                 <div id='prog' class='hidden mt-4'>
-                    <div class='w-full bg-slate-100 rounded-full h-3 overflow-hidden'><div id='bar' class='bg-blue-600 h-full transition-all' style='width:0%'></div></div>
-                    <p id='st' class='text-[10px] font-bold text-blue-800 mt-2'>Iniciando...</p>
+                    <div class='w-full bg-slate-100 rounded-full h-4 overflow-hidden shadow-inner'><div id='bar' class='bg-blue-600 h-full transition-all duration-500' style='width:0%'></div></div>
+                    <p id='st-count' class='text-[10px] font-bold text-blue-800 mt-3'>Conectando...</p>
                 </div>
             </div>
 
             <div id='lista' class='grid gap-3 pb-24'></div>
         </main>
-
-        <div id='modal' class='fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center p-4' onclick='this.classList.add("hidden")'>
-            <div class='bg-white w-full max-w-md rounded-3xl p-8 shadow-2xl relative' onclick='event.stopPropagation()'>
-                <h2 id='m-n' class='text-xl font-black uppercase text-slate-800 border-b-2 border-slate-100 pb-3 mb-5 italic'></h2>
-                <div class='space-y-5'>
-                    <div><p class='text-[9px] font-black text-slate-400 uppercase tracking-widest'>Cédula</p><p id='m-c' class='text-blue-800 font-black text-xl'></p></div>
-                    <div><p class='text-[9px] font-black text-slate-400 uppercase tracking-widest'>Dirección</p><p id='m-d' class='text-slate-700 font-medium'></p></div>
-                    <div><p class='text-[9px] font-black text-red-400 uppercase tracking-widest'>Notas Policiales</p><p id='m-no' class='text-red-600 font-bold leading-tight'></p></div>
-                </div>
-                <button onclick='document.getElementById("modal").classList.add("hidden")' class='mt-10 w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase tracking-widest'>CERRAR</button>
-            </div>
-        </div>
     </div>
 
     <script>
@@ -83,7 +69,7 @@
             if (document.getElementById('pin-input').value === '3268') {
                 document.getElementById('pin-screen').style.display = 'none';
                 document.getElementById('app').classList.remove('hidden');
-                const cache = localStorage.getItem('db_final_v29');
+                const cache = localStorage.getItem('db_police_v30');
                 if(cache) {
                     db = JSON.parse(cache);
                     document.getElementById('count').innerText = db.length;
@@ -97,52 +83,50 @@
             const btn = document.getElementById('btn-sync');
             const prog = document.getElementById('prog');
             const bar = document.getElementById('bar');
-            const st = document.getElementById('st');
+            const stCount = document.getElementById('st-count');
+            const stStatus = document.getElementById('st-status');
+            
             btn.classList.add('hidden');
             prog.classList.remove('hidden');
+            stStatus.innerText = '⌛ Sincronizando...';
             db = [];
+            
             try {
-                let off = 0; let lim = 250; let more = true;
+                let off = 0; let lim = 500; // Bloques más grandes para evitar timeouts
+                let more = true;
                 while (more) {
                     const r = await fetch(SB + '/rest/v1/personas?select=*&order=nombre.asc&offset=' + off + '&limit=' + lim, {
                         headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY }
                     });
+                    if (!r.ok) throw new Error('Error de red');
                     const d = await r.json();
                     if (d && d.length > 0) {
                         db = db.concat(d);
                         off += lim;
-                        st.innerText = 'CARGADO: ' + db.length + ' / 1950';
+                        stCount.innerText = 'DESCARGADO: ' + db.length + ' / 1950';
                         bar.style.width = Math.min((db.length/1950)*100, 100) + '%';
                         document.getElementById('count').innerText = db.length;
                         dibujar(db);
                         if (d.length < lim) more = false;
                     } else { more = false; }
                 }
-                localStorage.setItem('db_final_v29', JSON.stringify(db));
+                localStorage.setItem('db_police_v30', JSON.stringify(db));
                 document.getElementById('sync-zone').style.display = 'none';
+                alert('¡Sincronización Exitosa! ' + db.length + ' registros cargados.');
             } catch (e) {
-                alert('FALLÓ LA CONEXIÓN. Apague el Wi-Fi y use Datos Móviles.');
+                alert('FALLÓ LA CARGA: El servidor cortó la conexión. APAGUE EL WI-FI y use DATOS MÓVILES.');
                 btn.classList.remove('hidden');
                 prog.classList.add('hidden');
+                stStatus.innerText = '⚠️ Falló la carga. Reintente.';
             }
         }
 
         function dibujar(d) {
             document.getElementById('lista').innerHTML = d.map(p => `
-                <div onclick='ver("${p.ci}")' class='bg-white p-5 rounded-2xl shadow-sm persona-card flex justify-between items-center'>
+                <div class='bg-white p-5 rounded-2xl shadow-sm persona-card flex justify-between items-center'>
                     <div class='overflow-hidden'><h3 class='font-bold uppercase text-slate-800 text-[11px] truncate'>${p.nombre || 'SIN NOMBRE'}</h3><p class='text-[10px] text-slate-400 font-bold'>CI: ${p.ci || '---'}</p></div>
                     <i class='fas fa-chevron-right text-slate-200 text-xs'></i>
                 </div>`).join('');
-        }
-
-        function ver(ci) {
-            const p = db.find(x => x.ci == ci);
-            if(!p) return;
-            document.getElementById('m-n').innerText = p.nombre || 'S/N';
-            document.getElementById('m-c').innerText = p.ci || '---';
-            document.getElementById('m-d').innerText = p.direccion || '---';
-            document.getElementById('m-no').innerText = p.notas || '---';
-            document.getElementById('modal').classList.remove('hidden');
         }
 
         function filtrar() {
