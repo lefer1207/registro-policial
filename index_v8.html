@@ -177,7 +177,10 @@
 </head>
 <body>
 
-<header id="mainHeader">🛡️ Registro Policial</header>
+<header id="mainHeader" style="display:flex;align-items:center;justify-content:space-between;padding:16px;">
+  <span>🛡️ Registro Policial</span>
+  <button onclick="exportarDatos()" style="background:#38a169;color:white;border:none;padding:8px 14px;border-radius:8px;font-weight:bold;font-size:13px;cursor:pointer;">📥 EXPORTAR</button>
+</header>
 
 <div id="view-list" class="view active">
     <div class="container">
@@ -781,6 +784,13 @@ document.getElementById('f-alias').addEventListener('blur', function(){
     this.value = normalizarTexto(this.value);
 });
 document.getElementById('f-ci').addEventListener('input', chequearDuplicado);
+
+function exportarDatos() {
+    var a = document.createElement('a');
+    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(db));
+    a.download = 'respaldov8_' + new Date().toISOString().slice(0,10) + '.json';
+    a.click();
+}
 
 window.onload = cargar;
 </script>
